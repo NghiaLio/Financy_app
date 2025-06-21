@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'interfaceSettings.dart';
+import 'languageSettings.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);
@@ -13,7 +15,9 @@ class Settings extends StatelessWidget {
               icon: Icons.translate,
               title: 'Ngôn ngữ',
               iconColor: Colors.blue,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LanguageSelectionScreen()));
+              },
             ),
             const SizedBox(height: 12),
             _buildMenuItem(
@@ -27,7 +31,9 @@ class Settings extends StatelessWidget {
               icon: Icons.campaign,
               title: 'Giao diện hệ thống',
               iconColor: Colors.red,
-              onTap: () {},
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => InterfaceSettings()));
+              },
             ),
             const SizedBox(height: 12),
             _buildMenuItem(
