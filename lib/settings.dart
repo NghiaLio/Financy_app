@@ -1,68 +1,77 @@
 import 'package:flutter/material.dart';
 import 'interfaceSettings.dart';
 import 'languageSettings.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final app_local = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
     return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildMenuItem(
-              icon: Icons.translate,
-              title: 'Ngôn ngữ',
-              iconColor: Colors.blue,
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LanguageSelectionScreen()));
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.people,
-              title: 'Quản lý thẻ loại',
-              iconColor: Colors.orange,
-              onTap: () {},
-            ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.campaign,
-              title: 'Giao diện hệ thống',
-              iconColor: Colors.red,
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => InterfaceSettings()));
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.people_alt,
-              title: 'Bạn bè',
-              iconColor: Colors.purple,
-              onTap: () {},
-            ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.account_balance_wallet,
-              title: 'Tài khoản',
-              iconColor: Colors.teal,
-              onTap: () {},
-            ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.notifications,
-              title: 'Thông báo',
-              iconColor: Colors.orange,
-              hasNotification: true,
-              onTap: () {},
-            ),
-            const Spacer(),
-            
-          ],
-        ),
-      );
-    
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildMenuItem(
+            icon: Icons.translate,
+            title: app_local.language,
+            iconColor: theme.primaryColor,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LanguageSelectionScreen(),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.people,
+            title: app_local.manageCategory,
+            iconColor: Colors.orange,
+            onTap: () {},
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.campaign,
+            title: app_local.systemTheme,
+            iconColor: Colors.red,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => InterfaceSettings()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.people_alt,
+            title: app_local.userManagement,
+            iconColor: Colors.green,
+            onTap: () {},
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.account_balance_wallet,
+            title: app_local.account,
+            iconColor: Colors.teal,
+            onTap: () {},
+          ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.notifications,
+            title: app_local.notification,
+            iconColor: Colors.orange,
+            hasNotification: true,
+            onTap: () {},
+          ),
+          const Spacer(),
+        ],
+      ),
+    );
   }
 
   Widget _buildMenuItem({
@@ -88,11 +97,7 @@ class Settings extends StatelessWidget {
                 color: iconColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 24,
-              ),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -129,8 +134,4 @@ class Settings extends StatelessWidget {
       ),
     );
   }
-
-  
-
-  
 }

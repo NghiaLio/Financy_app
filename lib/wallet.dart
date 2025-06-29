@@ -1,10 +1,15 @@
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'core/constants/colors.dart';
 
 class Wallet extends StatelessWidget {
   const Wallet({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final app_local = AppLocalizations.of(context)!;
     return Column(
       children: [
         // Balance Card
@@ -12,7 +17,7 @@ class Wallet extends StatelessWidget {
           margin: EdgeInsets.all(16),
           padding: EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Color(0xFF2A2A3E),
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -21,19 +26,10 @@ class Wallet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Tài khoản của tôi',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  Text(app_local.myAccount, style: theme.textTheme.titleLarge),
                   Text(
                     '50,000,000 VND',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
+                    style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -42,14 +38,7 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 24),
 
               // Income Section
-              Text(
-                'Thu nhập',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(app_local.income, style: theme.textTheme.bodyMedium),
               SizedBox(height: 8),
               Row(
                 children: [
@@ -57,7 +46,7 @@ class Wallet extends StatelessWidget {
                     child: Container(
                       height: 6,
                       decoration: BoxDecoration(
-                        color: Colors.pink,
+                        color: AppColors.positiveGreen,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
@@ -73,7 +62,7 @@ class Wallet extends StatelessWidget {
                     child: Container(
                       margin: EdgeInsets.all(2),
                       decoration: BoxDecoration(
-                        color: Colors.pink,
+                        color: AppColors.positiveGreen,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -83,23 +72,15 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 4),
               Text(
                 '+100,000,000 VND',
-                style: TextStyle(
-                  color: Colors.pink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.positiveGreen,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               SizedBox(height: 16),
 
               // Expense Section
-              Text(
-                'Chi tiêu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(app_local.expense, style: theme.textTheme.bodyMedium),
               SizedBox(height: 8),
               Row(
                 children: [
@@ -108,21 +89,21 @@ class Wallet extends StatelessWidget {
                     child: Container(
                       height: 6,
                       decoration: BoxDecoration(
-                        color: Colors.grey[600],
+                        color: AppColors.negativeRed,
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
                   ),
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[700],
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
+                  // Expanded(
+                  //   flex: 3,
+                  //   child: Container(
+                  //     height: 6,
+                  //     decoration: BoxDecoration(
+                  //       color: AppTheme.negativeRed,
+                  //       borderRadius: BorderRadius.circular(3),
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(width: 8),
                   Container(
                     width: 20,
@@ -134,7 +115,7 @@ class Wallet extends StatelessWidget {
                     child: Container(
                       margin: EdgeInsets.all(2),
                       decoration: BoxDecoration(
-                        color: Colors.grey[600],
+                        color: AppColors.negativeRed,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -144,10 +125,9 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 4),
               Text(
                 '-10,000,000 VND',
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.negativeRed,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -160,6 +140,7 @@ class Wallet extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16),
             children: [
               _buildTransactionItem(
+                context,
                 icon: Icons.restaurant,
                 iconColor: Colors.orange,
                 title: 'Ăn uống',
@@ -167,6 +148,7 @@ class Wallet extends StatelessWidget {
                 amount: '-100,000 đ',
               ),
               _buildTransactionItem(
+                context,
                 icon: Icons.family_restroom,
                 iconColor: Colors.blue,
                 title: 'Du lịch',
@@ -174,6 +156,7 @@ class Wallet extends StatelessWidget {
                 amount: '-5,000,000 đ',
               ),
               _buildTransactionItem(
+                context,
                 icon: Icons.monetization_on,
                 iconColor: Colors.green,
                 title: 'Tiền lương',
@@ -182,6 +165,7 @@ class Wallet extends StatelessWidget {
                 isPositive: true,
               ),
               _buildTransactionItem(
+                context,
                 icon: Icons.medical_services,
                 iconColor: Colors.yellow,
                 title: 'Chữa bệnh',
@@ -189,6 +173,7 @@ class Wallet extends StatelessWidget {
                 amount: '-500,000 Đ',
               ),
               _buildTransactionItem(
+                context,
                 icon: Icons.directions_bus,
                 iconColor: Colors.blue,
                 title: 'Di chuyển',
@@ -196,6 +181,7 @@ class Wallet extends StatelessWidget {
                 amount: '-20,000 Đ',
               ),
               _buildTransactionItem(
+                context,
                 icon: Icons.receipt,
                 iconColor: Colors.grey,
                 title: 'Hóa đơn nước',
@@ -210,7 +196,8 @@ class Wallet extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem({
+  Widget _buildTransactionItem(
+    BuildContext context, {
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -218,6 +205,7 @@ class Wallet extends StatelessWidget {
     required String amount,
     bool isPositive = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       child: Row(
@@ -237,17 +225,12 @@ class Wallet extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
+                  style: theme.textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(color: Colors.white70, fontSize: 14),
-                ),
+                Text(subtitle, style: theme.textTheme.bodyMedium),
               ],
             ),
           ),
@@ -256,17 +239,16 @@ class Wallet extends StatelessWidget {
             children: [
               Text(
                 amount,
-                style: TextStyle(
-                  color: isPositive ? Colors.green : Colors.white,
-                  fontSize: 16,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color:
+                      isPositive
+                          ? AppColors.positiveGreen
+                          : theme.textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               SizedBox(height: 4),
-              Text(
-                'Ví của tôi',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
+              Text('Ví của tôi', style: theme.textTheme.bodySmall),
             ],
           ),
         ],

@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:hive/hive.dart';
+import 'core/constants/colors.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
 
   @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    print(Hive.box('settings').toMap());
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final app_local = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -15,25 +31,18 @@ class Home extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: Colors.white,
-                child: Icon(Icons.person, color: Colors.black),
+                backgroundColor: theme.colorScheme.background,
+                child: Icon(
+                  Icons.person,
+                  color: theme.colorScheme.onBackground,
+                ),
               ),
               SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Hi,',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                  Text(
-                    'Minh Hoa',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  Text(app_local.hello, style: theme.textTheme.titleMedium),
+                  Text('Minh Hoa', style: theme.textTheme.titleLarge),
                 ],
               ),
             ],
@@ -45,7 +54,7 @@ class Home extends StatelessWidget {
           margin: EdgeInsets.all(16),
           padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Color(0xFF2A2A3E),
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(12),
           ),
           height: 200,
@@ -58,28 +67,32 @@ class Home extends StatelessWidget {
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: Colors.pink,
+                      color: AppColors.negativeRed,
                       shape: BoxShape.circle,
                     ),
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'Thu nhập',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    app_local.income,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textGrey,
+                    ),
                   ),
                   SizedBox(width: 20),
                   Container(
                     width: 12,
                     height: 12,
                     decoration: BoxDecoration(
-                      color: Colors.green,
+                      color: AppColors.positiveGreen,
                       shape: BoxShape.circle,
                     ),
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'Chi tiêu',
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    app_local.expense,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textGrey,
+                    ),
                   ),
                 ],
               ),
@@ -95,8 +108,8 @@ class Home extends StatelessWidget {
                           getTitlesWidget: (value, meta) {
                             return Text(
                               '${value.toInt()}M',
-                              style: TextStyle(
-                                color: Colors.white70,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.textGrey,
                                 fontSize: 10,
                               ),
                             );
@@ -112,8 +125,8 @@ class Home extends StatelessWidget {
                             if (value >= 1 && value <= 6) {
                               return Text(
                                 'Tháng ${value.toInt()}',
-                                style: TextStyle(
-                                  color: Colors.white70,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.textGrey,
                                   fontSize: 10,
                                 ),
                               );
@@ -172,8 +185,9 @@ class Home extends StatelessWidget {
         Expanded(
           child: ListView(
             children: [
-              _buildDateHeader('22/04/2022', 'Thứ sáu'),
+              _buildDateHeader('22/04/2022', 'Thứ sáu', context),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.restaurant,
                 iconColor: Colors.orange,
                 title: 'Ăn uống',
@@ -181,6 +195,7 @@ class Home extends StatelessWidget {
                 amount: '-100,000 đ',
               ),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.family_restroom,
                 iconColor: Colors.blue,
                 title: 'Du lịch',
@@ -188,6 +203,7 @@ class Home extends StatelessWidget {
                 amount: '-5,000,000 đ',
               ),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.monetization_on,
                 iconColor: Colors.green,
                 title: 'Tiền lương',
@@ -196,8 +212,9 @@ class Home extends StatelessWidget {
                 isPositive: true,
               ),
 
-              _buildDateHeader('25/04/2022', 'Thứ hai'),
+              _buildDateHeader('25/04/2022', 'Thứ hai', context),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.medical_services,
                 iconColor: Colors.yellow,
                 title: 'Chữa bệnh',
@@ -205,6 +222,7 @@ class Home extends StatelessWidget {
                 amount: '-500,000 Đ',
               ),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.directions_bus,
                 iconColor: Colors.blue,
                 title: 'Di chuyển',
@@ -212,6 +230,7 @@ class Home extends StatelessWidget {
                 amount: '-20,000 Đ',
               ),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.receipt,
                 iconColor: Colors.grey,
                 title: 'Hóa đơn nước',
@@ -219,8 +238,9 @@ class Home extends StatelessWidget {
                 amount: '-300,000 Đ',
               ),
 
-              _buildDateHeader('22/04/2022', 'Thứ sáu'),
+              _buildDateHeader('22/04/2022', 'Thứ sáu', context),
               _buildTransactionItem(
+                context: context,
                 icon: Icons.pets,
                 iconColor: Colors.green,
                 title: 'Chăm sóc thú cưng',
@@ -234,20 +254,31 @@ class Home extends StatelessWidget {
     );
   }
 
-  Widget _buildDateHeader(String date, String day) {
+  Widget _buildDateHeader(String date, String day, BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(date, style: TextStyle(color: Colors.white70, fontSize: 14)),
-          Text(day, style: TextStyle(color: Colors.white70, fontSize: 14)),
+          Text(
+            date,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textGrey),
+          ),
+          Text(
+            day,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textGrey),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildTransactionItem({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required String title,
@@ -255,6 +286,7 @@ class Home extends StatelessWidget {
     required String amount,
     bool isPositive = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -274,17 +306,12 @@ class Home extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 if (subtitle.isNotEmpty)
-                  Text(
-                    subtitle,
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
+                  Text(subtitle, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -293,15 +320,15 @@ class Home extends StatelessWidget {
             children: [
               Text(
                 amount,
-                style: TextStyle(
-                  color: isPositive ? Colors.green : Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: isPositive ? AppColors.positiveGreen : null,
                 ),
               ),
               Text(
                 'Ví của tôi',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textGrey,
+                ),
               ),
             ],
           ),

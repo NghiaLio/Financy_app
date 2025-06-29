@@ -1,0 +1,82 @@
+{
+  "@@locale": "vi",
+
+  "transactionBook": "Sổ giao dịch",
+  "@transactionBook": {
+    "description": "Màn hình hiển thị danh sách giao dịch"
+  },
+
+  "wallet": "Ví tiền",
+  "@wallet": {
+    "description": "Mục quản lý ví cá nhân"
+  },
+
+  "statistics": "Thống kê",
+  "@statistics": {
+    "description": "Mục thống kê thu chi"
+  },
+
+  "settings": "Cài đặt",
+  "@settings": {
+    "description": "Màn hình cài đặt hệ thống"
+  },
+  "hello": "Xin chào",
+  "monday": "Thứ hai",
+  "tuesday": "Thứ ba",
+  "wednesday": "Thứ tư",
+  "thursday": "Thứ năm",
+  "friday": "Thứ sáu",
+  "saturday": "Thứ bảy",
+  "sunday": "Chủ nhật",
+  "myWallet": "Ví của tôi",
+  "jan": "Tháng 1",
+  "feb": "Tháng 2",
+  "mar": "Tháng 3",
+  "apr": "Tháng 4",
+  "may": "Tháng 5",
+  "jun": "Tháng 6",
+  "jul": "Tháng 7",
+  "aug": "Tháng 8",
+  "sep": "Tháng 9",
+  "oct": "Tháng 10",
+  "nov": "Tháng 11",
+  "dec": "Tháng 12",
+  "income": "Thu thập",
+  "expense": "Chi tiêu",
+  "myAccount": "Tài khoản của tôi",
+  "selectGroup": "Chọn nhóm giao dịch",
+  "transactionName": "Tên giao dịch",
+  "transactionAmount": "Số tiền giao dịch",
+  "addFriend": "Thêm bạn",
+  "dueDate": "Đến hạn",
+  "note": "Ghi chú",
+  "cancel": "Hủy",
+  "save": "Lưu",
+  "category": "Thể loại",
+  "month": "Tháng",
+  "year": "Năm",
+  "week": "Tuần",
+  "statisticsBy": "Thống kê chi tiêu theo",
+  "compareExpenseTypes": "So sánh các loại chi tiêu",
+  "language": "Ngôn ngữ",
+  "manageCategory": "Quản lý thể loại",
+  "systemTheme": "Giao diện hệ thống",
+  "userManagement": "Quản lý người dùng",
+  "account": "Tài khoản",
+  "notification": "Thông báo",
+  "chooseLanguage": "Chọn ngôn ngữ",
+  "themeSettings": "Cài đặt giao diện",
+  "theme": "Chủ đề",
+  "light": "Sáng",
+  "dark": "Tối",
+  "system": "Hệ thống",
+  "primaryColor": "Màu chủ đạo",
+  "fontFamily": "Phông chữ",
+  "fontSize": "Kích thước chữ",
+  "effect": "Hiệu ứng",
+  "saveSettings": "Lưu cài đặt",
+  "previewNote": "Đây là giao diện xem trước với các cài đặt hiện tại",
+  "languageChanged": "Thay đổi ngôn ngữ thành công",
+  "settingsSaved": "Cài đặt đã được lưu thành công"
+}
+

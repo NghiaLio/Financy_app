@@ -1,5 +1,11 @@
+import 'dart:developer';
+import 'package:financy_ui/app/cubit/themeCubit.dart';
+import 'package:financy_ui/core/constants/colors.dart';
+import 'package:financy_ui/shared/utils/color_utils.dart';
+import 'package:financy_ui/shared/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class InterfaceSettings extends StatefulWidget {
   const InterfaceSettings({Key? key}) : super(key: key);
 
@@ -9,37 +15,127 @@ class InterfaceSettings extends StatefulWidget {
 
 class _InterfaceSettingsState extends State<InterfaceSettings> {
   // Theme settings
-  String _selectedTheme = 'Dark';
-  String _selectedLanguage = 'Tiếng Việt';
-  String _selectedFont = 'Default';
-  double _fontSize = 16.0;
+  late String _selectedTheme;
+  late String _selectedFont;
+  late double _fontSize;
+  late ThemeMode _preThemeMode;
+  bool _isSaveChange = false;
   bool _enableAnimations = true;
   bool _enableVibration = true;
 
   // Color themes
   final Map<String, Color> _colorThemes = {
-    'Blue': Colors.blue,
-    'Green': Colors.green,
-    'Purple': Colors.purple,
-    'Orange': Colors.orange,
-    'Red': Colors.red,
-    'Cyan': Colors.cyan,
+    '0xFF2196F3': AppColors.blue,
+    '0xFF4CAF50': AppColors.green,
+    '0xFF9C27B0': AppColors.accentPink,
+    '0xFFFF9800': AppColors.orange,
+    '0xFFF44336': AppColors.red,
+    'Cyan': AppColors.cyan,
   };
-  String _selectedColorTheme = 'Blue';
+  late String _selectedColorTheme;
+  @override
+  void initState() {
+    _selectedColorTheme = ColorUtils.colorToHex(
+      context.read<ThemeCubit>().state.color!,
+    );
+    _preThemeMode = context.read<ThemeCubit>().state.themeMode!;
+    _selectedTheme = ThemeUtils.themeModeToString(_preThemeMode);
+
+    _fontSize = context.read<ThemeCubit>().state.fontSize!;
+    _selectedFont = context.read<ThemeCubit>().state.fontFamily!;
+
+    log(_selectedTheme);
+    super.initState();
+  }
+
+  // chọn chế độ theme
+  void selectedModeTheme(String? newValue) {
+    setState(() {
+      log(newValue!);
+      _selectedTheme = newValue;
+      // Chỉ đổi trạng thái theme, không lưu vào box
+      context.read<ThemeCubit>().changeThemeMode(newValue);
+    });
+  }
+
+  // chọn màu chủ đạo
+  void changeColorTheme(String themeName) {
+    setState(() {
+      _selectedColorTheme = themeName;
+    });
+  }
+
+  // chọn font chữ
+  void selectedFontFamily(String? newValue) {
+    if (newValue != null) {
+      setState(() {
+        _selectedFont = newValue;
+      });
+    }
+  }
+
+  // chọn kích thước chữ
+  void changeFontSize(double value) {
+    setState(() {
+      _fontSize = value;
+    });
+  }
+
+  // lưu toàn bộ thay đổi
+  void _saveSettings() {
+    log(_selectedColorTheme);
+    log(_selectedTheme);
+    log(_fontSize.toString());
+    log(_selectedFont);
+    setState(() {
+      _isSaveChange = true;
+    });
+    // Lưu cài đặt vào Hive
+    context.read<ThemeCubit>().changeSetting(
+      null,
+      _selectedFont,
+      _selectedTheme,
+      _fontSize,
+      _selectedColorTheme,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context)!.saveSettings),
+        backgroundColor: _colorThemes[_selectedColorTheme],
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // trở về màn trước
+  void back() {
+    // Cài lại chế độ theme khi chưa lưu
+    if (!_isSaveChange) {
+      context.read<ThemeCubit>().changeThemeMode(
+        ThemeUtils.themeModeToString(_preThemeMode),
+      );
+    }
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final app_local = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A2E),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1A1A2E),
+        backgroundColor: ColorUtils.parseColor(_selectedColorTheme),
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          icon: Icon(
+            Icons.arrow_back,
+            color: theme.appBarTheme.foregroundColor,
+          ),
+          onPressed: back,
         ),
         title: Text(
-          'Cài đặt giao diện',
+          app_local.themeSettings,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -54,24 +150,24 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Theme Section
-            _buildSectionTitle('Chủ đề'),
+            _buildSectionTitle(app_local.theme),
             _buildThemeSelector(),
             SizedBox(height: 24),
 
             // Color Theme Section
-            _buildSectionTitle('Màu chủ đạo'),
+            _buildSectionTitle(app_local.primaryColor),
             _buildColorThemeSelector(),
             SizedBox(height: 24),
 
             // Font Section
-            _buildSectionTitle('Phông chữ'),
+            _buildSectionTitle(app_local.fontFamily),
             _buildFontSelector(),
             SizedBox(height: 16),
             _buildFontSizeSlider(),
             SizedBox(height: 24),
 
             // Animation Section
-            _buildSectionTitle('Hiệu ứng'),
+            _buildSectionTitle(app_local.effect),
             _buildAnimationSettings(),
             SizedBox(height: 24),
 
@@ -93,8 +189,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
       padding: EdgeInsets.only(bottom: 12),
       child: Text(
         title,
-        style: TextStyle(
-          color: Colors.white,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
@@ -105,16 +200,16 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   Widget _buildThemeSelector() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A3E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
-          _buildRadioTile('Dark', 'Tối', Icons.dark_mode),
+          _buildRadioTile('Dark', AppLocalizations.of(context)!.dark, Icons.dark_mode),
           Divider(color: Colors.grey[600], height: 1),
-          _buildRadioTile('Light', 'Sáng', Icons.light_mode),
+          _buildRadioTile('Light', AppLocalizations.of(context)!.light, Icons.light_mode),
           Divider(color: Colors.grey[600], height: 1),
-          _buildRadioTile('Auto', 'Tự động', Icons.brightness_auto),
+          _buildRadioTile('System', AppLocalizations.of(context)!.system, Icons.brightness_auto),
         ],
       ),
     );
@@ -124,16 +219,12 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     return RadioListTile<String>(
       value: value,
       groupValue: _selectedTheme,
-      onChanged: (String? newValue) {
-        setState(() {
-          _selectedTheme = newValue!;
-        });
-      },
+      onChanged: selectedModeTheme,
       title: Row(
         children: [
-          Icon(icon, color: Colors.white70, size: 20),
+          Icon(icon, color: Theme.of(context).highlightColor, size: 20),
           SizedBox(width: 12),
-          Text(title, style: TextStyle(color: Colors.white, fontSize: 16)),
+          Text(title, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
       activeColor: _colorThemes[_selectedColorTheme],
@@ -149,7 +240,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   }
 
   Widget _buildColorThemeSelector() {
-    return Container(
+    return SizedBox(
       height: 80,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -160,11 +251,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           bool isSelected = _selectedColorTheme == themeName;
 
           return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedColorTheme = themeName;
-              });
-            },
+            onTap: () => changeColorTheme(themeName),
             child: Container(
               margin: EdgeInsets.only(right: 12),
               child: Column(
@@ -215,7 +302,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A3E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -223,20 +310,17 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
         child: DropdownButton<String>(
           value: _selectedFont,
           isExpanded: true,
-          dropdownColor: Color(0xFF2A2A3E),
-          style: TextStyle(color: Colors.white, fontSize: 16),
-          icon: Icon(Icons.keyboard_arrow_down, color: Colors.white70),
+          dropdownColor: Theme.of(context).cardColor,
+          style: Theme.of(context).textTheme.bodyLarge,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: Theme.of(context).highlightColor,
+          ),
           items:
               fonts.map((String font) {
                 return DropdownMenuItem<String>(value: font, child: Text(font));
               }).toList(),
-          onChanged: (String? newValue) {
-            if (newValue != null) {
-              setState(() {
-                _selectedFont = newValue;
-              });
-            }
-          },
+          onChanged: selectedFontFamily,
         ),
       ),
     );
@@ -245,7 +329,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   Widget _buildFontSizeSlider() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A3E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: EdgeInsets.all(16),
@@ -256,8 +340,8 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Kích thước chữ',
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                AppLocalizations.of(context)!.fontSize,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
               Text(
                 '${_fontSize.toInt()}px',
@@ -281,11 +365,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
               min: 12.0,
               max: 24.0,
               divisions: 12,
-              onChanged: (double value) {
-                setState(() {
-                  _fontSize = value;
-                });
-              },
+              onChanged: changeFontSize,
             ),
           ),
         ],
@@ -296,7 +376,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   Widget _buildAnimationSettings() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A3E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -304,11 +384,15 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           SwitchListTile(
             title: Row(
               children: [
-                Icon(Icons.animation, color: Colors.white70, size: 20),
+                Icon(
+                  Icons.animation,
+                  color: Theme.of(context).highlightColor,
+                  size: 20,
+                ),
                 SizedBox(width: 12),
                 Text(
                   'Hiệu ứng chuyển động',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),
@@ -324,11 +408,15 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           SwitchListTile(
             title: Row(
               children: [
-                Icon(Icons.vibration, color: Colors.white70, size: 20),
+                Icon(
+                  Icons.vibration,
+                  color: Theme.of(context).highlightColor,
+                  size: 20,
+                ),
                 SizedBox(width: 12),
                 Text(
                   'Rung phản hồi',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
             ),
@@ -348,7 +436,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   Widget _buildPreviewCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A3E),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       padding: EdgeInsets.all(16),
@@ -371,10 +459,8 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Ví tiền',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: _fontSize,
+                    AppLocalizations.of(context)!.wallet,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -399,8 +485,10 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           ),
           SizedBox(height: 8),
           Text(
-            'Đây là giao diện xem trước với các cài đặt hiện tại',
-            style: TextStyle(color: Colors.white70, fontSize: _fontSize - 2),
+            AppLocalizations.of(context)!.previewNote,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(fontSize: 10),
           ),
         ],
       ),
@@ -412,9 +500,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: back,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.grey[700],
               foregroundColor: Colors.white,
@@ -424,7 +510,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
               ),
             ),
             child: Text(
-              'Hủy',
+              AppLocalizations.of(context)!.cancel,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
@@ -444,25 +530,12 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
               ),
             ),
             child: Text(
-              'Lưu cài đặt',
+              AppLocalizations.of(context)!.saveSettings,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
         ),
       ],
     );
-  }
-
-  void _saveSettings() {
-    // Lưu cài đặt vào SharedPreferences hoặc database
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Cài đặt đã được lưu thành công!'),
-        backgroundColor: _colorThemes[_selectedColorTheme],
-        duration: Duration(seconds: 2),
-      ),
-    );
-
-    Navigator.pop(context);
   }
 }

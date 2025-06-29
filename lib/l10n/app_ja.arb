@@ -1,0 +1,81 @@
+{
+  "@@locale": "ja",
+
+  "transactionBook": "取引帳",
+  "@transactionBook": {
+    "description": "取引の一覧を表示する画面"
+  },
+
+  "wallet": "ウォレット",
+  "@wallet": {
+    "description": "ユーザーの個人ウォレットセクション"
+  },
+
+  "statistics": "統計",
+  "@statistics": {
+    "description": "収支統計のセクション"
+  },
+
+  "settings": "設定",
+  "@settings": {
+    "description": "システム設定画面"
+  },
+  "hello": "こんにちは",
+  "monday": "月曜日",
+  "tuesday": "火曜日",
+  "wednesday": "水曜日",
+  "thursday": "木曜日",
+  "friday": "金曜日",
+  "saturday": "土曜日",
+  "sunday": "日曜日",
+  "myWallet": "私の財布",
+  "jan": "1月",
+  "feb": "2月",
+  "mar": "3月",
+  "apr": "4月",
+  "may": "5月",
+  "jun": "6月",
+  "jul": "7月",
+  "aug": "8月",
+  "sep": "9月",
+  "oct": "10月",
+  "nov": "11月",
+  "dec": "12月",
+  "income": "収入",
+  "expense": "支出",
+  "myAccount": "私のアカウント",
+  "selectGroup": "取引グループを選択",
+  "transactionName": "取引名",
+  "transactionAmount": "取引金額",
+  "addFriend": "友達を追加",
+  "dueDate": "期日",
+  "note": "メモ",
+  "cancel": "キャンセル",
+  "save": "保存",
+  "category": "カテゴリー",
+  "month": "月",
+  "year": "年",
+  "week": "週",
+  "statisticsBy": "支出統計",
+  "compareExpenseTypes": "支出タイプの比較",
+  "language": "言語",
+  "manageCategory": "カテゴリーの管理",
+  "systemTheme": "システムテーマ",
+  "userManagement": "ユーザー管理",
+  "account": "アカウント",
+  "notification": "通知",
+  "chooseLanguage": "言語を選択",
+  "themeSettings": "テーマ設定",
+  "theme": "テーマ",
+  "light": "ライト",
+  "dark": "ダーク",
+  "system": "システム",
+  "primaryColor": "テーマカラー",
+  "fontFamily": "フォント",
+  "fontSize": "文字サイズ",
+  "effect": "エフェクト",
+  "saveSettings": "設定を保存",
+  "previewNote": "現在の設定によるプレビュー画面です",
+  "languageChanged": "言語が正常に変更されました",
+  "settingsSaved": "設定が正常に保存されました"
+}

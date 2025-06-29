@@ -31,6 +31,7 @@ class _StatiscalState extends State<Statiscal>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         // Tab Bar
@@ -38,11 +39,13 @@ class _StatiscalState extends State<Statiscal>
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TabBar(
             controller: _tabController,
-            indicatorColor: Colors.cyan,
+            indicatorColor: theme.primaryColor,
             indicatorWeight: 3,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
-            labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            labelColor: theme.textTheme.bodyLarge?.color,
+            unselectedLabelColor: theme.textTheme.bodyMedium?.color,
+            labelStyle: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
             tabs: [Tab(text: 'Chi tiêu'), Tab(text: 'Thu nhập')],
           ),
         ),

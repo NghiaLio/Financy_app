@@ -1,0 +1,23 @@
+{
+  "@@locale": "fr",
+
+  "transactionBook": "Carnet de transactions",
+  "@transactionBook": {
+    "description": "Écran listant les transactions"
+  },
+
+  "wallet": "Portefeuille",
+  "@wallet": {
+    "description": "Section portefeuille personnel de l'utilisateur"
+  },
+
+  "statistics": "Statistiques",
+  "@statistics": {
+    "description": "Section des statistiques des revenus et dépenses"
+  },
+
+  "settings": "Paramètres",
+  "@settings": {
+    "description": "Écran des paramètres système"
+  }
+}

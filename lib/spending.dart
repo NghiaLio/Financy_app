@@ -1,5 +1,7 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'core/constants/colors.dart';
 
 class Spending extends StatefulWidget {
   const Spending({super.key});
@@ -13,6 +15,8 @@ class _SpendingState extends State<Spending> {
   String selectedPiePeriod = 'Monthly';
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final app_local = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -21,16 +25,11 @@ class _SpendingState extends State<Spending> {
           // Summary
           Row(
             children: [
-              Text(
-                'Chi tiêu',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
+              Text(app_local.expense, style: theme.textTheme.bodyLarge),
               SizedBox(width: 16),
               Text(
                 '-10,000,000 VND',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
+                style: theme.textTheme.bodyLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -38,21 +37,21 @@ class _SpendingState extends State<Spending> {
           ),
           SizedBox(height: 8),
           Text(
-            'Thống kê chi tiêu theo tháng',
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            '${app_local.statisticsBy} + thangs',
+            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
           ),
           SizedBox(height: 16),
 
           // Category Filter
           Row(
             children: [
-              _buildDropdown('Theo thể loại', () {}),
+              _buildDropdown(app_local.category, () {}),
               SizedBox(width: 12),
               _buildDropdown(selectedBarPeriod, () {
                 _showPeriodDialog(true);
               }),
               SizedBox(width: 12),
-              _buildDropdown('Year', () {}),
+              _buildDropdown(app_local.year, () {}),
             ],
           ),
           SizedBox(height: 24),
@@ -84,7 +83,7 @@ class _SpendingState extends State<Spending> {
                           return Text(
                             months[value.toInt()],
                             style: TextStyle(
-                              color: Colors.white70,
+                              color: AppColors.textGrey,
                               fontSize: 10,
                             ),
                           );
@@ -97,30 +96,39 @@ class _SpendingState extends State<Spending> {
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, meta) {
-                        if (value == 5)
+                        if (value == 5) {
                           return Text(
                             '5M',
-                            style: TextStyle(
-                              color: Colors.white70,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
                               fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           );
-                        if (value == 10)
+                        }
+                        if (value == 10) {
                           return Text(
                             '10M',
-                            style: TextStyle(
-                              color: Colors.white70,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
                               fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           );
-                        if (value == 20)
+                        }
+                        if (value == 20) {
                           return Text(
                             '20M',
-                            style: TextStyle(
-                              color: Colors.white70,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.bodySmall?.copyWith(
                               fontSize: 10,
+                              fontWeight: FontWeight.bold,
                             ),
                           );
+                        }
                         return Text('');
                       },
                       reservedSize: 30,
@@ -154,12 +162,8 @@ class _SpendingState extends State<Spending> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'So sánh các loại chi tiêu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                app_local.compareExpenseTypes,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
           ),
@@ -172,7 +176,7 @@ class _SpendingState extends State<Spending> {
                 _showPeriodDialog(false);
               }),
               SizedBox(width: 12),
-              _buildDropdown('Year', () {}),
+              _buildDropdown(app_local.year, () {}),
             ],
           ),
           SizedBox(height: 24),
@@ -195,10 +199,11 @@ class _SpendingState extends State<Spending> {
                           color: Colors.cyan,
                           value: 40,
                           title: '40%',
-                          titleStyle: TextStyle(
+                          titleStyle: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                           radius: 40,
                         ),
@@ -206,10 +211,11 @@ class _SpendingState extends State<Spending> {
                           color: Colors.orange,
                           value: 17,
                           title: '17%',
-                          titleStyle: TextStyle(
+                          titleStyle: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                           radius: 40,
                         ),
@@ -217,10 +223,11 @@ class _SpendingState extends State<Spending> {
                           color: Colors.purple,
                           value: 23,
                           title: '23%',
-                          titleStyle: TextStyle(
+                          titleStyle: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                           radius: 40,
                         ),
@@ -228,10 +235,11 @@ class _SpendingState extends State<Spending> {
                           color: Colors.pink,
                           value: 20,
                           title: '20%',
-                          titleStyle: TextStyle(
+                          titleStyle: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.copyWith(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
                           ),
                           radius: 40,
                         ),
@@ -270,15 +278,24 @@ class _SpendingState extends State<Spending> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Color(0xFF2A2A3E),
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(text, style: TextStyle(color: Colors.white70, fontSize: 12)),
+            Text(
+              text,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 12),
+            ),
             SizedBox(width: 4),
-            Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 16),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Theme.of(context).highlightColor,
+              size: 16,
+            ),
           ],
         ),
       ),
@@ -308,7 +325,7 @@ class _SpendingState extends State<Spending> {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         SizedBox(width: 8),
-        Text(text, style: TextStyle(color: Colors.white70, fontSize: 14)),
+        Text(text, style: Theme.of(context).textTheme.bodyMedium),
       ],
     );
   }
@@ -318,13 +335,19 @@ class _SpendingState extends State<Spending> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Color(0xFF2A2A3E),
-          title: Text('Select Period', style: TextStyle(color: Colors.white)),
+          backgroundColor: Theme.of(context).cardColor,
+          title: Text(
+            'Select Period',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text('Monthly', style: TextStyle(color: Colors.white)),
+                title: Text(
+                  'Monthly',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 onTap: () {
                   setState(() {
                     if (isBarChart) {
@@ -337,7 +360,10 @@ class _SpendingState extends State<Spending> {
                 },
               ),
               ListTile(
-                title: Text('Weekly', style: TextStyle(color: Colors.white)),
+                title: Text(
+                  'Weekly',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 onTap: () {
                   setState(() {
                     if (isBarChart) {

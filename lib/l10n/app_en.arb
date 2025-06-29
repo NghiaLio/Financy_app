@@ -1,0 +1,82 @@
+{
+  "@@locale": "en",
+
+  "transactionBook": "Transaction Book",
+  "@transactionBook": {
+    "description": "Screen showing list of transactions"
+  },
+
+  "wallet": "Wallet",
+  "@wallet": {
+    "description": "User's personal wallet section"
+  },
+
+  "statistics": "Statistics",
+  "@statistics": {
+    "description": "Income and expense statistics section"
+  },
+
+  "settings": "Settings",
+  "@settings": {
+    "description": "System settings screen"
+  },
+  "hello": "Hello",
+  "monday": "Monday",
+  "tuesday": "Tuesday",
+  "wednesday": "Wednesday",
+  "thursday": "Thursday",
+  "friday": "Friday",
+  "saturday": "Saturday",
+  "sunday": "Sunday",
+  "myWallet": "My Wallet",
+  "jan": "January",
+  "feb": "February",
+  "mar": "March",
+  "apr": "April",
+  "may": "May",
+  "jun": "June",
+  "jul": "July",
+  "aug": "August",
+  "sep": "September",
+  "oct": "October",
+  "nov": "November",
+  "dec": "December",
+  "income": "Income",
+  "expense": "Expense",
+  "myAccount": "My Account",
+  "selectGroup": "Select transaction group",
+  "transactionName": "Transaction name",
+  "transactionAmount": "Transaction amount",
+  "addFriend": "Add friend",
+  "dueDate": "Due date",
+  "note": "Note",
+  "cancel": "Cancel",
+  "save": "Save",
+  "category": "Category",
+  "month": "Month",
+  "year": "Year",
+  "week": "Week",
+  "statisticsBy": "Statistics by",
+  "compareExpenseTypes": "Compare expense types",
+  "language": "Language",
+  "manageCategory": "Manage categories",
+  "systemTheme": "System theme",
+  "userManagement": "User management",
+  "account": "Account",
+  "notification": "Notification",
+  "chooseLanguage": "Choose language",
+  "themeSettings": "Theme settings",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "primaryColor": "Primary color",
+  "fontFamily": "Font family",
+  "fontSize": "Font size",
+  "effect": "Effect",
+  "saveSettings": "Save settings",
+  "previewNote": "This is the preview screen with current settings",
+  "languageChanged": "Language changed successfully",
+  "settingsSaved": "Settings have been saved successfully"
+}
+

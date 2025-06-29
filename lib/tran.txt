@@ -1,0 +1,7 @@
+Xin chào, Thứ hai, Thứ 3, Thứ 4 , Thứ 5 , Thứ 6, Thứ 7, Chủ Nhật (Thứ trong tuần),Ví của tôi,
+Tháng 1 -> tháng 12 , Thu thập, chi tiêu , tài khoản của tôi, chọn nhóm giao dịch, tên giao dịch, số tiền giao dịch
+thêm bạn, đến hạn, ghi chú, hủy, lưu, thể loại,tháng, năm, tuần, Thống kê chi tiêu theo, so sánh các loại chi tiêu,
+ngôn ngữ, quản lý thể loại, giao diện hệ thống, quản lý người dùng, tài khoản, thông báo, Chọn ngôn ngữ, cài đặt giao diện
+chủ đề, sáng, tối , hệ thống, màu chủ đạo, phông chữ, kích thước chữ, hiệu ứng, lưu cài đặt, Đây là giao diện xem trước với các cài đặt hiện tại,
+thay đổi ngôn ngữ thành công , Cài đặt đã được lưu thành công
+Các categories(thể loại, danh mục,tên ngân sách...) --> tùy chỉnh sau

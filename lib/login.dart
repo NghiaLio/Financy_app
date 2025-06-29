@@ -10,6 +10,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(20),
@@ -31,7 +32,7 @@ class _LoginState extends State<Login> {
             //tilte
             Text(
               'Xin chào',
-              style: TextStyle(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
                 color: Colors.white,
@@ -42,7 +43,7 @@ class _LoginState extends State<Login> {
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 'Đăng nhập để truy cập trải nghiệm cá nhân của bạn',
-                style: TextStyle(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
                   color: Colors.grey,
@@ -75,7 +76,7 @@ class _LoginState extends State<Login> {
                     SizedBox(width: 10),
                     Text(
                       'Tiếp tục với Google',
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: Colors.white,
@@ -88,7 +89,7 @@ class _LoginState extends State<Login> {
             SizedBox(height: 20),
             Text(
               'hoặc',
-              style: TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey,
@@ -111,7 +112,7 @@ class _LoginState extends State<Login> {
                   children: [
                     Text(
                       'Tiếp tục mà không dùng tài khoản',
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: Colors.white,
@@ -120,21 +121,21 @@ class _LoginState extends State<Login> {
                   ],
                 ),
               ),
-                         ),
-             //footer
-             Spacer(),
-             Padding(
-               padding: EdgeInsets.symmetric(vertical: 25),
-               child: Text(
-               'Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ của chúng tôi',
-               style: TextStyle(
-                 fontSize: 12,
-                 fontWeight: FontWeight.w400,
-                 color: Colors.grey,
-               ),
-                 textAlign: TextAlign.center,
-               ),
-             ),
+            ),
+            //footer
+            Spacer(),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 25),
+              child: Text(
+                'Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ của chúng tôi',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
           ],
         ),
       ),

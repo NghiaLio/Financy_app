@@ -1,3 +1,4 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class Add extends StatefulWidget {
@@ -13,13 +14,8 @@ class _AddState extends State<Add> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
-  String _selectedCategory = 'Thêm ban';
+  String? _selectedCategory;
   DateTime _selectedDate = DateTime.now();
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   // select date
   void _selectDate() async {
@@ -31,11 +27,11 @@ class _AddState extends State<Add> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
-              primary: Colors.blue,
-              onPrimary: Colors.white,
-              surface: Color(0xFF2A2A3E),
-              onSurface: Colors.white,
+            colorScheme: Theme.of(context).colorScheme.copyWith(
+              primary: Theme.of(context).primaryColor,
+              onPrimary: Theme.of(context).colorScheme.onPrimary,
+              surface: Theme.of(context).cardColor,
+              onSurface: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           child: child!,
@@ -75,6 +71,18 @@ class _AddState extends State<Add> {
   }
 
   @override
+  void didChangeDependencies() {
+    // Khởi tạo _selectedCategory và _categories từ AppLocalization
+    final localization = AppLocalizations.of(context);
+    if (_selectedCategory == null) {
+      setState(() {
+        _selectedCategory = localization!.addFriend;
+      });
+    }
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _groupController.dispose();
     _nameController.dispose();
@@ -85,6 +93,8 @@ class _AddState extends State<Add> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final app_local = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: Column(
@@ -96,21 +106,24 @@ class _AddState extends State<Add> {
                   const SizedBox(height: 20),
                   _buildInputField(
                     controller: _groupController,
-                    label: 'Chọn nhóm giao dịch',
+                    label: app_local.selectGroup,
                     isRequired: true,
+                    theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
                     controller: _nameController,
-                    label: 'Tên giao dịch',
+                    label: app_local.transactionName,
                     isRequired: true,
+                    theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
                     controller: _amountController,
-                    label: 'Số tiền giao dịch',
+                    label: app_local.transactionAmount,
                     isRequired: true,
                     keyboardType: TextInputType.number,
+                    theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildDropdownField(),
@@ -133,6 +146,7 @@ class _AddState extends State<Add> {
     required String label,
     bool isRequired = false,
     TextInputType? keyboardType,
+    required dynamic theme,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -142,10 +156,10 @@ class _AddState extends State<Add> {
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        style: const TextStyle(color: Colors.white),
+        style: theme.textTheme.bodyLarge,
         decoration: InputDecoration(
           labelText: label + (isRequired ? ' *' : ''),
-          labelStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          labelStyle: theme.textTheme.bodyMedium,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(10),
           floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -165,11 +179,11 @@ class _AddState extends State<Add> {
         child: DropdownButton<String>(
           value: _selectedCategory,
           isExpanded: true,
-          dropdownColor: const Color(0xFF2A2A3E),
-          style: const TextStyle(color: Colors.white),
+          dropdownColor: Theme.of(context).cardColor,
+          style: Theme.of(context).textTheme.bodyMedium,
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           items:
-              ['Thêm ban', 'Ăn uống', 'Di chuyển', 'Giải trí', 'Mua sắm'].map((
+              [AppLocalizations.of(context)!.addFriend, 'Ăn uống', 'Di chuyển', 'Giải trí', 'Mua sắm'].map((
                 String value,
               ) {
                 return DropdownMenuItem<String>(
@@ -203,8 +217,8 @@ class _AddState extends State<Add> {
         child: Row(
           children: [
             Text(
-              'Đến hạn',
-              style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+              AppLocalizations.of(context)!.dueDate,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
             Container(
@@ -236,10 +250,10 @@ class _AddState extends State<Add> {
         controller: _noteController,
         maxLines: null,
         expands: true,
-        style: const TextStyle(color: Colors.white),
+        style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
-          labelText: 'Ghi chú',
-          labelStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+          labelText: AppLocalizations.of(context)!.note,
+          labelStyle: Theme.of(context).textTheme.bodyMedium,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
           alignLabelWithHint: true,
@@ -263,9 +277,12 @@ class _AddState extends State<Add> {
                 borderRadius: BorderRadius.circular(50),
               ),
             ),
-            child: const Text(
-              'HỦY',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            child: Text(
+              AppLocalizations.of(context)!.cancel,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
@@ -283,9 +300,12 @@ class _AddState extends State<Add> {
                 borderRadius: BorderRadius.circular(50),
               ),
             ),
-            child: const Text(
-              'LƯU',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            child: Text(
+              AppLocalizations.of(context)!.save,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
