@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'interfaceSettings.dart';
 import 'languageSettings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'man_Categories_spend.dart';
 
 class Settings extends StatelessWidget {
   const Settings({Key? key}) : super(key: key);
@@ -32,7 +33,12 @@ class Settings extends StatelessWidget {
             icon: Icons.people,
             title: app_local.manageCategory,
             iconColor: Colors.orange,
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ExpenseCategoriesScreen()),
+              );
+            },
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
