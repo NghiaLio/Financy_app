@@ -77,6 +77,11 @@
   "saveSettings": "Lưu cài đặt",
   "previewNote": "Đây là giao diện xem trước với các cài đặt hiện tại",
   "languageChanged": "Thay đổi ngôn ngữ thành công",
-  "settingsSaved": "Cài đặt đã được lưu thành công"
+  "settingsSaved": "Cài đặt đã được lưu thành công",
+  "sign_in_to_access": "Đăng nhập để truy cập trải nghiệm cá nhân của bạn",
+  "continue_with_google": "Tiếp tục với Google",
+  "or": "hoặc",
+  "continue_without_account": "Tiếp tục mà không dùng tài khoản",
+  "agree_terms": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ của chúng tôi"
 }
 

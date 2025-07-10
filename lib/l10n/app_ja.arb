@@ -77,5 +77,10 @@
   "saveSettings": "設定を保存",
   "previewNote": "現在の設定によるプレビュー画面です",
   "languageChanged": "言語が正常に変更されました",
-  "settingsSaved": "設定が正常に保存されました"
+  "settingsSaved": "設定が正常に保存されました",
+  "sign_in_to_access": "サインインして自分だけの体験にアクセスする",
+  "continue_with_google": "Googleで続ける",
+  "or": "または",
+  "continue_without_account": "アカウントなしで続ける",
+  "agree_terms": "続行することで、利用規約に同意したことになります"
 }

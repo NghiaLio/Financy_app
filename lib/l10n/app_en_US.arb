@@ -77,6 +77,11 @@
   "saveSettings": "Save settings",
   "previewNote": "This is the preview screen with current settings",
   "languageChanged": "Language changed successfully",
-  "settingsSaved": "Settings have been saved successfully"
+  "settingsSaved": "Settings have been saved successfully",
+  "sign_in_to_access": "Sign in to access your personalized experience",
+  "continue_with_google": "Continue with Google",
+  "or": "or",
+  "continue_without_account": "Continue without an account",
+  "agree_terms": "By continuing, you agree to our Terms of Service"
 }
 

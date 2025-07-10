@@ -1,4 +1,8 @@
+import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -8,9 +12,18 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  void loginGoogle() async {
+    await context.read<Authcubit>().sendSaveIdToken();
+    // await context.read<Authcubit>().login();
+    // set app state
+    Hive.box('settings').put('app_state', false);
+    Navigator.pushReplacementNamed(context, '/');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final app_local = AppLocalizations.of(context)!;
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(20),
@@ -31,11 +44,10 @@ class _LoginState extends State<Login> {
             const SizedBox(height: 20),
             //tilte
             Text(
-              'Xin chào',
+              app_local.hello,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
@@ -58,7 +70,7 @@ class _LoginState extends State<Login> {
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.06,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: loginGoogle,
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -78,8 +90,7 @@ class _LoginState extends State<Login> {
                       'Tiếp tục với Google',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -114,8 +125,7 @@ class _LoginState extends State<Login> {
                       'Tiếp tục mà không dùng tài khoản',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],

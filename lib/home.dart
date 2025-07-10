@@ -1,5 +1,9 @@
+
+import 'package:financy_ui/features/auth/cubits/authCubit.dart';
+import 'package:financy_ui/features/auth/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'core/constants/colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -12,6 +16,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  late Usermodels? user;
   @override
   void initState() {
     print(Hive.box('settings').toMap());
