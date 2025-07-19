@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'core/constants/colors.dart';
@@ -8,7 +10,7 @@ class Wallet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     return Column(
       children: [
         // Balance Card
@@ -26,7 +28,7 @@ class Wallet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    app_local.myAccount,
+                    appLocal.myAccount,
                     style: theme.textTheme.titleLarge,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -45,7 +47,7 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 24),
 
               // Income Section
-              Text(app_local.income, style: theme.textTheme.bodyMedium),
+              Text(appLocal.income, style: theme.textTheme.bodyMedium),
               SizedBox(height: 8),
               Row(
                 children: [
@@ -87,7 +89,7 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 16),
 
               // Expense Section
-              Text(app_local.expense, style: theme.textTheme.bodyMedium),
+              Text(appLocal.expense, style: theme.textTheme.bodyMedium),
               SizedBox(height: 8),
               Row(
                 children: [

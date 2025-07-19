@@ -1,15 +1,18 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'interfaceSettings.dart';
 import 'languageSettings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'man_Categories_spend.dart';
+import 'features/settings/manage_account/screen/manageAccount.dart';
 
 class Settings extends StatelessWidget {
-  const Settings({Key? key}) : super(key: key);
+  const Settings({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -17,7 +20,7 @@ class Settings extends StatelessWidget {
         children: [
           _buildMenuItem(
             icon: Icons.translate,
-            title: app_local.language,
+            title: appLocal.language,
             iconColor: theme.primaryColor,
             onTap: () {
               Navigator.push(
@@ -31,19 +34,21 @@ class Settings extends StatelessWidget {
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.people,
-            title: app_local.manageCategory,
+            title: appLocal.manageCategory,
             iconColor: Colors.orange,
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ExpenseCategoriesScreen()),
+                MaterialPageRoute(
+                  builder: (context) => ExpenseCategoriesScreen(),
+                ),
               );
             },
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.campaign,
-            title: app_local.systemTheme,
+            title: appLocal.systemTheme,
             iconColor: Colors.red,
             onTap: () {
               Navigator.push(
@@ -55,21 +60,26 @@ class Settings extends StatelessWidget {
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.people_alt,
-            title: app_local.userManagement,
+            title: appLocal.userManagement,
             iconColor: Colors.green,
             onTap: () {},
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.account_balance_wallet,
-            title: app_local.account,
+            title: appLocal.account,
             iconColor: Colors.teal,
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AccountMoneyScreen()),
+              );
+            },
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.notifications,
-            title: app_local.notification,
+            title: appLocal.notification,
             iconColor: Colors.orange,
             hasNotification: true,
             onTap: () {},

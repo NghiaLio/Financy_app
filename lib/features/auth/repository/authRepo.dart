@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/app/services/dio_client.dart';
 import 'package:hive_flutter/adapters.dart';
 
@@ -16,7 +18,7 @@ class Authrepo {
   Future<Map<String,dynamic>> authenticated() async{
     final accessToken = Hive.box('jwt').get('accessToken');
     ApiService().setToken(accessToken);
-    final res = await ApiService().get('/google/check');
+    final res = await ApiService().get('/google/user');
     return res.data;
   }
 }

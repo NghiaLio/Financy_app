@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/features/auth/cubits/authState.dart';
 import 'package:financy_ui/features/auth/models/userModels.dart';
 import 'package:financy_ui/features/auth/repository/authRepo.dart';
@@ -6,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Authcubit extends Cubit<Authstate> {
-  Authcubit() : super(initialAuth());
+  Authcubit() : super(Authstate.unAuthenticated());
   
   final Authrepo _authrepo = Authrepo();
   Usermodels? _currentUserGG;
@@ -32,12 +34,15 @@ class Authcubit extends Cubit<Authstate> {
     await _authrepo.ssIdToken(idToken!);
   }
 
-  Future<Usermodels> login() async{
-    emit(loadingAuth());
+  Future<Usermodels> loginWithGG() async{
     final res = await _authrepo.authenticated();
     final currentUser = Usermodels.fromJson(res);
     _currentUserGG = currentUser;
-    emit(Auth(true));
+    emit(Authstate.authenticated(currentUser));
     return currentUser;
+  }
+
+  Future<void> loginWithNoAccount() async{
+    emit(Authstate.guest());
   }
 }

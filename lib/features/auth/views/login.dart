@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,14 +18,19 @@ class _LoginState extends State<Login> {
     await context.read<Authcubit>().sendSaveIdToken();
     // await context.read<Authcubit>().login();
     // set app state
-    Hive.box('settings').put('app_state', false);
+    Hive.box('settings').put('app_state', 'google');
+    Navigator.pushReplacementNamed(context, '/');
+  }
+
+  void loginNoAccount(){
+    Hive.box('settings').put('app_state', 'no_account');
     Navigator.pushReplacementNamed(context, '/');
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.all(20),
@@ -44,7 +51,7 @@ class _LoginState extends State<Login> {
             const SizedBox(height: 20),
             //tilte
             Text(
-              app_local.hello,
+              appLocal.hello,
               style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class ColorUtils {
@@ -10,7 +12,7 @@ class ColorUtils {
     }
     // fallback: parse hex string like '#2196F3' or '2196F3'
     colorString = colorString.replaceAll('#', '');
-    if (colorString.length == 6) colorString = 'FF' + colorString;
+    if (colorString.length == 6) colorString = 'FF$colorString';
     return Color(int.parse(colorString, radix: 16));
   }
 

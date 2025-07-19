@@ -1,5 +1,7 @@
+// ignore_for_file: deprecated_member_use, avoid_print
 
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
+import 'package:financy_ui/features/auth/cubits/authState.dart';
 import 'package:financy_ui/features/auth/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -16,8 +18,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
-  late Usermodels? user;
   @override
   void initState() {
     print(Hive.box('settings').toMap());
@@ -27,236 +27,244 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 20.0),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundColor: theme.colorScheme.background,
-                child: Icon(
-                  Icons.person,
-                  color: theme.colorScheme.onBackground,
-                ),
+    final appLocal = AppLocalizations.of(context)!;
+    return BlocBuilder<Authcubit, Authstate>(
+      builder: (context, state) {
+        Usermodels? user;
+        if (state.authStatus == AuthStatus.authenticated) {
+          user = state.user;
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 20.0),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: theme.colorScheme.background,
+                    child: Icon(
+                      Icons.person,
+                      color: theme.colorScheme.onBackground,
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(appLocal.hello, style: theme.textTheme.titleMedium),
+                      Text(user?.userName ?? '', style: theme.textTheme.titleLarge),
+                    ],
+                  ),
+                ],
               ),
-              SizedBox(width: 10),
-              Column(
+            ),
+
+            // Chart Section
+            Container(
+              margin: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: theme.cardColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              height: 200,
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(app_local.hello, style: theme.textTheme.titleMedium),
-                  Text('Minh Hoa', style: theme.textTheme.titleLarge),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Chart Section
-        Container(
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: theme.cardColor,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          height: 200,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AppColors.negativeRed,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    app_local.income,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textGrey,
-                    ),
-                  ),
-                  SizedBox(width: 20),
-                  Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: AppColors.positiveGreen,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    app_local.expense,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textGrey,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              Expanded(
-                child: LineChart(
-                  LineChartData(
-                    gridData: FlGridData(show: false),
-                    titlesData: FlTitlesData(
-                      leftTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            return Text(
-                              '${value.toInt()}M',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textGrey,
-                                fontSize: 10,
-                              ),
-                            );
-                          },
-                          reservedSize: 30,
+                  Row(
+                    children: [
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: AppColors.negativeRed,
+                          shape: BoxShape.circle,
                         ),
                       ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            // Chỉ hiển thị T1 đến T6
-                            if (value >= 1 && value <= 6) {
-                              return Text(
-                                'Tháng ${value.toInt()}',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textGrey,
-                                  fontSize: 10,
-                                ),
-                              );
-                            }
-                            return SizedBox.shrink(); // Ẩn các tháng khác
-                          },
-                          interval: 1, // Hiển thị mỗi tháng
+                      SizedBox(width: 8),
+                      Text(
+                        appLocal.income,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textGrey,
                         ),
                       ),
-                      rightTitles: AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
+                      SizedBox(width: 20),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: AppColors.positiveGreen,
+                          shape: BoxShape.circle,
+                        ),
                       ),
-                      topTitles: AxisTitles(
-                        sideTitles: SideTitles(showTitles: false),
-                      ),
-                    ),
-                    borderData: FlBorderData(show: false),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: [
-                          FlSpot(1, 15),
-                          FlSpot(2, 25),
-                          FlSpot(3, 18),
-                          FlSpot(4, 30),
-                          FlSpot(5, 12),
-                          FlSpot(6, 28),
-                        ],
-                        isCurved: true,
-                        color: Colors.pink,
-                        barWidth: 2,
-                        dotData: FlDotData(show: false),
-                      ),
-                      LineChartBarData(
-                        spots: [
-                          FlSpot(1, 8),
-                          FlSpot(2, 12),
-                          FlSpot(3, 15),
-                          FlSpot(4, 10),
-                          FlSpot(5, 20),
-                          FlSpot(6, 18),
-                        ],
-                        isCurved: true,
-                        color: Colors.green,
-                        barWidth: 2,
-                        dotData: FlDotData(show: false),
+                      SizedBox(width: 8),
+                      Text(
+                        appLocal.expense,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textGrey,
+                        ),
                       ),
                     ],
                   ),
-                ),
+                  SizedBox(height: 16),
+                  Expanded(
+                    child: LineChart(
+                      LineChartData(
+                        gridData: FlGridData(show: false),
+                        titlesData: FlTitlesData(
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                return Text(
+                                  '${value.toInt()}M',
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textGrey,
+                                    fontSize: 10,
+                                  ),
+                                );
+                              },
+                              reservedSize: 30,
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                // Chỉ hiển thị T1 đến T6
+                                if (value >= 1 && value <= 6) {
+                                  return Text(
+                                    'Tháng ${value.toInt()}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textGrey,
+                                      fontSize: 10,
+                                    ),
+                                  );
+                                }
+                                return SizedBox.shrink(); // Ẩn các tháng khác
+                              },
+                              interval: 1, // Hiển thị mỗi tháng
+                            ),
+                          ),
+                          rightTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                        ),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: [
+                              FlSpot(1, 15),
+                              FlSpot(2, 25),
+                              FlSpot(3, 18),
+                              FlSpot(4, 30),
+                              FlSpot(5, 12),
+                              FlSpot(6, 28),
+                            ],
+                            isCurved: true,
+                            color: Colors.pink,
+                            barWidth: 2,
+                            dotData: FlDotData(show: false),
+                          ),
+                          LineChartBarData(
+                            spots: [
+                              FlSpot(1, 8),
+                              FlSpot(2, 12),
+                              FlSpot(3, 15),
+                              FlSpot(4, 10),
+                              FlSpot(5, 20),
+                              FlSpot(6, 18),
+                            ],
+                            isCurved: true,
+                            color: Colors.green,
+                            barWidth: 2,
+                            dotData: FlDotData(show: false),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
 
-        // Transaction List
-        Expanded(
-          child: ListView(
-            children: [
-              _buildDateHeader('22/04/2022', 'Thứ sáu', context),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.restaurant,
-                iconColor: Colors.orange,
-                title: 'Ăn uống',
-                subtitle: 'Riêng tôi',
-                amount: '-100,000 đ',
-              ),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.family_restroom,
-                iconColor: Colors.blue,
-                title: 'Du lịch',
-                subtitle: 'Gia đình',
-                amount: '-5,000,000 đ',
-              ),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.monetization_on,
-                iconColor: Colors.green,
-                title: 'Tiền lương',
-                subtitle: 'Riêng tôi',
-                amount: '+30,000,000 đ',
-                isPositive: true,
-              ),
+            // Transaction List
+            Expanded(
+              child: ListView(
+                children: [
+                  _buildDateHeader('22/04/2022', 'Thứ sáu', context),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.restaurant,
+                    iconColor: Colors.orange,
+                    title: 'Ăn uống',
+                    subtitle: 'Riêng tôi',
+                    amount: '-100,000 đ',
+                  ),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.family_restroom,
+                    iconColor: Colors.blue,
+                    title: 'Du lịch',
+                    subtitle: 'Gia đình',
+                    amount: '-5,000,000 đ',
+                  ),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.monetization_on,
+                    iconColor: Colors.green,
+                    title: 'Tiền lương',
+                    subtitle: 'Riêng tôi',
+                    amount: '+30,000,000 đ',
+                    isPositive: true,
+                  ),
 
-              _buildDateHeader('25/04/2022', 'Thứ hai', context),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.medical_services,
-                iconColor: Colors.yellow,
-                title: 'Chữa bệnh',
-                subtitle: 'Thú cưng',
-                amount: '-500,000 Đ',
-              ),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.directions_bus,
-                iconColor: Colors.blue,
-                title: 'Di chuyển',
-                subtitle: 'Riêng tôi',
-                amount: '-20,000 Đ',
-              ),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.receipt,
-                iconColor: Colors.grey,
-                title: 'Hóa đơn nước',
-                subtitle: 'Riêng tôi',
-                amount: '-300,000 Đ',
-              ),
+                  _buildDateHeader('25/04/2022', 'Thứ hai', context),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.medical_services,
+                    iconColor: Colors.yellow,
+                    title: 'Chữa bệnh',
+                    subtitle: 'Thú cưng',
+                    amount: '-500,000 Đ',
+                  ),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.directions_bus,
+                    iconColor: Colors.blue,
+                    title: 'Di chuyển',
+                    subtitle: 'Riêng tôi',
+                    amount: '-20,000 Đ',
+                  ),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.receipt,
+                    iconColor: Colors.grey,
+                    title: 'Hóa đơn nước',
+                    subtitle: 'Riêng tôi',
+                    amount: '-300,000 Đ',
+                  ),
 
-              _buildDateHeader('22/04/2022', 'Thứ sáu', context),
-              _buildTransactionItem(
-                context: context,
-                icon: Icons.pets,
-                iconColor: Colors.green,
-                title: 'Chăm sóc thú cưng',
-                subtitle: '',
-                amount: '-500,000 Đ',
+                  _buildDateHeader('22/04/2022', 'Thứ sáu', context),
+                  _buildTransactionItem(
+                    context: context,
+                    icon: Icons.pets,
+                    iconColor: Colors.green,
+                    title: 'Chăm sóc thú cưng',
+                    subtitle: '',
+                    amount: '-500,000 Đ',
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 

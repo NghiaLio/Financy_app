@@ -1,3 +1,4 @@
+
 {
   "@@locale": "en",
 
@@ -57,6 +58,10 @@
   "year": "Year",
   "week": "Week",
   "statisticsBy": "Statistics by",
+  "linkBank": "Link bank",
+  "linkBankDialogTitle": "Link a bank",
+  "linkBankDialogContent": "This feature will be developed soon.",
+  "close": "Close",
   "compareExpenseTypes": "Compare expense types",
   "language": "Language",
   "manageCategory": "Manage categories",
@@ -82,6 +87,33 @@
   "continue_with_google": "Continue with Google",
   "or": "or",
   "continue_without_account": "Continue without an account",
-  "agree_terms": "By continuing, you agree to our Terms of Service"
+  "agree_terms": "By continuing, you agree to our Terms of Service",
+  "moneySources": "Money Sources",
+  "totalMoney": "Total Money",
+  "sourcesAvailable": "{count} sources available",
+  "cash": "Cash",
+  "physicalCash": "Physical cash",
+  "digitalWallet": "Digital wallet",
+  "bankingAccount": "Banking account"
+  ,
+  "addMoneySource": "Add Money Source",
+  "sourceName": "Source Name",
+  "initialBalance": "Initial Balance",
+  "descriptionOptional": "Description (Optional)",
+  "iconLabel": "Icon:",
+  "colorLabel": "Color:",
+  "add": "Add",
+  "customSource": "Custom source",
+  "addRemoveMoney": "Add/Remove Money",
+  "useMinusForRemove": "Use - for removing money",
+  "update": "Update",
+  "editSource": "Edit Source",
+  "description": "Description",
+  "deleteSource": "Delete Source",
+  "deleteSourceConfirm": "Are you sure you want to delete \"{name}\"?",
+  "delete": "Delete",
+  "chooseIcon": "Choose Icon",
+  "chooseColor": "Choose Color",
+  "edit": "Edit"
 }
 

@@ -1,12 +1,17 @@
-abstract class Authstate {}
+// ignore_for_file: file_names
 
-class initialAuth extends Authstate{}
+import 'package:financy_ui/features/auth/models/userModels.dart';
 
-class loadingAuth extends Authstate{}
+enum AuthStatus {unAuthenticated , guest, authenticated}
 
-class Auth extends Authstate{
-  bool isGoogle;
-  Auth(this.isGoogle); 
+class Authstate {
+
+  final AuthStatus authStatus;
+  final Usermodels? user;
+
+  Authstate({required this.authStatus, this.user});
+
+  factory Authstate.unAuthenticated() => Authstate(authStatus: AuthStatus.unAuthenticated);
+  factory Authstate.guest()=> Authstate(authStatus: AuthStatus.guest);
+  factory Authstate.authenticated(Usermodels currentUser) => Authstate(authStatus:AuthStatus.authenticated, user: currentUser);
 }
-
-class ErrorAuth extends Authstate{}

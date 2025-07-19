@@ -15,6 +15,8 @@ import 'app/theme/app_theme.dart';
 import 'core/constants/colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'features/settings/manage_account/screen/add_money_source.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +30,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +77,8 @@ class MyApp extends StatelessWidget {
             ),
             themeMode: state.themeMode,
             initialRoute: '/',
-            routes: {'/': (context) => const MainApp()},
+            routes: {'/': (context) => const MainApp(),
+                     '/addMoneySource': (context) => const AddMoneySourceScreen()},
             debugShowCheckedModeBanner: false,
           );
         },
@@ -94,15 +97,15 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late bool isFirst;
+  late String appState;
   @override
   void initState() {
-    isFirst = Hive.box('settings').get('app_state', defaultValue: true);
+    appState = Hive.box('settings').get('app_state', defaultValue: '');
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return isFirst ? Login() : ExpenseTrackerScreen();
+    return appState.isEmpty ? Login() : ExpenseTrackerScreen();
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, deprecated_member_use
+
 import 'dart:developer';
 import 'package:financy_ui/app/cubit/themeCubit.dart';
 import 'package:financy_ui/core/constants/colors.dart';
@@ -7,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class InterfaceSettings extends StatefulWidget {
-  const InterfaceSettings({Key? key}) : super(key: key);
+  const InterfaceSettings({super.key});
 
   @override
   State<InterfaceSettings> createState() => _InterfaceSettingsState();
@@ -121,7 +123,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -135,7 +137,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           onPressed: back,
         ),
         title: Text(
-          app_local.themeSettings,
+          appLocal.themeSettings,
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -150,24 +152,24 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Theme Section
-            _buildSectionTitle(app_local.theme),
+            _buildSectionTitle(appLocal.theme),
             _buildThemeSelector(),
             SizedBox(height: 24),
 
             // Color Theme Section
-            _buildSectionTitle(app_local.primaryColor),
+            _buildSectionTitle(appLocal.primaryColor),
             _buildColorThemeSelector(),
             SizedBox(height: 24),
 
             // Font Section
-            _buildSectionTitle(app_local.fontFamily),
+            _buildSectionTitle(appLocal.fontFamily),
             _buildFontSelector(),
             SizedBox(height: 16),
             _buildFontSizeSlider(),
             SizedBox(height: 24),
 
             // Animation Section
-            _buildSectionTitle(app_local.effect),
+            _buildSectionTitle(appLocal.effect),
             _buildAnimationSettings(),
             SizedBox(height: 24),
 
@@ -228,10 +230,10 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
         ],
       ),
       activeColor: _colorThemes[_selectedColorTheme],
-      fillColor: MaterialStateProperty.resolveWith<Color?>((
-        Set<MaterialState> states,
+      fillColor: WidgetStateProperty.resolveWith<Color?>((
+        Set<WidgetState> states,
       ) {
-        if (states.contains(MaterialState.selected)) {
+        if (states.contains(WidgetState.selected)) {
           return _colorThemes[_selectedColorTheme];
         }
         return Colors.grey;

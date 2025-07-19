@@ -2,7 +2,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class Add extends StatefulWidget {
-  const Add({Key? key}) : super(key: key);
+  const Add({super.key});
 
   @override
   State<Add> createState() => _AddState();
@@ -94,7 +94,7 @@ class _AddState extends State<Add> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: Column(
@@ -106,21 +106,21 @@ class _AddState extends State<Add> {
                   const SizedBox(height: 20),
                   _buildInputField(
                     controller: _groupController,
-                    label: app_local.selectGroup,
+                    label: appLocal.selectGroup,
                     isRequired: true,
                     theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
                     controller: _nameController,
-                    label: app_local.transactionName,
+                    label: appLocal.transactionName,
                     isRequired: true,
                     theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
                     controller: _amountController,
-                    label: app_local.transactionAmount,
+                    label: appLocal.transactionAmount,
                     isRequired: true,
                     keyboardType: TextInputType.number,
                     theme: theme,

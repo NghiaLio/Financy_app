@@ -58,6 +58,10 @@
   "week": "Week",
   "statisticsBy": "Statistics by",
   "compareExpenseTypes": "Compare expense types",
+  "linkBank": "Link bank",
+  "linkBankDialogTitle": "Link a bank",
+  "linkBankDialogContent": "This feature will be developed soon.",
+  "close": "Close",
   "language": "Language",
   "manageCategory": "Manage categories",
   "systemTheme": "System theme",
@@ -82,5 +86,12 @@
   "continue_with_google": "Continue with Google",
   "or": "or",
   "continue_without_account": "Continue without an account",
-  "agree_terms": "By continuing, you agree to our Terms of Service"
+  "agree_terms": "By continuing, you agree to our Terms of Service",
+  "moneySources": "Money Sources",
+  "totalMoney": "Total Money",
+  "sourcesAvailable": "{count} sources available",
+  "cash": "Cash",
+  "physicalCash": "Physical cash",
+  "digitalWallet": "Digital wallet",
+  "bankingAccount": "Banking account"
 }

@@ -16,7 +16,7 @@ class _SpendingState extends State<Spending> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -25,7 +25,7 @@ class _SpendingState extends State<Spending> {
           // Summary
           Row(
             children: [
-              Text(app_local.expense, style: theme.textTheme.bodyLarge),
+              Text(appLocal.expense, style: theme.textTheme.bodyLarge),
               SizedBox(width: 16),
               Text(
                 '-10,000,000 VND',
@@ -37,7 +37,7 @@ class _SpendingState extends State<Spending> {
           ),
           SizedBox(height: 8),
           Text(
-            '${app_local.statisticsBy} + thangs',
+            '${appLocal.statisticsBy} + thangs',
             style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
           ),
           SizedBox(height: 16),
@@ -45,13 +45,13 @@ class _SpendingState extends State<Spending> {
           // Category Filter
           Row(
             children: [
-              _buildDropdown(app_local.category, () {}),
+              _buildDropdown(appLocal.category, () {}),
               SizedBox(width: 12),
               _buildDropdown(selectedBarPeriod, () {
                 _showPeriodDialog(true);
               }),
               SizedBox(width: 12),
-              _buildDropdown(app_local.year, () {}),
+              _buildDropdown(appLocal.year, () {}),
             ],
           ),
           SizedBox(height: 24),
@@ -162,7 +162,7 @@ class _SpendingState extends State<Spending> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                app_local.compareExpenseTypes,
+                appLocal.compareExpenseTypes,
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
@@ -176,7 +176,7 @@ class _SpendingState extends State<Spending> {
                 _showPeriodDialog(false);
               }),
               SizedBox(width: 12),
-              _buildDropdown(app_local.year, () {}),
+              _buildDropdown(appLocal.year, () {}),
             ],
           ),
           SizedBox(height: 24),

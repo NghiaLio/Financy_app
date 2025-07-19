@@ -19,5 +19,37 @@
   "settings": "Paramètres",
   "@settings": {
     "description": "Écran des paramètres système"
-  }
+  },
+  "agree_terms": "En continuant, vous acceptez nos conditions d'utilisation",
+  "moneySources": "Sources de fonds",
+  "totalMoney": "Argent total",
+  "sourcesAvailable": "{count} sources disponibles",
+  "cash": "Espèces",
+  "physicalCash": "Espèces physiques",
+  "digitalWallet": "Portefeuille numérique",
+  "bankingAccount": "Compte bancaire"
+  ,
+  "addMoneySource": "Ajouter une source de fonds",
+  "sourceName": "Nom de la source",
+  "initialBalance": "Solde initial",
+  "descriptionOptional": "Description (optionnelle)",
+  "iconLabel": "Icône:",
+  "colorLabel": "Couleur:",
+  "add": "Ajouter",
+  "customSource": "Source personnalisée",
+  "addRemoveMoney": "Ajouter/Retirer de l'argent",
+  "useMinusForRemove": "Utilisez - pour retirer de l'argent",
+  "update": "Mettre à jour",
+  "editSource": "Modifier la source",
+  "description": "Description",
+  "deleteSource": "Supprimer la source",
+  "deleteSourceConfirm": "Êtes-vous sûr de vouloir supprimer \"{name}\"?",
+  "delete": "Supprimer",
+  "chooseIcon": "Choisir une icône",
+  "chooseColor": "Choisir une couleur",
+  "edit": "Modifier",
+  "linkBank": "Lier une banque",
+  "linkBankDialogTitle": "Lier une banque",
+  "linkBankDialogContent": "Cette fonctionnalité sera développée prochainement.",
+  "close": "Fermer"
 }

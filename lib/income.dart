@@ -17,7 +17,7 @@ class _IncomeState extends State<Income> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -26,7 +26,7 @@ class _IncomeState extends State<Income> {
           // Summary
           Row(
             children: [
-              Text(app_local.income, style: theme.textTheme.bodyLarge),
+              Text(appLocal.income, style: theme.textTheme.bodyLarge),
               SizedBox(width: 16),
               Text(
                 '+60,000,000 VND',
@@ -47,13 +47,13 @@ class _IncomeState extends State<Income> {
           // Category Filter
           Row(
             children: [
-              _buildDropdown(app_local.category, () {}),
+              _buildDropdown(appLocal.category, () {}),
               SizedBox(width: 12),
               _buildDropdown(selectedIncomeBarPeriod, () {
                 _showIncomePeriodDialog(true);
               }),
               SizedBox(width: 12),
-              _buildDropdown(app_local.year, () {}),
+              _buildDropdown(appLocal.year, () {}),
             ],
           ),
           SizedBox(height: 24),

@@ -1,3 +1,6 @@
+
+// ignore_for_file: file_names
+
 import 'package:financy_ui/add.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/home.dart';
@@ -30,11 +33,10 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
     Statiscal(),
     Settings(),
   ];
-  
 
   @override
   void initState() {
-    context.read<Authcubit>().login();
+    context.read<Authcubit>().loginWithGG();
     super.initState();
   }
 

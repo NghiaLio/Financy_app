@@ -1,7 +1,9 @@
+// ignore_for_file: file_names, deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class ExpenseCategoriesScreen extends StatefulWidget {
-  const ExpenseCategoriesScreen({Key? key}) : super(key: key);
+  const ExpenseCategoriesScreen({super.key});
 
   @override
   State<ExpenseCategoriesScreen> createState() => _ExpenseCategoriesScreenState();

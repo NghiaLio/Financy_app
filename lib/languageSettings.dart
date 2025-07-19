@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, use_build_context_synchronously
+
 import 'package:financy_ui/app/cubit/themeCubit.dart';
 import 'package:financy_ui/core/constants/languageOptions.dart';
 import 'package:financy_ui/shared/utils/locale_utils.dart';
@@ -6,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
-  const LanguageSelectionScreen({Key? key}) : super(key: key);
+  const LanguageSelectionScreen({super.key});
 
   @override
   State<LanguageSelectionScreen> createState() =>
@@ -152,8 +154,7 @@ class FlagWidget extends StatelessWidget {
   final String countryCode;
   final double size;
 
-  const FlagWidget({Key? key, required this.countryCode, this.size = 40})
-    : super(key: key);
+  const FlagWidget({super.key, required this.countryCode, this.size = 40});
 
   @override
   Widget build(BuildContext context) {
