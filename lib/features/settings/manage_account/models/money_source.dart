@@ -1,22 +1,29 @@
+import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/constants/colors.dart';
 
+enum CurrencyType { vnd, usd }
+
+enum TypeMoney { cash, eWallet, bank, other }
+
 class MoneySource {
-  String id;
+  String? id;
   String name;
   double balance;
-  String type;
-  String currency;
-  IconData icon;
-  Color color;
+  TypeMoney? type;
+  CurrencyType? currency;
+  IconData? icon;
+  String? color;
+  String? description;
   MoneySource({
-    required this.id,
+    this.id,
     required this.name,
     required this.balance,
-    required this.type,
-    required this.currency,
-    required this.icon,
-    required this.color,
+     this.type,
+     this.currency,
+    this.icon,
+    this.color,
+    this.description,
   });
 
   /// Factory constructor for backend data (no icon/color)
@@ -25,45 +32,51 @@ class MoneySource {
       id: json['_id'] as String,
       name: json['accountName'] as String,
       balance: (json['accountBalance'] as num).toDouble(),
-      type: json['accountType'] as String,
-      currency: json['currency'] as String,
+      type: TypeMoney.values.firstWhere(
+        (e) => e.toString() == 'TypeMoney.${json['accountType']}',
+        orElse: () => TypeMoney.other,
+      ),
+      currency: CurrencyType.values.firstWhere(
+        (e) => e.toString() == 'CurrencyType.${json['currency']}',
+        orElse: () => CurrencyType.vnd,
+      ),
       icon: MoneySourceIconColorMapper.iconFor(json['accountType']),
-      color: MoneySourceIconColorMapper.colorFor(json['accountType']),
+      color: json['color'] as String? ?? ColorUtils.colorToHex(AppColors.blue), 
+      // Default color if not provided
+      description: json['description'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'accountName': name,
+    "accountBalance": balance,
+    'accountType': type?.toString().split('.').last,
+    'currency': currency?.toString().split('.').last,
+    'color': color ?? ColorUtils.colorToHex(AppColors.blue), // Default color if not provided
+    'description': description ?? '',
+  };
 }
 
 /// Mapping tên nguồn tiền sang icon và màu mặc định
 class MoneySourceIconColorMapper {
   static const Map<String, IconData> _iconMap = {
-    'Cash': Icons.payments,
-    'E_Wallet': Icons.account_balance_wallet,
-    'Banking': Icons.account_balance,
+    'cash': Icons.payments,
+    'ewallet': Icons.account_balance_wallet,
+    'banking': Icons.account_balance,
     'default': Icons.account_balance_wallet,
   };
 
-  static const Map<String, Color> _colorMap = {
-    'Cash': AppColors.positiveGreen,
-    'E_Wallet': AppColors.accentPink,
-    'Banking': AppColors.primaryBlue,
-    'default': AppColors.blue,
-  };
+ 
 
   static IconData iconFor(String name) {
+    final key = name.toLowerCase();
     return _iconMap.entries
         .firstWhere(
-          (e) => name.contains(e.key),
+          (e) => key.contains(e.key),
           orElse: () => const MapEntry('default', Icons.account_balance_wallet),
         )
         .value;
   }
 
-  static Color colorFor(String name) {
-    return _colorMap.entries
-        .firstWhere(
-          (e) => name.contains(e.key),
-          orElse: () => const MapEntry('default', Colors.blueGrey),
-        )
-        .value;
-  }
+  
 }

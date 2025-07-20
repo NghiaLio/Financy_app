@@ -51,5 +51,14 @@
   "linkBank": "Lier une banque",
   "linkBankDialogTitle": "Lier une banque",
   "linkBankDialogContent": "Cette fonctionnalité sera développée prochainement.",
-  "close": "Fermer"
+  "close": "Fermer",
+  "typeLabel": "Type de source",
+  "typeCash": "Espèces",
+  "typeEwallet": "Portefeuille électronique",
+  "typeBanking": "Banque",
+  "typeOther": "Autre",
+  "currencyLabel": "Devise",
+  "currencyVnd": "VND",
+  "currencyUsd": "USD",
+  "colorLabel": "Couleur"
 }

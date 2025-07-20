@@ -1,6 +1,7 @@
 // ignore_for_file: must_be_immutable
 import 'package:financy_ui/app/cubit/themeCubit.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
+import 'package:financy_ui/features/settings/manage_account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/firebase_options.dart';
 import 'package:financy_ui/l10n/l10n.dart';
 import 'package:financy_ui/myApp.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => Authcubit()),
+        BlocProvider(create: (_) => ManageMoneyCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {

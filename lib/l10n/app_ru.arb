@@ -93,5 +93,14 @@
   "delete": "Удалить",
   "chooseIcon": "Выбрать иконку",
   "chooseColor": "Выбрать цвет",
-  "edit": "Редактировать"
+  "edit": "Редактировать",
+  "typeLabel": "Тип источника",
+  "typeCash": "Наличные",
+  "typeEwallet": "Электронный кошелек",
+  "typeBanking": "Банк",
+  "typeOther": "Другое",
+  "currencyLabel": "Валюта",
+  "currencyVnd": "VND",
+  "currencyUsd": "USD",
+  "colorLabel": "Цвет"
 }

@@ -1,4 +1,3 @@
-
 {
   "@@locale": "vi",
 
@@ -114,6 +113,15 @@
   "delete": "Xoá",
   "chooseIcon": "Chọn biểu tượng",
   "chooseColor": "Chọn màu sắc",
-  "edit": "Chỉnh sửa"
+  "edit": "Chỉnh sửa",
+  "typeLabel": "Loại nguồn tiền",
+  "typeCash": "Tiền mặt",
+  "typeEwallet": "Ví điện tử",
+  "typeBanking": "Ngân hàng",
+  "typeOther": "Khác",
+  "currencyLabel": "Loại tiền tệ",
+  "currencyVnd": "VND",
+  "currencyUsd": "USD",
+  "colorLabel": "Màu sắc"
 }
 

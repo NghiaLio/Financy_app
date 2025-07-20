@@ -5,8 +5,14 @@ import '../models/money_source.dart';
 import 'package:hive/hive.dart';
 
 class ManageMoneyRepo {
-  Future<void> addMoneySource(MoneySource source) async {
-    // Implementation for adding a money source
+  Future<MoneySource?> addMoneySource(MoneySource source) async {
+    final accessToken = Hive.box('jwt').get('accessToken');
+    ApiService().setToken(accessToken);
+    final res = await ApiService().post('/accounts', data: source.toJson());
+    if(res.statusCode == 201){
+      return MoneySource.fromJson(res.data);
+    }
+    return null;
   }
 
   Future<void> updateMoneySource(MoneySource source) async {

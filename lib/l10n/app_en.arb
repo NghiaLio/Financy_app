@@ -1,4 +1,3 @@
-
 {
   "@@locale": "en",
 
@@ -114,6 +113,15 @@
   "delete": "Delete",
   "chooseIcon": "Choose Icon",
   "chooseColor": "Choose Color",
-  "edit": "Edit"
+  "edit": "Edit",
+  "typeLabel": "Source Type",
+  "typeCash": "Cash",
+  "typeEwallet": "E-wallet",
+  "typeBanking": "Banking",
+  "typeOther": "Other",
+  "currencyLabel": "Currency",
+  "currencyVnd": "VND",
+  "currencyUsd": "USD",
+  "colorLabel": "Color"
 }
 

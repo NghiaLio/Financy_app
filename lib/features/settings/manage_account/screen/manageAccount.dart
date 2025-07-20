@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:financy_ui/features/settings/manage_account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/settings/manage_account/cubit/manageMoneyState.dart';
+import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -20,7 +21,10 @@ class AccountMoneyScreen extends StatefulWidget {
 class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
   bool isBalanceVisible = true;
 
-  List<MoneySource> get moneySources => [];
+  List<MoneySource> get moneySources {
+    final state = context.read<ManageMoneyCubit>().state;
+    return state.listAccounts ?? [];
+  }
 
   double get totalBalance =>
       moneySources.fold(0.0, (sum, source) => sum + source.balance);
@@ -31,134 +35,138 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final localizations = AppLocalizations.of(context)!;
-    return BlocProvider(
-      create: (create) => ManageMoneyCubit()..getAllAccount(),
-      child: BlocBuilder<ManageMoneyCubit, ManageMoneyState>(
-        builder: (context, state) {
-          log(state.status.toString());
-          if (state.status == ManageMoneyStatus.loading) {
-            return Scaffold(body: Center(child: CircularProgressIndicator()));
-          } else if (state.status == ManageMoneyStatus.error) {
-            return Scaffold(body: Center(child: Text(state.message!)));
-          } else {
-            return Scaffold(
-              backgroundColor: colorScheme.background,
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back, color: colorScheme.onBackground),
-                  onPressed: () => Navigator.pop(context),
+    return BlocBuilder<ManageMoneyCubit, ManageMoneyState>(
+      builder: (context, state) {
+        log(state.status.toString());
+        if (state.status == ManageMoneyStatus.loading) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        } else if (state.status == ManageMoneyStatus.error) {
+          return Scaffold(body: Center(child: Text(state.message!)));
+        } else {
+          return Scaffold(
+            backgroundColor: colorScheme.background,
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: colorScheme.onBackground),
+                onPressed: () => Navigator.pop(context),
+              ),
+              title: Text(
+                localizations.moneySources,
+                style: textTheme.titleLarge?.copyWith(
+                  color: colorScheme.onBackground,
+                  fontWeight: FontWeight.w600,
                 ),
-                title: Text(
-                  localizations.moneySources,
-                  style: textTheme.titleLarge?.copyWith(
-                    color: colorScheme.onBackground,
-                    fontWeight: FontWeight.w600,
+              ),
+              actions: [
+                IconButton(
+                  onPressed:
+                      () => Navigator.pushNamed(context, '/addMoneySource'),
+                  icon: Icon(
+                    Icons.add_circle_outline,
+                    color: colorScheme.primary,
                   ),
                 ),
-                actions: [
-                  IconButton(
-                    onPressed:
-                        () => Navigator.pushNamed(context, '/addMoneySource'),
-                    icon: Icon(
-                      Icons.add_circle_outline,
-                      color: colorScheme.primary,
+              ],
+            ),
+            body: Column(
+              children: [
+                // Total Balance Card
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primaryBlue, AppColors.accentPink],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.15),
+                      width: 1.5,
                     ),
                   ),
-                ],
-              ),
-              body: Column(
-                children: [
-                  // Total Balance Card
-                  Container(
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.primaryBlue, AppColors.accentPink],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            localizations.totalMoney,
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                isBalanceVisible = !isBalanceVisible;
+                              });
+                            },
+                            icon: Icon(
+                              isBalanceVisible
+                                  ? Icons.visibility_outlined
+                                  : Icons.visibility_off_outlined,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ],
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.15),
-                        width: 1.5,
+                      const SizedBox(height: 8),
+                      Text(
+                        isBalanceVisible
+                            ? '\$${totalBalance.toStringAsFixed(2)}'
+                            : '••••••',
+                        style: textTheme.displaySmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        localizations.sourcesAvailable(moneySources.length),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Money Sources List
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              localizations.totalMoney,
-                              style: textTheme.bodyMedium?.copyWith(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  isBalanceVisible = !isBalanceVisible;
-                                });
-                              },
-                              icon: Icon(
-                                isBalanceVisible
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          isBalanceVisible
-                              ? '\$${totalBalance.toStringAsFixed(2)}'
-                              : '••••••',
-                          style: textTheme.displaySmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          localizations.sourcesAvailable(moneySources.length),
-                          style: textTheme.bodySmall?.copyWith(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Money Sources List
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Text(
-                              localizations.moneySources,
-                              style: textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.onSurface,
-                              ),
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Text(
+                            localizations.moneySources,
+                            style: textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: colorScheme.onSurface,
                             ),
                           ),
-                          Expanded(
+                        ),
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              await context
+                                  .read<ManageMoneyCubit>()
+                                  .getAllAccount();
+                            },
                             child: ListView.builder(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
@@ -178,19 +186,25 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                               },
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            );
-          }
-        },
-      ),
+                ),
+              ],
+            ),
+          );
+        }
+      },
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // Load initial data if needed
+    BlocProvider.of<ManageMoneyCubit>(context).getAllAccount();
+  }
 
   void _showSourceDetailDialog(MoneySource source) {
     final TextEditingController amountController = TextEditingController();
@@ -213,10 +227,10 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: source.color.withOpacity(0.1),
+                        color: ColorUtils.parseColor(source.color!),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(source.icon, color: source.color, size: 24),
+                      child: Icon(source.icon, color: ColorUtils.parseColor(source.color!), size: 24),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -269,7 +283,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: source.color,
+                  backgroundColor: ColorUtils.parseColor(source.color!),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -377,8 +391,6 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           ),
     );
   }
-
-
 }
 
 class _MoneySourceTile extends StatelessWidget {
@@ -415,10 +427,10 @@ class _MoneySourceTile extends StatelessWidget {
           width: 50,
           height: 50,
           decoration: BoxDecoration(
-            color: source.color.withOpacity(0.1),
+            color: ColorUtils.parseColor(source.color!)!.withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(source.icon, color: source.color, size: 24),
+          child: Icon(source.icon, color: ColorUtils.parseColor(source.color!), size: 24),
         ),
         title: Text(
           source.name,

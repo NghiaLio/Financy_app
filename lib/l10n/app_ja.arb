@@ -113,5 +113,14 @@
   "delete": "削除",
   "chooseIcon": "アイコンを選択",
   "chooseColor": "色を選択",
-  "edit": "編集"
+  "edit": "編集",
+  "typeLabel": "資金タイプ",
+  "typeCash": "現金",
+  "typeEwallet": "電子ウォレット",
+  "typeBanking": "銀行",
+  "typeOther": "その他",
+  "currencyLabel": "通貨",
+  "currencyVnd": "VND",
+  "currencyUsd": "USD",
+  "colorLabel": "色"
 }
