@@ -2,7 +2,7 @@
 
 
 
-import 'package:financy_ui/features/settings/manage_account/models/money_source.dart';
+import 'package:financy_ui/features/Account/models/money_source.dart';
 
 enum ManageMoneyStatus {loading, loaded,error, success}
 

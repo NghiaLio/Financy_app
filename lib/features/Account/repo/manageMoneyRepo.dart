@@ -16,11 +16,33 @@ class ManageMoneyRepo {
   }
 
   Future<void> updateMoneySource(MoneySource source) async {
-    // Implementation for updating a money source
+    final accessToken = Hive.box('jwt').get('accessToken');
+    ApiService().setToken(accessToken);
+    final res = await ApiService().put('/accounts/${source.id}', data: source.toJson());
+    if (res.statusCode != 200) {
+      throw Exception(res.data['message'] ?? 'Failed to update money source');
+    }
   }
 
   Future<void> deleteMoneySource(String id) async {
-    // Implementation for deleting a money source
+    final accessToken = Hive.box('jwt').get('accessToken');
+    ApiService().setToken(accessToken);
+    final res = await ApiService().delete('/accounts/$id');
+    if (res.statusCode != 204) {
+      throw Exception(res.data['message'] ?? 'Failed to delete money source');
+    }
+  }
+
+  Future<void> toggleActiveMoneySource(MoneySource source) async {
+    final accessToken = Hive.box('jwt').get('accessToken');
+    ApiService().setToken(accessToken);
+    final res = await ApiService().put(
+      '/accounts/${source.id}/active',
+      data: source.toJson(),
+    );
+    if (res.statusCode != 200) {
+      throw Exception(res.data['message'] ?? 'Failed to update money source');
+    }
   }
 
   Future<List<MoneySource>?> getMoneySources() async {

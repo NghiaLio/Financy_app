@@ -5,7 +5,7 @@ import 'interfaceSettings.dart';
 import 'languageSettings.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'man_Categories_spend.dart';
-import 'features/settings/manage_account/screen/manageAccount.dart';
+import 'features/Account/screen/manageAccount.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});

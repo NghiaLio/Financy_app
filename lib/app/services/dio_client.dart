@@ -44,4 +44,19 @@ class ApiService {
       throw Exception(e.message);
     }
   }
+
+  Future<Response> put(String path, {dynamic data}) async {
+    try {
+      return await _dio.put(path, data: data);
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+  Future<Response> delete(String path, {dynamic data}) async {
+    try {
+      return await _dio.delete(path, data: data);
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }

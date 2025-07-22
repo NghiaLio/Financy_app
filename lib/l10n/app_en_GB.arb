@@ -103,4 +103,8 @@
   "currencyVnd": "VND",
   "currencyUsd": "USD",
   "colorLabel": "Color"
+  ,"accountDetail": "Account Detail"
+  ,"active": "Active"
+  ,"inactive": "Inactive"
 }
+  

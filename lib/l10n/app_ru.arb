@@ -103,4 +103,7 @@
   "currencyVnd": "VND",
   "currencyUsd": "USD",
   "colorLabel": "Цвет"
+  ,"accountDetail": "Детали аккаунта",
+  "active": "Активен",
+  "inactive": "Неактивен"
 }

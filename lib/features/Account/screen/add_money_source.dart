@@ -1,13 +1,13 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
-import 'package:financy_ui/features/settings/manage_account/cubit/manageMoneyCubit.dart';
-import 'package:financy_ui/features/settings/manage_account/cubit/manageMoneyState.dart';
-import 'package:financy_ui/features/settings/manage_account/models/money_source.dart';
+import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
+import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../../../../core/constants/colors.dart';
+import '../../../core/constants/colors.dart';
 // import '../../../../core/constants/money_source_icons.dart';
 
 class AddMoneySourceScreen extends StatefulWidget {
@@ -74,6 +74,9 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.edit),
                     hintText: localizations.sourceName,
+                    hintStyle: textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
@@ -132,28 +135,36 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                         value: 'cash',
                         child: Text(
                           localizations.typeCash,
-                          style: textTheme.bodyLarge,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'ewallet',
                         child: Text(
                           localizations.typeEwallet,
-                          style: textTheme.bodyLarge,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'banking',
                         child: Text(
                           localizations.typeBanking,
-                          style: textTheme.bodyLarge,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'other',
                         child: Text(
                           localizations.typeOther,
-                          style: textTheme.bodyLarge,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ],
@@ -217,14 +228,18 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                         value: 'vnd',
                         child: Text(
                           localizations.currencyVnd,
-                          style: textTheme.bodyLarge,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'usd',
                         child: Text(
                           localizations.currencyUsd,
-                          style: textTheme.bodyLarge,
+                          style: textTheme.bodyLarge?.copyWith(
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     ],
@@ -272,6 +287,9 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                     prefixIcon: const Icon(Icons.attach_money),
                     hintText: localizations.initialBalance,
                     filled: true,
+                    hintStyle: textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 16,
@@ -311,6 +329,9 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.notes),
                     hintText: localizations.descriptionOptional,
+                    hintStyle: textTheme.bodyLarge?.copyWith(
+                      color: Colors.grey[600],
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: const EdgeInsets.symmetric(
@@ -489,7 +510,11 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
       type: _typeFromString(selectedType),
       currency: _currencyFromString(selectedCurrency),
       color: ColorUtils.colorToHex(selectedColor),
-      description: descriptionController.text.isEmpty ? null : descriptionController.text,
+      description:
+          descriptionController.text.isEmpty
+              ? null
+              : descriptionController.text,
+      isActive: true,
     );
     context.read<ManageMoneyCubit>().createAccount(source);
   }

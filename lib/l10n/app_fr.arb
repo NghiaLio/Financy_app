@@ -61,4 +61,8 @@
   "currencyVnd": "VND",
   "currencyUsd": "USD",
   "colorLabel": "Couleur"
+  ,"accountDetail": "Détail du compte"
+  ,"active": "Actif"
+  ,"inactive": "Inactif"
 }
+  

@@ -1,7 +1,10 @@
 // ignore_for_file: must_be_immutable
 import 'package:financy_ui/app/cubit/themeCubit.dart';
+import 'package:financy_ui/features/Account/models/money_source.dart';
+import 'package:financy_ui/features/Account/screen/account_detail_screen.dart';
+import 'package:financy_ui/features/Account/screen/manageAccount.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
-import 'package:financy_ui/features/settings/manage_account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/firebase_options.dart';
 import 'package:financy_ui/l10n/l10n.dart';
 import 'package:financy_ui/myApp.dart';
@@ -16,7 +19,7 @@ import 'app/theme/app_theme.dart';
 import 'core/constants/colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'features/settings/manage_account/screen/add_money_source.dart';
+import 'features/Account/screen/add_money_source.dart';
 
 
 void main() async {
@@ -79,8 +82,23 @@ class MyApp extends StatelessWidget {
             ),
             themeMode: state.themeMode,
             initialRoute: '/',
-            routes: {'/': (context) => const MainApp(),
-                     '/addMoneySource': (context) => const AddMoneySourceScreen()},
+            routes: {
+              '/': (context) => const MainApp(),
+              '/addMoneySource': (context) => const AddMoneySourceScreen(),
+              '/login': (context) => Login(),
+              '/expenseTracker': (context) => ExpenseTrackerScreen(),
+              '/manageAccount': (context) => AccountMoneyScreen(),
+              // Add other routes here
+            },
+            onGenerateRoute: (settings) {
+              if (settings.name == '/accountDetail') {
+                final args = settings.arguments as MoneySource;
+                return MaterialPageRoute(
+                  builder: (context) => AccountDetailScreen(account: args),
+                );
+              }
+              return null; // Return null if no matching route found
+            },
             debugShowCheckedModeBanner: false,
           );
         },

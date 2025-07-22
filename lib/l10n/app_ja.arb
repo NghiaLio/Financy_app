@@ -123,4 +123,8 @@
   "currencyVnd": "VND",
   "currencyUsd": "USD",
   "colorLabel": "色"
+  ,"accountDetail": "アカウントの詳細"
+  ,"active": "有効"
+  ,"inactive": "無効"
 }
+  

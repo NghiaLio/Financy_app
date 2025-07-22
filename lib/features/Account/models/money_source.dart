@@ -1,6 +1,6 @@
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
-import '../../../../core/constants/colors.dart';
+import '../../../core/constants/colors.dart';
 
 enum CurrencyType { vnd, usd }
 
@@ -15,6 +15,7 @@ class MoneySource {
   IconData? icon;
   String? color;
   String? description;
+  bool isActive;
   MoneySource({
     this.id,
     required this.name,
@@ -24,6 +25,7 @@ class MoneySource {
     this.icon,
     this.color,
     this.description,
+    required this.isActive,
   });
 
   /// Factory constructor for backend data (no icon/color)
@@ -44,6 +46,7 @@ class MoneySource {
       color: json['color'] as String? ?? ColorUtils.colorToHex(AppColors.blue), 
       // Default color if not provided
       description: json['description'] as String? ?? '',
+      isActive: json['active'] as bool? ?? true, // Default to true if not provided
     );
   }
 
@@ -54,6 +57,7 @@ class MoneySource {
     'currency': currency?.toString().split('.').last,
     'color': color ?? ColorUtils.colorToHex(AppColors.blue), // Default color if not provided
     'description': description ?? '',
+    'active': isActive,
   };
 }
 

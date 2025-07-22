@@ -123,5 +123,9 @@
   "currencyVnd": "VND",
   "currencyUsd": "USD",
   "colorLabel": "Màu sắc"
+  ,"accountDetail": "Chi tiết tài khoản",
+  "active": "Đang hoạt động",
+  "inactive": "Ngừng hoạt động"
 }
+  
 
