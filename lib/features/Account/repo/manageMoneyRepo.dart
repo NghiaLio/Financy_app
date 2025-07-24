@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/app/services/dio_client.dart';
+import 'package:financy_ui/app/services/Server/dio_client.dart';
 import '../models/money_source.dart';
 import 'package:hive/hive.dart';
 

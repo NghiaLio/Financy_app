@@ -1,48 +1,32 @@
 // ignore_for_file: file_names
 
 import 'package:financy_ui/features/auth/cubits/authState.dart';
-import 'package:financy_ui/features/auth/models/userModels.dart';
+import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/auth/repository/authRepo.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 class Authcubit extends Cubit<Authstate> {
   Authcubit() : super(Authstate.unAuthenticated());
   
   final Authrepo _authrepo = Authrepo();
-  Usermodels? _currentUserGG;
+  UserModel? _currentUser;
 
-  Usermodels? get currentUserGG => _currentUserGG;
+  UserModel? get currentUser => _currentUser;
 
-  Future<UserCredential> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication googleAuth =
-        await googleUser!.authentication;
-
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    return await FirebaseAuth.instance.signInWithCredential(credential);
-  }
-
-  Future<void> sendSaveIdToken()async{
-    final credentialUser = await signInWithGoogle();
+  Future<void> login()async{
+    final credentialUser = await _authrepo.signInWithGoogle();
     final idToken = await credentialUser.user!.getIdToken();
-    await _authrepo.ssIdToken(idToken!);
+    await _authrepo.loginWithGoogle(idToken!);
   }
 
-  Future<Usermodels> loginWithGG() async{
-    final res = await _authrepo.authenticated();
-    final currentUser = Usermodels.fromJson(res);
-    _currentUserGG = currentUser;
+  Future<UserModel?> getUser() async{
+    final currentUser = await _authrepo.getCurrentUser();
+    _currentUser = currentUser;
     emit(Authstate.authenticated(currentUser));
     return currentUser;
   }
 
-  Future<void> loginWithNoAccount() async{
-    emit(Authstate.guest());
-  }
+  // Future<void> loginWithNoAccount() async{
+  //   emit(Authstate.guest());
+  // }
 }

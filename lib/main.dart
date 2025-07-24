@@ -5,6 +5,7 @@ import 'package:financy_ui/features/Account/screen/account_detail_screen.dart';
 import 'package:financy_ui/features/Account/screen/manageAccount.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/firebase_options.dart';
 import 'package:financy_ui/l10n/l10n.dart';
 import 'package:financy_ui/myApp.dart';
@@ -24,8 +25,10 @@ import 'features/Account/screen/add_money_source.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dir = await getApplicationDocumentsDirectory();
-  Hive.init(dir.path);
+  final appDocDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocDir.path);
+  Hive.registerAdapter(UserModelAdapter());
+  await Hive.openBox<UserModel>('userBox');
   await dotenv.load(fileName: ".env");
   await Hive.openBox('settings');
   await Hive.openBox('jwt');

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:financy_ui/app/services/auth_interceptor.dart';
+import 'package:financy_ui/app/services/Server/auth_interceptor.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiService {

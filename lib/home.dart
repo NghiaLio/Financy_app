@@ -2,7 +2,7 @@
 
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/auth/cubits/authState.dart';
-import 'package:financy_ui/features/auth/models/userModels.dart';
+import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,13 +24,17 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appLocal = AppLocalizations.of(context)!;
     return BlocBuilder<Authcubit, Authstate>(
       builder: (context, state) {
-        Usermodels? user;
+        UserModel? user;
         if (state.authStatus == AuthStatus.authenticated) {
           user = state.user;
         }
@@ -53,8 +57,14 @@ class _HomeState extends State<Home> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(appLocal.hello, style: theme.textTheme.titleMedium),
-                      Text(user?.userName ?? '', style: theme.textTheme.titleLarge),
+                      Text(
+                        _localText((l) => l.hello),
+                        style: theme.textTheme.titleMedium,
+                      ),
+                      Text(
+                        user?.name ?? '',
+                        style: theme.textTheme.titleLarge,
+                      ),
                     ],
                   ),
                 ],
@@ -85,7 +95,7 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        appLocal.income,
+                        _localText((l) => l.income),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textGrey,
                         ),
@@ -101,7 +111,7 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(width: 8),
                       Text(
-                        appLocal.expense,
+                        _localText((l) => l.expense),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textGrey,
                         ),

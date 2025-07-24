@@ -28,6 +28,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     super.initState();
   }
 
+  // Hàm tiện ích
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -42,7 +48,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          AppLocalizations.of(context)!.chooseLanguage,
+          _localText((l) => l.chooseLanguage),
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -138,7 +144,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     // Show confirmation
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context)!.languageChanged),
+        content: Text(_localText((l) => l.languageChanged)),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
       ),

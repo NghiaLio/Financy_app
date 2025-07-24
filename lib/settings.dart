@@ -10,9 +10,17 @@ import 'features/Account/screen/manageAccount.dart';
 class Settings extends StatelessWidget {
   const Settings({super.key});
 
+  // Hàm tiện ích
+  String _localText(
+    BuildContext context,
+    String Function(AppLocalizations) getter,
+  ) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final appLocal = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -20,7 +28,7 @@ class Settings extends StatelessWidget {
         children: [
           _buildMenuItem(
             icon: Icons.translate,
-            title: appLocal.language,
+            title: _localText(context, (l) => l.language),
             iconColor: theme.primaryColor,
             onTap: () {
               Navigator.push(
@@ -34,7 +42,7 @@ class Settings extends StatelessWidget {
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.people,
-            title: appLocal.manageCategory,
+            title: _localText(context, (l) => l.manageCategory),
             iconColor: Colors.orange,
             onTap: () {
               Navigator.push(
@@ -48,7 +56,7 @@ class Settings extends StatelessWidget {
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.campaign,
-            title: appLocal.systemTheme,
+            title: _localText(context, (l) => l.systemTheme),
             iconColor: Colors.red,
             onTap: () {
               Navigator.push(
@@ -60,14 +68,14 @@ class Settings extends StatelessWidget {
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.people_alt,
-            title: appLocal.userManagement,
+            title: _localText(context, (l) => l.userManagement),
             iconColor: Colors.green,
             onTap: () {},
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.account_balance_wallet,
-            title: appLocal.account,
+            title: _localText(context, (l) => l.account),
             iconColor: Colors.teal,
             onTap: () {
               Navigator.push(
@@ -79,7 +87,7 @@ class Settings extends StatelessWidget {
           const SizedBox(height: 12),
           _buildMenuItem(
             icon: Icons.notifications,
-            title: appLocal.notification,
+            title: _localText(context, (l) => l.notification),
             iconColor: Colors.orange,
             hasNotification: true,
             onTap: () {},

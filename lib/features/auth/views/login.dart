@@ -15,7 +15,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   void loginGoogle() async {
-    await context.read<Authcubit>().sendSaveIdToken();
+    await context.read<Authcubit>().login();
     // await context.read<Authcubit>().login();
     // set app state
     Hive.box('settings').put('app_state', 'google');

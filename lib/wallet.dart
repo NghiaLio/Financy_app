@@ -7,10 +7,18 @@ import 'core/constants/colors.dart';
 class Wallet extends StatelessWidget {
   const Wallet({super.key});
 
+  // Hàm tiện ích
+  String _localText(
+    BuildContext context,
+    String Function(AppLocalizations) getter,
+  ) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appLocal = AppLocalizations.of(context)!;
     return Column(
       children: [
         // Balance Card
@@ -28,7 +36,7 @@ class Wallet extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    appLocal.myAccount,
+                    _localText(context, (l) => l.myAccount),
                     style: theme.textTheme.titleLarge,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -47,7 +55,10 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 24),
 
               // Income Section
-              Text(appLocal.income, style: theme.textTheme.bodyMedium),
+              Text(
+                _localText(context, (l) => l.income),
+                style: theme.textTheme.bodyMedium,
+              ),
               SizedBox(height: 8),
               Row(
                 children: [
@@ -89,7 +100,10 @@ class Wallet extends StatelessWidget {
               SizedBox(height: 16),
 
               // Expense Section
-              Text(appLocal.expense, style: theme.textTheme.bodyMedium),
+              Text(
+                _localText(context, (l) => l.expense),
+                style: theme.textTheme.bodyMedium,
+              ),
               SizedBox(height: 8),
               Row(
                 children: [

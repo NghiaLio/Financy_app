@@ -14,10 +14,16 @@ class _IncomeState extends State<Income> {
   String selectedPiePeriod = 'Monthly';
   String selectedIncomeBarPeriod = 'Monthly';
   String selectedIncomePiePeriod = 'Monthly';
+
+  // Hàm tiện ích
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appLocal = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -26,7 +32,10 @@ class _IncomeState extends State<Income> {
           // Summary
           Row(
             children: [
-              Text(appLocal.income, style: theme.textTheme.bodyLarge),
+              Text(
+                _localText((l) => l.income),
+                style: theme.textTheme.bodyLarge,
+              ),
               SizedBox(width: 16),
               Text(
                 '+60,000,000 VND',
@@ -39,7 +48,7 @@ class _IncomeState extends State<Income> {
           ),
           SizedBox(height: 8),
           Text(
-            'Thống kê thu nhập theo tháng',
+            _localText((l) => l.month),
             style: theme.textTheme.bodyMedium,
           ),
           SizedBox(height: 16),
@@ -47,13 +56,13 @@ class _IncomeState extends State<Income> {
           // Category Filter
           Row(
             children: [
-              _buildDropdown(appLocal.category, () {}),
+              _buildDropdown(_localText((l) => l.category), () {}),
               SizedBox(width: 12),
               _buildDropdown(selectedIncomeBarPeriod, () {
                 _showIncomePeriodDialog(true);
               }),
               SizedBox(width: 12),
-              _buildDropdown(appLocal.year, () {}),
+              _buildDropdown(_localText((l) => l.year), () {}),
             ],
           ),
           SizedBox(height: 24),

@@ -8,6 +8,7 @@ import 'package:financy_ui/shared/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class InterfaceSettings extends StatefulWidget {
   const InterfaceSettings({super.key});
 
@@ -102,7 +103,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     );
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context)!.saveSettings),
+        content: Text(_localText((l) => l.saveSettings)),
         backgroundColor: _colorThemes[_selectedColorTheme],
         duration: Duration(seconds: 2),
       ),
@@ -120,10 +121,15 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     Navigator.pop(context);
   }
 
+  // Hàm tiện ích
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appLocal = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -137,7 +143,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           onPressed: back,
         ),
         title: Text(
-          appLocal.themeSettings,
+          _localText((l) => l.themeSettings),
           style: TextStyle(
             color: Colors.white,
             fontSize: 20,
@@ -152,24 +158,24 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Theme Section
-            _buildSectionTitle(appLocal.theme),
+            _buildSectionTitle(_localText((l) => l.theme)),
             _buildThemeSelector(),
             SizedBox(height: 24),
 
             // Color Theme Section
-            _buildSectionTitle(appLocal.primaryColor),
+            _buildSectionTitle(_localText((l) => l.primaryColor)),
             _buildColorThemeSelector(),
             SizedBox(height: 24),
 
             // Font Section
-            _buildSectionTitle(appLocal.fontFamily),
+            _buildSectionTitle(_localText((l) => l.fontFamily)),
             _buildFontSelector(),
             SizedBox(height: 16),
             _buildFontSizeSlider(),
             SizedBox(height: 24),
 
             // Animation Section
-            _buildSectionTitle(appLocal.effect),
+            _buildSectionTitle(_localText((l) => l.effect)),
             _buildAnimationSettings(),
             SizedBox(height: 24),
 
@@ -207,11 +213,19 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
       ),
       child: Column(
         children: [
-          _buildRadioTile('Dark', AppLocalizations.of(context)!.dark, Icons.dark_mode),
+          _buildRadioTile('Dark', _localText((l) => l.dark), Icons.dark_mode),
           Divider(color: Colors.grey[600], height: 1),
-          _buildRadioTile('Light', AppLocalizations.of(context)!.light, Icons.light_mode),
+          _buildRadioTile(
+            'Light',
+            _localText((l) => l.light),
+            Icons.light_mode,
+          ),
           Divider(color: Colors.grey[600], height: 1),
-          _buildRadioTile('System', AppLocalizations.of(context)!.system, Icons.brightness_auto),
+          _buildRadioTile(
+            'System',
+            _localText((l) => l.system),
+            Icons.brightness_auto,
+          ),
         ],
       ),
     );
@@ -342,7 +356,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context)!.fontSize,
+                _localText((l) => l.fontSize),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               Text(
@@ -461,7 +475,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    AppLocalizations.of(context)!.wallet,
+                    _localText((l) => l.wallet),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -487,7 +501,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
           ),
           SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context)!.previewNote,
+            _localText((l) => l.previewNote),
             style: Theme.of(
               context,
             ).textTheme.bodySmall?.copyWith(fontSize: 10),
@@ -512,7 +526,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context)!.cancel,
+              _localText((l) => l.cancel),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
@@ -532,7 +546,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context)!.saveSettings,
+              _localText((l) => l.saveSettings),
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),

@@ -36,7 +36,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
 
   @override
   void initState() {
-    context.read<Authcubit>().loginWithGG();
+    context.read<Authcubit>().getUser();
     super.initState();
   }
 
