@@ -39,13 +39,13 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   @override
   void initState() {
     _selectedColorTheme = ColorUtils.colorToHex(
-      context.read<ThemeCubit>().state.color!,
+      context.read<ThemeCubit>().state.color ?? Colors.blue,
     );
-    _preThemeMode = context.read<ThemeCubit>().state.themeMode!;
+    _preThemeMode = context.read<ThemeCubit>().state.themeMode ?? ThemeMode.system;
     _selectedTheme = ThemeUtils.themeModeToString(_preThemeMode);
 
-    _fontSize = context.read<ThemeCubit>().state.fontSize!;
-    _selectedFont = context.read<ThemeCubit>().state.fontFamily!;
+    _fontSize = context.read<ThemeCubit>().state.fontSize ?? 14.0;
+    _selectedFont = context.read<ThemeCubit>().state.fontFamily ?? 'Roboto';
 
     log(_selectedTheme);
     super.initState();
@@ -152,9 +152,10 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Theme Section
@@ -180,13 +181,14 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
             SizedBox(height: 24),
 
             // Preview Section
-            _buildSectionTitle('Xem trước'),
+            _buildSectionTitle('Preview'),
             _buildPreviewCard(),
             SizedBox(height: 24),
 
             // Action Buttons
             _buildActionButtons(),
           ],
+        ),
         ),
       ),
     );
@@ -407,7 +409,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
                 ),
                 SizedBox(width: 12),
                 Text(
-                  'Hiệu ứng chuyển động',
+                  'Motion Effects',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],
@@ -431,7 +433,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
                 ),
                 SizedBox(width: 12),
                 Text(
-                  'Rung phản hồi',
+                  'Haptic Feedback',
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ],

@@ -45,6 +45,7 @@ class _LoginState extends State<Login> {
     final theme = Theme.of(context);
     final appLocal = AppLocalizations.of(context);
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

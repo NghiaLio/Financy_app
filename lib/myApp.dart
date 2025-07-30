@@ -56,11 +56,11 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.timeline),
-            label: appLocal?.transactionBook ?? 'Sổ giao dịch',
+            label: appLocal?.transactionBook ?? 'Transaction Book',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.wallet),
-            label: appLocal?.wallet ?? 'Ví tiền',
+            label: appLocal?.wallet ?? 'Wallet',
           ),
           BottomNavigationBarItem(
             icon: Container(
@@ -78,11 +78,11 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.pie_chart),
-            label: appLocal?.statistics ?? 'Thống kê',
+            label: appLocal?.statistics ?? 'Statistics',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
-            label: appLocal?.settings ?? 'Cài đặt',
+            label: appLocal?.settings ?? 'Settings',
           ),
         ],
       ),

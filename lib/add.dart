@@ -52,7 +52,7 @@ class _AddState extends State<Add> {
         _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng điền đầy đủ thông tin bắt buộc'),
+          content: Text('Please fill in all required information'),
           backgroundColor: Colors.red,
         ),
       );
@@ -62,7 +62,7 @@ class _AddState extends State<Add> {
     // Save transaction logic here
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Giao dịch đã được lưu thành công!'),
+        content: Text('Transaction saved successfully!'),
         backgroundColor: Colors.green,
       ),
     );
@@ -72,7 +72,7 @@ class _AddState extends State<Add> {
 
   @override
   void didChangeDependencies() {
-    // Khởi tạo _selectedCategory và _categories từ AppLocalization
+    // Initialize _selectedCategory and _categories from AppLocalization
     final localization = AppLocalizations.of(context);
     if (_selectedCategory == null) {
       setState(() {
@@ -183,7 +183,7 @@ class _AddState extends State<Add> {
           style: Theme.of(context).textTheme.bodyMedium,
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           items:
-              [AppLocalizations.of(context)!.addFriend, 'Ăn uống', 'Di chuyển', 'Giải trí', 'Mua sắm'].map((
+              [AppLocalizations.of(context)!.addFriend, 'Dining', 'Transport', 'Entertainment', 'Shopping'].map((
                 String value,
               ) {
                 return DropdownMenuItem<String>(

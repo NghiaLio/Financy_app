@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class SuccessAlertDialog extends StatelessWidget {
-  const SuccessAlertDialog({super.key});
+class ResultDialogAnimation extends StatelessWidget {
+  final bool isSuccess;
+  const ResultDialogAnimation({super.key, required this.isSuccess});
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +17,16 @@ class SuccessAlertDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Lottie.asset(
-            'assets/animation/Check Mark.json', // Replace with your Lottie animation file
+            isSuccess
+                ? 'assets/animation/Check Mark.json'
+                : 'assets/animation/Tomato Error.json', // Replace with your Lottie animation file
             width: 150,
             height: 150,
             repeat: true,
           ),
           const SizedBox(height: 20),
           Text(
-            'Success!',
+            isSuccess ? AppLocalizations.of(context)?.success ?? 'Success!' : AppLocalizations.of(context)?.error ?? 'Error!',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Colors.green,
               fontWeight: FontWeight.bold,

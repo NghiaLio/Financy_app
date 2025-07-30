@@ -53,7 +53,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
           } else if (state.status == ManageMoneyStatus.error) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.message!)));
+            ).showSnackBar(SnackBar(content: Text(state.message ?? 'An error occurred')));
           }
         },
         child: Padding(
@@ -495,13 +495,13 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
     if (nameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Vui lòng nhập tên nguồn tiền!')));
+              ).showSnackBar(SnackBar(content: Text('Please enter source name!')));
       return;
     }
     if (balanceController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Vui lòng nhập số dư!')));
+              ).showSnackBar(SnackBar(content: Text('Please enter balance!')));
       return;
     }
     final source = MoneySource(

@@ -171,7 +171,7 @@ class _IncomeState extends State<Income> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'So sánh các loại thu nhập',
+                'Compare income types',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
@@ -251,11 +251,11 @@ class _IncomeState extends State<Income> {
                   children: [
                     _buildLegendItem(Colors.cyan, 'OT'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.blue[800]!, 'Lãi cho vay'),
+                    _buildLegendItem(Colors.blue[800]!, 'Loan Interest'),
                     SizedBox(height: 8),
                     _buildLegendItem(Colors.purple, 'Parttime'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.orange, 'Tiền lương chính'),
+                    _buildLegendItem(Colors.orange, 'Main Salary'),
                   ],
                 ),
               ),

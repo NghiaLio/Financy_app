@@ -292,7 +292,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Chọn biểu tượng'),
+            title: const Text('Choose Icon'),
             content: Wrap(
               children:
                   icons
@@ -336,7 +336,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text('Chọn màu sắc'),
+            title: const Text('Choose Color'),
             content: Wrap(
               children:
                   colors

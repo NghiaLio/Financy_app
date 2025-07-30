@@ -4,7 +4,7 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/auth/cubits/authState.dart';
 import 'package:financy_ui/shared/utils/generateID.dart';
-import 'package:financy_ui/shared/widgets/successAnimation.dart';
+import 'package:financy_ui/shared/widgets/resultDialogAnimation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,27 +59,53 @@ class _InputDialogState extends State<InputDialog> {
 
   void _handleSave() async {
     final appLocal = AppLocalizations.of(context);
+    
+    // Validate input
+    if (!_validateInput(appLocal)) return;
+    
+    // Create user and login
+    final newUser = _createUserFromInput();
+    await context.read<Authcubit>().loginWithNoAccount(newUser);
+  }
+
+  /// Validates user input and shows error messages if invalid
+  bool _validateInput(AppLocalizations? appLocal) {
+    // Validate name
     if (nameController.text.trim().isEmpty) {
       _showError(appLocal?.pleaseEnterName ?? 'Please enter a name');
-      return;
+      return false;
     }
+    
+    // Parse date components
     final day = int.tryParse(dayController.text);
     final month = int.tryParse(monthController.text);
     final year = int.tryParse(yearController.text);
 
+    // Validate date numbers
     if (day == null || month == null || year == null) {
       _showError(
         appLocal?.pleaseEnterValidNumbers ??
             'Please enter valid numbers for day, month, and year',
       );
-      return;
+      return false;
     }
+    
+    // Validate date logic
     if (!_isValidDate(day, month, year)) {
       _showError(appLocal?.pleaseEnterValidDate ?? 'Please enter a valid date');
-      return;
+      return false;
     }
+    
+    return true;
+  }
 
-    final newUser = UserModel(
+  /// Creates UserModel from input fields
+  UserModel _createUserFromInput() {
+    final day = int.parse(dayController.text);
+    final month = int.parse(monthController.text);
+    final year = int.parse(yearController.text);
+    
+    return UserModel(
       id: GenerateID.newID(),
       name: nameController.text.trim(),
       picture: '',
@@ -88,7 +114,6 @@ class _InputDialogState extends State<InputDialog> {
       email: '',
       dateOfBirth: DateTime(year, month, day),
     );
-    await context.read<Authcubit>().loginWithNoAccount(newUser);
   }
 
   void _showError(String message) {
@@ -98,6 +123,49 @@ class _InputDialogState extends State<InputDialog> {
         backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );
+  }
+
+  /// Handles authentication result by showing appropriate dialog and navigation
+  Future<void> _handleAuthResult(BuildContext context, bool isSuccess) async {
+    // Store the context before closing the dialog
+    final navigatorContext = Navigator.of(context).context;
+    
+    // Close the current dialog first
+    Navigator.of(context).pop();
+    
+    // Show result dialog
+    showDialog(
+      context: navigatorContext,
+      barrierDismissible: false,
+      builder: (BuildContext ctx) {
+        return ResultDialogAnimation(isSuccess: isSuccess);
+      },
+    );
+    
+    // Wait for animation to complete
+    await Future.delayed(const Duration(milliseconds: 1500));
+    
+    // Close result dialog
+    if (navigatorContext.mounted) {
+      Navigator.of(navigatorContext).pop();
+      
+      // Navigate based on result
+      if (isSuccess) {
+        // Navigate to home on success
+        Navigator.pushNamedAndRemoveUntil(
+          navigatorContext,
+          '/',
+          (route) => false,
+        );
+      } else {
+        // Navigate back to login on error
+        Navigator.pushNamedAndRemoveUntil(
+          navigatorContext,
+          '/login',
+          (route) => false,
+        );
+      }
+    }
   }
 
   @override
@@ -111,24 +179,9 @@ class _InputDialogState extends State<InputDialog> {
 
     return BlocListener<Authcubit, Authstate>(
       listener: (context, state) async {
-        if (state.authStatus == AuthStatus.authenticated) {
-          // Lưu context của dialog
-          BuildContext? dialogContext;
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext ctx) {
-              dialogContext = ctx;
-              return const SuccessAlertDialog();
-            },
-          );
-          await Future.delayed(const Duration(milliseconds: 1000));
-          if (dialogContext != null) {
-            Navigator.of(
-              dialogContext!,
-            ).pop(); // Đóng dialog bằng context của dialog
-          }
-          Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+        if (state.authStatus == AuthStatus.authenticated || 
+            state.authStatus == AuthStatus.error) {
+          await _handleAuthResult(context, state.authStatus == AuthStatus.authenticated);
         }
       },
       child: AlertDialog(

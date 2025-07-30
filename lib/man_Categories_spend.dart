@@ -15,72 +15,72 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
   final List<CategoryItem> expenseCategories = [
     CategoryItem(
       icon: Icons.local_grocery_store,
-      label: 'Thực phẩm',
+      label: 'Food',
       color: Colors.green,
     ),
     CategoryItem(
       icon: Icons.restaurant,
-      label: 'Chế độ ăn',
+      label: 'Dining',
       color: Colors.orange,
     ),
     CategoryItem(
       icon: Icons.local_shipping,
-      label: 'Di chuyển',
+      label: 'Transport',
       color: Colors.blue,
     ),
     CategoryItem(
       icon: Icons.checkroom,
-      label: 'Thời trang',
+      label: 'Fashion',
       color: Colors.purple,
     ),
     CategoryItem(
       icon: Icons.local_bar,
-      label: 'Chế độ uống',
+      label: 'Drinks',
       color: Colors.red,
     ),
     CategoryItem(
       icon: Icons.pets,
-      label: 'Thú cưng',
+      label: 'Pets',
       color: Colors.brown,
     ),
     CategoryItem(
       icon: Icons.school,
-      label: 'Giáo dục',
+      label: 'Education',
       color: Colors.indigo,
     ),
     CategoryItem(
       icon: Icons.local_hospital,
-      label: 'Sức khỏe',
+      label: 'Health',
       color: Colors.teal,
     ),
     CategoryItem(
       icon: Icons.beach_access,
-      label: 'Du lịch',
+      label: 'Travel',
       color: Colors.cyan,
     ),
     CategoryItem(
       icon: Icons.sports_esports,
-      label: 'Giải trí',
+      label: 'Entertainment',
       color: Colors.pink,
     ),
     CategoryItem(
       icon: Icons.water_drop,
-      label: 'Hóa đơn nước',
+      label: 'Water Bill',
       color: Colors.lightBlue,
     ),
     CategoryItem(
       icon: Icons.electrical_services,
-      label: 'Hóa đơn điện',
+      label: 'Electricity Bill',
       color: Colors.amber,
     ),
     CategoryItem(
       icon: Icons.receipt_long,
-      label: 'Hóa đơn',
+      label: 'Bills',
       color: Colors.grey,
     ),
     CategoryItem(
       icon: Icons.card_giftcard,
-      label: 'Quà tặng',
+      label: 'Gifts',
       color: Colors.pinkAccent,
     ),
   ];
@@ -88,22 +88,22 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
   final List<CategoryItem> incomeCategories = [
     CategoryItem(
       icon: Icons.work,
-      label: 'Lương',
+      label: 'Salary',
       color: Colors.green,
     ),
     CategoryItem(
       icon: Icons.business,
-      label: 'Kinh doanh',
+      label: 'Business',
       color: Colors.blue,
     ),
     CategoryItem(
       icon: Icons.trending_up,
-      label: 'Đầu tư',
+      label: 'Investment',
       color: Colors.orange,
     ),
     CategoryItem(
       icon: Icons.card_giftcard,
-      label: 'Quà tặng',
+      label: 'Gifts',
       color: Colors.purple,
     ),
   ];
@@ -146,8 +146,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
           indicatorColor: Colors.white,
           indicatorWeight: 2,
           tabs: const [
-            Tab(text: 'Chi tiêu'),
-            Tab(text: 'Thu nhập'),
+            Tab(text: 'Expenses'),
+            Tab(text: 'Income'),
           ],
         ),
       ),
@@ -270,7 +270,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
             ),
             SizedBox(height: 8),
             Text(
-              'Thêm danh mục',
+              'Add Category',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -313,7 +313,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
           children: [
             ListTile(
               leading: const Icon(Icons.edit, color: Colors.white),
-              title: const Text('Chỉnh sửa danh mục', style: TextStyle(color: Colors.white)),
+              title: const Text('Edit Categories', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 _showEditCategoriesDialog();
@@ -321,7 +321,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
             ),
             ListTile(
               leading: const Icon(Icons.restore, color: Colors.white),
-              title: const Text('Khôi phục mặc định', style: TextStyle(color: Colors.white)),
+              title: const Text('Restore Default', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Navigator.pop(context);
                 _showRestoreDefaultDialog();
@@ -340,7 +340,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2A2A3E),
-        title: const Text('Thêm danh mục mới', style: TextStyle(color: Colors.white)),
+        title: const Text('Add New Category', style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -348,7 +348,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
               controller: nameController,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
-                labelText: 'Tên danh mục',
+                labelText: 'Category Name',
                 labelStyle: TextStyle(color: Colors.grey),
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(color: Colors.grey),
@@ -363,7 +363,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
@@ -372,13 +372,13 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Đã thêm danh mục: ${nameController.text}'),
+                    content: Text('Added category: ${nameController.text}'),
                     backgroundColor: Colors.green,
                   ),
                 );
               }
             },
-            child: const Text('Thêm', style: TextStyle(color: Colors.blue)),
+            child: const Text('Add', style: TextStyle(color: Colors.blue)),
           ),
         ],
       ),
@@ -388,7 +388,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
   void _showEditCategoriesDialog() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Chức năng chỉnh sửa danh mục'),
+        content: Text('Edit categories feature'),
         backgroundColor: Colors.blue,
       ),
     );
@@ -399,27 +399,27 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> with 
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2A2A3E),
-        title: const Text('Khôi phục mặc định', style: TextStyle(color: Colors.white)),
+        title: const Text('Restore Default', style: TextStyle(color: Colors.white)),
         content: const Text(
-          'Bạn có muốn khôi phục tất cả danh mục về mặc định không?',
+          'Do you want to restore all categories to default?',
           style: TextStyle(color: Colors.white),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Đã khôi phục danh mục mặc định'),
+                  content: Text('Restored default categories'),
                   backgroundColor: Colors.green,
                 ),
               );
             },
-            child: const Text('Khôi phục', style: TextStyle(color: Colors.red)),
+            child: const Text('Restore', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

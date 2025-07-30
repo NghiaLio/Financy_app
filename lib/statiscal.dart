@@ -46,7 +46,7 @@ class _StatiscalState extends State<Statiscal>
             labelStyle: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
-            tabs: [Tab(text: 'Chi tiêu'), Tab(text: 'Thu nhập')],
+            tabs: [Tab(text: 'Expenses'), Tab(text: 'Income')],
           ),
         ),
 
@@ -55,9 +55,9 @@ class _StatiscalState extends State<Statiscal>
           child: TabBarView(
             controller: _tabController,
             children: [
-              // Chi tiêu tab
+              // Expenses tab
               Spending(),
-              // Thu nhập tab
+              // Income tab
               Income(),
             ],
           ),

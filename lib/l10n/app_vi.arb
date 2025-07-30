@@ -142,7 +142,9 @@
   "loginToAccess": "Đăng nhập để truy cập trải nghiệm cá nhân của bạn",
   "or": "hoặc",
   "continueAgreement": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ của chúng tôi",
-  "savedInfoMessage": "Đã lưu: {name}, sinh ngày {day}/{month}/{year}"
+  "savedInfoMessage": "Đã lưu: {name}, sinh ngày {day}/{month}/{year}",
+  "success":"Thành công",
+  "error":"Thất bại"
 }
 
 

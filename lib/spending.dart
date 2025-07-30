@@ -264,13 +264,13 @@ class _SpendingState extends State<Spending> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLegendItem(Colors.cyan, 'Gia đình'),
+                    _buildLegendItem(Colors.cyan, 'Family'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.blue[800]!, 'Riêng tôi'),
+                    _buildLegendItem(Colors.blue[800]!, 'Personal'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.purple, 'Thú cưng'),
+                    _buildLegendItem(Colors.purple, 'Pets'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.orange, 'Xã giao'),
+                    _buildLegendItem(Colors.orange, 'Social'),
                   ],
                 ),
               ),

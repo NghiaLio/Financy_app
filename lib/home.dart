@@ -147,7 +147,7 @@ class _HomeState extends State<Home> {
                                 // Chỉ hiển thị T1 đến T6
                                 if (value >= 1 && value <= 6) {
                                   return Text(
-                                    'Tháng ${value.toInt()}',
+                                    'Month ${value.toInt()}',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: AppColors.textGrey,
                                       fontSize: 10,
@@ -208,65 +208,65 @@ class _HomeState extends State<Home> {
             Expanded(
               child: ListView(
                 children: [
-                  _buildDateHeader('22/04/2022', 'Thứ sáu', context),
+                  _buildDateHeader('22/04/2022', 'Friday', context),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.restaurant,
                     iconColor: Colors.orange,
-                    title: 'Ăn uống',
-                    subtitle: 'Riêng tôi',
+                    title: 'Dining',
+                    subtitle: 'Personal',
                     amount: '-100,000 đ',
                   ),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.family_restroom,
                     iconColor: Colors.blue,
-                    title: 'Du lịch',
-                    subtitle: 'Gia đình',
+                    title: 'Travel',
+                    subtitle: 'Family',
                     amount: '-5,000,000 đ',
                   ),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.monetization_on,
                     iconColor: Colors.green,
-                    title: 'Tiền lương',
-                    subtitle: 'Riêng tôi',
+                    title: 'Salary',
+                    subtitle: 'Personal',
                     amount: '+30,000,000 đ',
                     isPositive: true,
                   ),
 
-                  _buildDateHeader('25/04/2022', 'Thứ hai', context),
+                  _buildDateHeader('25/04/2022', 'Monday', context),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.medical_services,
                     iconColor: Colors.yellow,
-                    title: 'Chữa bệnh',
-                    subtitle: 'Thú cưng',
+                    title: 'Medical',
+                    subtitle: 'Pets',
                     amount: '-500,000 Đ',
                   ),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.directions_bus,
                     iconColor: Colors.blue,
-                    title: 'Di chuyển',
-                    subtitle: 'Riêng tôi',
+                    title: 'Transport',
+                    subtitle: 'Personal',
                     amount: '-20,000 Đ',
                   ),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.receipt,
                     iconColor: Colors.grey,
-                    title: 'Hóa đơn nước',
-                    subtitle: 'Riêng tôi',
+                    title: 'Water Bill',
+                    subtitle: 'Personal',
                     amount: '-300,000 Đ',
                   ),
 
-                  _buildDateHeader('22/04/2022', 'Thứ sáu', context),
+                  _buildDateHeader('22/04/2022', 'Friday', context),
                   _buildTransactionItem(
                     context: context,
                     icon: Icons.pets,
                     iconColor: Colors.green,
-                    title: 'Chăm sóc thú cưng',
+                    title: 'Pet Care',
                     subtitle: '',
                     amount: '-500,000 Đ',
                   ),

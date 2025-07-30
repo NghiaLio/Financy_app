@@ -59,29 +59,29 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
 
-            /// 👇 Luôn fallback về tiếng Việt nếu locale không khớp
+            /// 👇 Always fallback to Vietnamese if locale doesn't match
             localeResolutionCallback: (locale, supportedLocales) {
               for (var supportedLocale in supportedLocales) {
                 if (supportedLocale.languageCode == locale?.languageCode) {
                   return supportedLocale;
                 }
               }
-              return const Locale('vi'); // fallback mặc định
+              return const Locale('vi'); // default fallback
             },
             locale: state.lang,
             theme: AppTheme.lightTheme(
-              primaryColor: state.color!,
+              primaryColor: state.color ?? Colors.blue,
               backgroundColor: AppColors.backgroundLight,
-              selectedItemColor: state.color!,
-              fontFamily: state.fontFamily!,
-              fontSize: state.fontSize!,
+              selectedItemColor: state.color ?? Colors.blue,
+              fontFamily: state.fontFamily ?? 'Roboto',
+              fontSize: state.fontSize ?? 14.0,
             ),
             darkTheme: AppTheme.darkTheme(
-              primaryColor: state.color!,
+              primaryColor: state.color ?? Colors.blue,
               backgroundColor: AppColors.backgroundDark,
-              selectedItemColor: state.color!,
-              fontFamily: state.fontFamily!,
-              fontSize: state.fontSize!,
+              selectedItemColor: state.color ?? Colors.blue,
+              fontFamily: state.fontFamily ?? 'Roboto',
+              fontSize: state.fontSize ?? 14.0,
             ),
             themeMode: state.themeMode,
             initialRoute: '/',
