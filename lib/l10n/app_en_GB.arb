@@ -105,6 +105,21 @@
   "colorLabel": "Color"
   ,"accountDetail": "Account Detail"
   ,"active": "Active"
-  ,"inactive": "Inactive"
+  ,"inactive": "Inactive",
+  "personalInformation": "Personal Information",
+  "fullName": "Full Name",
+  "enterFullName": "Enter your full name",
+  "dateOfBirth": "Date of Birth",
+  "day": "Day",
+  "month": "Month",
+  "year": "Year",
+  "cancel": "Cancel",
+  "save": "Save",
+  "pleaseEnterName": "Please enter a name",
+  "pleaseEnterValidNumbers": "Please enter valid numbers for day, month, and year",
+  "pleaseEnterValidDate": "Please enter a valid date",
+  "hello": "Hello",
+  "loginToAccess": "Log in to access your personalized experience",
+  "savedInfoMessage": "Saved: {name}, born on {day}/{month}/{year}"
 }
   

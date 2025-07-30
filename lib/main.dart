@@ -120,15 +120,15 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  late String appState;
+  late bool appState;
   @override
   void initState() {
-    appState = Hive.box('settings').get('app_state', defaultValue: '');
+    appState = Hive.box('settings').get('app_state', defaultValue:false);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return appState.isEmpty ? Login() : ExpenseTrackerScreen();
+    return !appState ? Login() : ExpenseTrackerScreen();
   }
 }

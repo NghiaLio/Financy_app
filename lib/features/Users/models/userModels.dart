@@ -22,6 +22,9 @@ class UserModel extends HiveObject {
   String picture;
 
   @HiveField(5)
+  DateTime dateOfBirth;
+
+  @HiveField(6)
   DateTime createdAt;
 
   UserModel({
@@ -30,15 +33,19 @@ class UserModel extends HiveObject {
     required this.name,
     required this.email,
     required this.picture,
+    required this.dateOfBirth,
     required this.createdAt,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     DateTime? parsedDate;
+    DateTime? createdAt;
     try {
-      parsedDate = json['date'] != null ? DateTime.parse(json['date']) : null;
+      parsedDate = json['dateOfBirth'] != null ? DateTime.parse(json['date']) : null;
+      createdAt = json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null;
     } catch (e) {
-      parsedDate = null; // or set a default value
+      parsedDate = null;
+      createdAt = null; // or set a default value
     }
     return UserModel(
       id: json['_id'] ?? '',
@@ -46,7 +53,8 @@ class UserModel extends HiveObject {
       name: json['userName'] ?? '',
       email: json['email'] ?? '',
       picture: json['photo'] ?? '',
-      createdAt: parsedDate ?? DateTime.now(),
+      dateOfBirth: parsedDate ?? DateTime.now(),
+      createdAt: createdAt ?? DateTime.now(),
     );
   }
 
@@ -56,6 +64,7 @@ class UserModel extends HiveObject {
     'name': name,
     'email': email,
     'picture': picture,
+    'dateOfBirth': dateOfBirth.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
   };
 }

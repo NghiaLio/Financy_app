@@ -34,7 +34,8 @@ class Authrepo {
     // fetch user data
     final user = await ApiService().get('/google/user');
     //save user to local storage
-    Hive.box<UserModel>('userBox').put('currentUser', UserModel.fromJson(user.data));
+    await Hive.box<UserModel>('userBox').put('currentUser', UserModel.fromJson(user.data));
+    Hive.box('settings').put('app_state', true);
   }
 
   Future<Map<String,dynamic>> authenticated() async{
@@ -48,6 +49,13 @@ class Authrepo {
   Future<UserModel?> getCurrentUser() async{
     final boxUser = Hive.box<UserModel>('userBox').get('currentUser');
     return boxUser;
+  }
+
+
+  //login with no account
+  Future<void> loginWithNoAccount(UserModel guestUser) async {
+    await Hive.box<UserModel>('userBox').put('currentUser', guestUser);
+    Hive.box('settings').put('app_state', true);
   }
 
 }

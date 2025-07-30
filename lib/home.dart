@@ -35,6 +35,7 @@ class _HomeState extends State<Home> {
     return BlocBuilder<Authcubit, Authstate>(
       builder: (context, state) {
         UserModel? user;
+     
         if (state.authStatus == AuthStatus.authenticated) {
           user = state.user;
         }

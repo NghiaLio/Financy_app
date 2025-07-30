@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
+import 'package:financy_ui/features/auth/views/nameInputDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
@@ -14,31 +15,42 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String? savedName;
+  int? savedDay;
+  int? savedMonth;
+  int? savedYear;
+
   void loginGoogle() async {
     await context.read<Authcubit>().login();
-    // await context.read<Authcubit>().login();
-    // set app state
-    Hive.box('settings').put('app_state', 'google');
+    Hive.box('settings').put('app_state', true);
     Navigator.pushReplacementNamed(context, '/');
   }
 
-  void loginNoAccount(){
-    Hive.box('settings').put('app_state', 'no_account');
-    Navigator.pushReplacementNamed(context, '/');
+  Future<void> _showInputDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (context) => InputDialog(),
+    );
+  }
+
+  void loginNoAccount() async {
+    await _showInputDialog();
+    Hive.box('settings').put('app_state', false);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final appLocal = AppLocalizations.of(context)!;
+    final appLocal = AppLocalizations.of(context);
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Spacer(),
-            //banner
+            const Spacer(),
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: Image.asset(
@@ -49,9 +61,8 @@ class _LoginState extends State<Login> {
               ),
             ),
             const SizedBox(height: 20),
-            //tilte
             Text(
-              appLocal.hello,
+              appLocal?.hello ?? 'Hello',
               style: theme.textTheme.titleLarge?.copyWith(
                 fontSize: 44,
                 fontWeight: FontWeight.w700,
@@ -59,9 +70,9 @@ class _LoginState extends State<Login> {
               textAlign: TextAlign.center,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                'Đăng nhập để truy cập trải nghiệm cá nhân của bạn',
+                appLocal?.loginToAccess ?? 'Login to access',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 16,
                   fontWeight: FontWeight.w400,
@@ -70,9 +81,7 @@ class _LoginState extends State<Login> {
                 textAlign: TextAlign.center,
               ),
             ),
-            SizedBox(height: 20),
-
-            //button login
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.06,
@@ -82,7 +91,10 @@ class _LoginState extends State<Login> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  side: BorderSide(color: Colors.green, width: 2),
+                  side: BorderSide(
+                    color: theme.colorScheme.secondary,
+                    width: 2,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -92,9 +104,9 @@ class _LoginState extends State<Login> {
                       width: 20,
                       height: 20,
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Text(
-                      'Tiếp tục với Google',
+                      appLocal?.continue_with_google ?? 'Continue with Google',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -104,32 +116,35 @@ class _LoginState extends State<Login> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
-              'hoặc',
+              appLocal?.or ?? 'Or',
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey,
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: MediaQuery.of(context).size.height * 0.06,
               child: OutlinedButton(
-                onPressed: () {},
+                onPressed: loginNoAccount,
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  side: BorderSide(color: Colors.green, width: 2),
+                  side: BorderSide(
+                    color: theme.colorScheme.secondary,
+                    width: 2,
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Tiếp tục mà không dùng tài khoản',
+                      appLocal?.continue_without_account ?? 'Continue without account',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -139,12 +154,11 @@ class _LoginState extends State<Login> {
                 ),
               ),
             ),
-            //footer
-            Spacer(),
+            const Spacer(),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 25),
+              padding: const EdgeInsets.symmetric(vertical: 25),
               child: Text(
-                'Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ của chúng tôi',
+                appLocal?.agree_terms ?? 'I agree to the terms and conditions',
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12,
                   fontWeight: FontWeight.w400,
