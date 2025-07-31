@@ -107,6 +107,7 @@
   "active": "Активен",
   "inactive": "Неактивен",
   "personalInformation": "Личная информация",
+  "contactInformation": "Контактная информация",
   "fullName": "Полное имя",
   "enterFullName": "Введите ваше полное имя",
   "dateOfBirth": "Дата рождения",
@@ -225,5 +226,12 @@
   "typeOther": "Другое",
   "currencyLabel": "Валюта",
   "currencyVnd": "VND",
-  "currencyUsd": "USD"
+  "currencyUsd": "USD",
+  "success": "Успех",
+  "error": "Ошибка",
+  "email": "Электронная почта",
+  "pleaseFillRequiredFields": "Пожалуйста, заполните все обязательные поля",
+  "invalidEmailFormat": "Неверный формат электронной почты",
+  "profileUpdateSuccess": "Профиль успешно обновлен!",
+  "imagePickerFeatureComingSoon": "Функция выбора изображений будет добавлена позже"
 }

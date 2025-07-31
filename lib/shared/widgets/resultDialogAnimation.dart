@@ -22,7 +22,7 @@ class ResultDialogAnimation extends StatelessWidget {
                 : 'assets/animation/Tomato Error.json', // Replace with your Lottie animation file
             width: 150,
             height: 150,
-            repeat: true,
+            repeat: false,
           ),
           const SizedBox(height: 20),
           Text(

@@ -1,11 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:flutter/material.dart';
-import 'interfaceSettings.dart';
-import 'languageSettings.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'man_Categories_spend.dart';
-import 'features/Account/screen/manageAccount.dart';
 
 class Settings extends StatelessWidget {
   const Settings({super.key});
@@ -31,12 +29,7 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.language),
             iconColor: theme.primaryColor,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LanguageSelectionScreen(),
-                ),
-              );
+              Navigator.pushNamed(context, '/languageSelection');
             },
           ),
           const SizedBox(height: 12),
@@ -45,12 +38,7 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.manageCategory),
             iconColor: Colors.orange,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ExpenseCategoriesScreen(),
-                ),
-              );
+              Navigator.pushNamed(context, '/manageCategory');
             },
           ),
           const SizedBox(height: 12),
@@ -59,10 +47,7 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.systemTheme),
             iconColor: Colors.red,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => InterfaceSettings()),
-              );
+              Navigator.pushNamed(context, '/interfaceSettings');
             },
           ),
           const SizedBox(height: 12),
@@ -70,7 +55,9 @@ class Settings extends StatelessWidget {
             icon: Icons.people_alt,
             title: _localText(context, (l) => l.userManagement),
             iconColor: Colors.green,
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/profile',arguments: context.read<UserCubit>().currentUser);
+            },
           ),
           const SizedBox(height: 12),
           _buildMenuItem(
@@ -78,10 +65,7 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.account),
             iconColor: Colors.teal,
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AccountMoneyScreen()),
-              );
+              Navigator.pushNamed(context, '/manageAccount');
             },
           ),
           const SizedBox(height: 12),

@@ -94,6 +94,7 @@ class _AddState extends State<Add> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // AppLocalizations.of(context) will never be null in a properly configured app
     final appLocal = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(30.0),
@@ -183,7 +184,7 @@ class _AddState extends State<Add> {
           style: Theme.of(context).textTheme.bodyMedium,
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           items:
-              [AppLocalizations.of(context)!.addFriend, 'Dining', 'Transport', 'Entertainment', 'Shopping'].map((
+              [AppLocalizations.of(context)?.addFriend ?? 'Add Friend', 'Dining', 'Transport', 'Entertainment', 'Shopping'].map((
                 String value,
               ) {
                 return DropdownMenuItem<String>(
@@ -217,7 +218,7 @@ class _AddState extends State<Add> {
         child: Row(
           children: [
             Text(
-              AppLocalizations.of(context)!.dueDate,
+              AppLocalizations.of(context)?.dueDate ?? 'Due Date',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
@@ -252,7 +253,7 @@ class _AddState extends State<Add> {
         expands: true,
         style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
-          labelText: AppLocalizations.of(context)!.note,
+          labelText: AppLocalizations.of(context)?.note ?? 'Note',
           labelStyle: Theme.of(context).textTheme.bodyMedium,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -278,7 +279,7 @@ class _AddState extends State<Add> {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context)!.cancel,
+              AppLocalizations.of(context)?.cancel ?? 'Cancel',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -301,7 +302,7 @@ class _AddState extends State<Add> {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context)!.save,
+              AppLocalizations.of(context)?.save ?? 'Save',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

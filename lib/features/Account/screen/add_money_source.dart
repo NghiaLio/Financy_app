@@ -4,6 +4,7 @@ import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
+import 'package:financy_ui/shared/utils/generateID.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -28,8 +29,18 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // AppLocalizations.of(context) will never be null in a properly configured app
     final localizations = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Theme-aware colors
+    final backgroundColor = isDark ? const Color(0xFF2A2A3E) : Colors.white;
+    final textColor = isDark ? AppColors.textDark : AppColors.textLight;
+    final borderColor = isDark ? AppColors.textGrey.withOpacity(0.3) : AppColors.primaryBlue.withOpacity(0.2);
+    final focusedBorderColor = isDark ? AppColors.primaryBlue : AppColors.primaryBlue;
+    final hintColor = isDark ? AppColors.textGrey.withOpacity(0.7) : Colors.grey[600];
+    
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -42,7 +53,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
           if (state.status == ManageMoneyStatus.success) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(AppLocalizations.of(context)!.languageChanged),
+                content: Text(AppLocalizations.of(context)?.success ?? 'Success'),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 2),
               ),
@@ -66,39 +77,35 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   localizations.sourceName,
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: nameController,
+                  style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.edit),
+                    prefixIcon: Icon(Icons.edit, color: textColor.withOpacity(0.7)),
                     hintText: localizations.sourceName,
-                    hintStyle: textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                    hintStyle: TextStyle(color: hintColor),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: backgroundColor,
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 16,
                       horizontal: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryBlue.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: borderColor),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryBlue.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: borderColor),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryBlue,
+                      borderSide: BorderSide(
+                        color: focusedBorderColor,
                         width: 2,
                       ),
                     ),
@@ -110,19 +117,20 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   localizations.typeLabel,
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Theme(
                   data: Theme.of(context).copyWith(
-                    canvasColor: Colors.white,
-                    cardColor: Colors.white,
+                    canvasColor: backgroundColor,
+                    cardColor: backgroundColor,
                     popupMenuTheme: PopupMenuThemeData(
-                      color: Colors.white,
+                      color: backgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                         side: BorderSide(
-                          color: AppColors.primaryBlue.withOpacity(0.5),
+                          color: borderColor,
                           width: 1.5,
                         ),
                       ),
@@ -135,36 +143,28 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                         value: 'cash',
                         child: Text(
                           localizations.typeCash,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(color: textColor),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'ewallet',
                         child: Text(
                           localizations.typeEwallet,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(color: textColor),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'banking',
                         child: Text(
                           localizations.typeBanking,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(color: textColor),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'other',
                         child: Text(
                           localizations.typeOther,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(color: textColor),
                         ),
                       ),
                     ],
@@ -175,24 +175,24 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: backgroundColor,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: AppColors.primaryBlue.withOpacity(0.2),
+                          color: borderColor,
                           width: 1.5,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AppColors.primaryBlue,
+                        borderSide: BorderSide(
+                          color: focusedBorderColor,
                           width: 2,
                         ),
                       ),
                     ),
-                    style: textTheme.bodyLarge,
-                    dropdownColor: Colors.white,
+                    style: TextStyle(color: textColor),
+                    dropdownColor: backgroundColor,
                     menuMaxHeight: 350,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -203,19 +203,20 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   localizations.currencyLabel,
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Theme(
                   data: Theme.of(context).copyWith(
-                    canvasColor: Colors.white,
-                    cardColor: Colors.white,
+                    canvasColor: backgroundColor,
+                    cardColor: backgroundColor,
                     popupMenuTheme: PopupMenuThemeData(
-                      color: Colors.white,
+                      color: backgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                         side: BorderSide(
-                          color: AppColors.primaryBlue.withOpacity(0.5),
+                          color: borderColor,
                           width: 1.5,
                         ),
                       ),
@@ -228,18 +229,14 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                         value: 'vnd',
                         child: Text(
                           localizations.currencyVnd,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(color: textColor),
                         ),
                       ),
                       DropdownMenuItem(
                         value: 'usd',
                         child: Text(
                           localizations.currencyUsd,
-                          style: textTheme.bodyLarge?.copyWith(
-                            color: Colors.black,
-                          ),
+                          style: TextStyle(color: textColor),
                         ),
                       ),
                     ],
@@ -250,24 +247,24 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: backgroundColor,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: AppColors.primaryBlue.withOpacity(0.2),
+                          color: borderColor,
                           width: 1.5,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: AppColors.primaryBlue,
+                        borderSide: BorderSide(
+                          color: focusedBorderColor,
                           width: 2,
                         ),
                       ),
                     ),
-                    style: textTheme.bodyLarge,
-                    dropdownColor: Colors.white,
+                    style: TextStyle(color: textColor),
+                    dropdownColor: backgroundColor,
                     menuMaxHeight: 350,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -277,40 +274,36 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   localizations.initialBalance,
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: balanceController,
                   keyboardType: TextInputType.number,
+                  style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.attach_money),
+                    prefixIcon: Icon(Icons.attach_money, color: textColor.withOpacity(0.7)),
                     hintText: localizations.initialBalance,
                     filled: true,
-                    hintStyle: textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                    fillColor: Colors.white,
+                    hintStyle: TextStyle(color: hintColor),
+                    fillColor: backgroundColor,
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 16,
                       horizontal: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryBlue.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: borderColor),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryBlue.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: borderColor),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryBlue,
+                      borderSide: BorderSide(
+                        color: focusedBorderColor,
                         width: 2,
                       ),
                     ),
@@ -321,39 +314,35 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   localizations.descriptionOptional,
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: textColor,
                   ),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: descriptionController,
+                  style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.notes),
+                    prefixIcon: Icon(Icons.notes, color: textColor.withOpacity(0.7)),
                     hintText: localizations.descriptionOptional,
-                    hintStyle: textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                    hintStyle: TextStyle(color: hintColor),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: backgroundColor,
                     contentPadding: const EdgeInsets.symmetric(
                       vertical: 16,
                       horizontal: 16,
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryBlue.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: borderColor),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: AppColors.primaryBlue.withOpacity(0.2),
-                      ),
+                      borderSide: BorderSide(color: borderColor),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(
-                        color: AppColors.primaryBlue,
+                      borderSide: BorderSide(
+                        color: focusedBorderColor,
                         width: 2,
                       ),
                     ),
@@ -363,7 +352,10 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                 // Chọn màu sắc
                 Row(
                   children: [
-                    Text(localizations.colorLabel),
+                    Text(
+                      localizations.colorLabel,
+                      style: TextStyle(color: textColor),
+                    ),
                     const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () => _showColorPicker(),
@@ -461,7 +453,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.colorLabel),
+            title: Text(AppLocalizations.of(context)?.colorLabel ?? 'Choose Color'),
             content: Wrap(
               children:
                   colors
@@ -505,6 +497,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
       return;
     }
     final source = MoneySource(
+      id: GenerateID.newID(),
       name: nameController.text,
       balance: double.tryParse(balanceController.text) ?? 0.0,
       type: _typeFromString(selectedType),
@@ -518,6 +511,4 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
     );
     context.read<ManageMoneyCubit>().createAccount(source);
   }
-
-  // Đã loại bỏ chọn icon và màu thủ công, icon/màu tự động theo loại nguồn tiền
 }

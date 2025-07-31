@@ -65,6 +65,7 @@
   "active": "Actif",
   "inactive": "Inactif",
   "personalInformation": "Informations personnelles",
+  "contactInformation": "Informations de contact",
   "fullName": "Nom complet",
   "enterFullName": "Entrez votre nom complet",
   "dateOfBirth": "Date de naissance",
@@ -168,6 +169,13 @@
   "typeOther": "Autre",
   "currencyLabel": "Devise",
   "currencyVnd": "VND",
-  "currencyUsd": "USD"
+  "currencyUsd": "USD",
+  "success": "Succès",
+  "error": "Erreur",
+  "email": "Email",
+  "pleaseFillRequiredFields": "Veuillez remplir tous les champs obligatoires",
+  "invalidEmailFormat": "Format d'email invalide",
+  "profileUpdateSuccess": "Profil mis à jour avec succès !",
+  "imagePickerFeatureComingSoon": "La fonctionnalité de sélection d'image sera ajoutée plus tard"
 }
   

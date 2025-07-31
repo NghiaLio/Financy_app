@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/shared/widgets/resultDialogAnimation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -10,8 +11,8 @@ import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 
 class AccountDetailScreen extends StatefulWidget {
-  final MoneySource account;
-  const AccountDetailScreen({super.key, required this.account});
+  final MoneySource? account;
+  const AccountDetailScreen({super.key, this.account});
 
   @override
   State<AccountDetailScreen> createState() => _AccountDetailScreenState();
@@ -28,16 +29,16 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.account.name);
+    nameController = TextEditingController(text: widget.account?.name ?? '');
     balanceController = TextEditingController(
-      text: widget.account.balance.toString(),
+      text: widget.account?.balance.toString(),
     );
     descriptionController = TextEditingController(
-      text: widget.account.description ?? '',
+      text: widget.account?.description ?? '',
     );
     selectedColor =
-        ColorUtils.parseColor(widget.account.color!) ?? AppColors.primaryBlue;
-    isActive = widget.account.isActive;
+        ColorUtils.parseColor(widget.account?.color ?? '') ?? AppColors.primaryBlue;
+    isActive = widget.account?.isActive ?? false;
   }
 
   @override
@@ -63,7 +64,9 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)!.colorLabel),
+            title: Text(
+              AppLocalizations.of(context)?.colorLabel ?? 'Choose Color',
+            ),
             content: Wrap(
               children:
                   colors
@@ -96,11 +99,11 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
   void _saveChanges() {
     context.read<ManageMoneyCubit>().updateAccount(
       MoneySource(
-        id: widget.account.id,
+        id: widget.account?.id ?? '',
         name: nameController.text,
         balance: double.tryParse(balanceController.text) ?? 0.0,
-        type: widget.account.type,
-        currency: widget.account.currency,
+        type: widget.account?.type ?? TypeMoney.cash,
+        currency: widget.account?.currency ?? CurrencyType.vnd,
         description: descriptionController.text,
         color: ColorUtils.colorToHex(selectedColor),
         isActive: isActive,
@@ -111,66 +114,31 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
   @override
   Widget build(BuildContext context) {
     _rootContext = context;
-    final localizations = AppLocalizations.of(context)!;
+    // AppLocalizations.of(context) will never be null in a properly configured app
+    final localizations = AppLocalizations.of(context);
     final textTheme = Theme.of(context).textTheme;
     return BlocListener<ManageMoneyCubit, ManageMoneyState>(
       listener: (listenerContext, state) async {
         if (state.status == ManageMoneyStatus.error ||
             state.status == ManageMoneyStatus.success) {
           final isSuccess = state.status == ManageMoneyStatus.success;
-          final message =
-              isSuccess
-                  ? localizations.update
-                  : (state.message ?? 'Unknown error');
-          final icon =
-              isSuccess
-                  ? Icon(Icons.check_circle, color: AppColors.positiveGreen, size: 48)
-                  : Icon(Icons.cancel, color: AppColors.negativeRed, size: 48);
-          await showDialog(
+
+          // Show result dialog
+          showDialog(
             context: listenerContext,
             barrierDismissible: false,
-            builder: (context) {
-              Future.delayed(const Duration(milliseconds: 1000), () {
-                if (Navigator.of(context).canPop()) {
-                  Navigator.of(context).pop();
-                }
-              });
-              return Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 32,
-                    horizontal: 24,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      icon,
-                      const SizedBox(height: 16),
-                      Text(
-                        localizations.notification,
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color:
-                              isSuccess
-                                  ? AppColors.positiveGreen
-                                  : AppColors.negativeRed,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        message,
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyLarge,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+            builder: (context) => ResultDialogAnimation(isSuccess: isSuccess),
           );
+          
+          // Wait 2 seconds, then close dialog and navigate
+          await Future.delayed(const Duration(milliseconds: 1200));
+          
+          // Close dialog if still open
+          if (Navigator.of(listenerContext).canPop()) {
+            Navigator.of(listenerContext).pop();
+          }
+          
+          // Navigate back to manage account
           if (mounted) {
             Navigator.of(_rootContext).pushNamedAndRemoveUntil(
               '/manageAccount',
@@ -182,7 +150,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            localizations.accountDetail,
+            localizations?.accountDetail ?? 'Account Detail',
             style: textTheme.titleLarge!.copyWith(color: Colors.white),
           ),
         ),
@@ -208,8 +176,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                       ),
                       child: Text(
                         isActive
-                            ? localizations.active
-                            : localizations.inactive,
+                            ? localizations?.active ?? 'Active'
+                            : localizations?.inactive ?? 'Inactive',
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -232,7 +200,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  localizations.sourceName,
+                  localizations?.sourceName ?? 'Source Name',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -242,7 +210,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   controller: nameController,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.edit),
-                    hintText: localizations.sourceName,
+                    hintText: localizations?.sourceName ?? 'Source Name',
                     hintStyle: const TextStyle(color: Colors.black54),
                     filled: true,
                     fillColor: Colors.white,
@@ -274,7 +242,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  localizations.initialBalance,
+                  localizations?.initialBalance ?? 'Initial Balance',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -285,7 +253,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.attach_money),
-                    hintText: localizations.initialBalance,
+                    hintText: localizations?.initialBalance ?? 'Initial Balance',
                     hintStyle: const TextStyle(color: Colors.black54),
                     filled: true,
                     fillColor: Colors.white,
@@ -317,7 +285,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  localizations.descriptionOptional,
+                  localizations?.descriptionOptional ?? 'Description (Optional)',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -327,7 +295,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   controller: descriptionController,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.notes),
-                    hintText: localizations.descriptionOptional,
+                    hintText: localizations?.descriptionOptional ?? 'Description (Optional)',
                     hintStyle: const TextStyle(color: Colors.black54),
                     filled: true,
                     fillColor: Colors.white,
@@ -360,7 +328,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 const SizedBox(height: 20),
                 Row(
                   children: [
-                    Text(localizations.colorLabel),
+                    Text(localizations?.colorLabel ?? 'Color'),
                     const SizedBox(width: 8),
                     GestureDetector(
                       onTap: _showColorPicker,
@@ -382,7 +350,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(localizations.cancel),
+                      child: Text(localizations?.cancel ?? 'Cancel'),
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
@@ -394,7 +362,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                         ),
                       ),
                       child: Text(
-                        localizations.save,
+                        localizations?.save ?? 'Save',
                         style: const TextStyle(color: Colors.white),
                       ),
                     ),

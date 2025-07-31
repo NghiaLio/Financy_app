@@ -122,29 +122,29 @@
   "currencyLabel": "Loại tiền tệ",
   "currencyVnd": "VND",
   "currencyUsd": "USD",
-  "colorLabel": "Màu sắc"
-  ,"accountDetail": "Chi tiết tài khoản",
+  "accountDetail": "Chi tiết tài khoản",
   "active": "Đang hoạt động",
   "inactive": "Ngừng hoạt động",
   "personalInformation": "Thông tin cá nhân",
+  "contactInformation": "Thông tin liên hệ",
   "fullName": "Họ và tên",
   "enterFullName": "Nhập họ và tên",
   "dateOfBirth": "Ngày sinh",
   "day": "Ngày",
-  "month": "Tháng",
-  "year": "Năm",
-  "cancel": "Hủy",
-  "save": "Lưu",
   "pleaseEnterName": "Vui lòng nhập tên",
   "pleaseEnterValidNumbers": "Vui lòng nhập số hợp lệ cho ngày, tháng, năm",
   "pleaseEnterValidDate": "Vui lòng nhập ngày hợp lệ",
-  "hello": "Xin chào",
   "loginToAccess": "Đăng nhập để truy cập trải nghiệm cá nhân của bạn",
   "or": "hoặc",
   "continueAgreement": "Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ của chúng tôi",
   "savedInfoMessage": "Đã lưu: {name}, sinh ngày {day}/{month}/{year}",
-  "success":"Thành công",
-  "error":"Thất bại"
+  "success": "Thành công",
+  "error": "Thất bại",
+  "email": "Email",
+  "pleaseFillRequiredFields": "Vui lòng điền đầy đủ thông tin bắt buộc",
+  "invalidEmailFormat": "Định dạng email không hợp lệ",
+  "profileUpdateSuccess": "Cập nhật hồ sơ thành công!",
+  "imagePickerFeatureComingSoon": "Chức năng chọn ảnh sẽ được thêm vào sau"
 }
 
 

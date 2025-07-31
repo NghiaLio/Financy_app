@@ -13,7 +13,7 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
   // get accounts 
   Future<void> getAllAccount() async{
     try {
-      final List<MoneySource> listAccount = await _manageMoneyRepo.getMoneySources() ?? [];
+      final List<MoneySource> listAccount = _manageMoneyRepo.getAllFromLocal();
       emit(ManageMoneyState.loaded(listAccount));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
@@ -23,13 +23,9 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
   // create account
   Future<void> createAccount(MoneySource source) async {
     try {
-      final result = await _manageMoneyRepo.addMoneySource(source);
-      if (result != null) {
-        getAllAccount();
-        emit(ManageMoneyState.success('Account created successfully'));
-      } else {
-        emit(ManageMoneyState.error('Failed to create account'));
-      }
+      await _manageMoneyRepo.saveToLocal(source);
+      emit(ManageMoneyState.success('Account created successfully'));
+      getAllAccount();
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
@@ -38,21 +34,9 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
   //update account
   Future<void> updateAccount(MoneySource source) async {
     try {
-      await _manageMoneyRepo.updateMoneySource(source);
+      await _manageMoneyRepo.updateInLocal(source);
       getAllAccount();
       emit(ManageMoneyState.success('Account updated successfully'));
-    } catch (e) {
-      emit(ManageMoneyState.error(e.toString()));
-    }
-  }
-
-  //toggle active account 
-  Future<void> toggleAccountActiveStatus(MoneySource source) async {
-    try {
-      source.isActive = !source.isActive;
-      await _manageMoneyRepo.updateMoneySource(source);
-      getAllAccount();
-      emit(ManageMoneyState.success('Account status updated successfully'));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
@@ -61,9 +45,9 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
   // delete account
   Future<void> deleteAccount(MoneySource source) async {
     try {
-      await _manageMoneyRepo.deleteMoneySource(source.id!);
-      getAllAccount();
+      await _manageMoneyRepo.deleteFromLocal(source.id!);
       emit(ManageMoneyState.success('Account deleted successfully'));
+      getAllAccount();
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }

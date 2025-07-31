@@ -125,6 +125,7 @@
   "active": "Active",
   "inactive": "Inactive",
   "personalInformation": "Personal Information",
+  "contactInformation": "Contact Information",
   "fullName": "Full Name",
   "enterFullName": "Enter your full name",
   "dateOfBirth": "Date of Birth",
@@ -134,7 +135,14 @@
   "pleaseEnterValidDate": "Please enter a valid date",
   "loginToAccess": "Log in to access your personalized experience",
   "continueAgreement": "By continuing, you agree to our Terms of Service",
-  "savedInfoMessage": "Saved: {name}, born on {day}/{month}/{year}"
+  "savedInfoMessage": "Saved: {name}, born on {day}/{month}/{year}",
+  "success": "Success",
+  "error": "Error",
+  "email": "Email",
+  "pleaseFillRequiredFields": "Please fill in all required fields",
+  "invalidEmailFormat": "Invalid email format",
+  "profileUpdateSuccess": "Profile updated successfully!",
+  "imagePickerFeatureComingSoon": "Image picker feature will be added later"
 }
 
 

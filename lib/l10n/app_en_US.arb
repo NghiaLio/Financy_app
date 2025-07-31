@@ -107,6 +107,7 @@
   ,"active": "Active"
   ,"inactive": "Inactive",
   "personalInformation": "Personal Information",
+  "contactInformation": "Contact Information",
   "fullName": "Full Name",
   "enterFullName": "Enter your full name",
   "dateOfBirth": "Date of Birth",
@@ -123,7 +124,14 @@
   "savedInfoMessage": "Saved: {name}, born on {day}/{month}/{year}",
   "continueAgreement": "By continuing, you agree to our Terms of Service",
   "linkBank": "Link bank",
-  "colorLabel": "Color:"
+  "colorLabel": "Color:",
+  "success": "Success",
+  "error": "Error",
+  "email": "Email",
+  "pleaseFillRequiredFields": "Please fill in all required fields",
+  "invalidEmailFormat": "Invalid email format",
+  "profileUpdateSuccess": "Profile updated successfully!",
+  "imagePickerFeatureComingSoon": "Image picker feature will be added later"
 }
 
 

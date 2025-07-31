@@ -127,6 +127,7 @@
   "active": "有効",
   "inactive": "無効",
   "personalInformation": "個人情報",
+  "contactInformation": "連絡先情報",
   "fullName": "氏名",
   "enterFullName": "氏名を入力してください",
   "dateOfBirth": "生年月日",
@@ -244,6 +245,13 @@
   "typeOther": "その他",
   "currencyLabel": "通貨",
   "currencyVnd": "VND",
-  "currencyUsd": "USD"
+  "currencyUsd": "USD",
+  "success": "成功",
+  "error": "エラー",
+  "email": "メール",
+  "pleaseFillRequiredFields": "必須項目をすべて入力してください",
+  "invalidEmailFormat": "メール形式が無効です",
+  "profileUpdateSuccess": "プロフィールが正常に更新されました！",
+  "imagePickerFeatureComingSoon": "画像選択機能は後で追加されます"
 }
   

@@ -1,7 +1,8 @@
 // ignore_for_file: deprecated_member_use, avoid_print
 
-import 'package:financy_ui/features/auth/cubits/authCubit.dart';
-import 'package:financy_ui/features/auth/cubits/authState.dart';
+
+import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
+import 'package:financy_ui/features/Users/Cubit/userState.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -32,11 +33,10 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return BlocBuilder<Authcubit, Authstate>(
+    return BlocBuilder<UserCubit, UserState>(
       builder: (context, state) {
         UserModel? user;
-     
-        if (state.authStatus == AuthStatus.authenticated) {
+        if (state.status == UserStatus.success) {
           user = state.user;
         }
         return Column(
@@ -46,12 +46,17 @@ class _HomeState extends State<Home> {
               padding: const EdgeInsets.only(left: 20.0),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: theme.colorScheme.background,
-                    child: Icon(
-                      Icons.person,
-                      color: theme.colorScheme.onBackground,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/profile', arguments: user);
+                    },
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundColor: theme.colorScheme.background,
+                      child: Icon(
+                        Icons.person,
+                        color: theme.colorScheme.onBackground,
+                      ),
                     ),
                   ),
                   SizedBox(width: 10),
@@ -62,10 +67,7 @@ class _HomeState extends State<Home> {
                         _localText((l) => l.hello),
                         style: theme.textTheme.titleMedium,
                       ),
-                      Text(
-                        user?.name ?? '',
-                        style: theme.textTheme.titleLarge,
-                      ),
+                      Text(user?.name ?? '', style: theme.textTheme.titleLarge),
                     ],
                   ),
                 ],
