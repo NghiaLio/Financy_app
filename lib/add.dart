@@ -2,7 +2,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class Add extends StatefulWidget {
-  const Add({Key? key}) : super(key: key);
+  const Add({super.key});
 
   @override
   State<Add> createState() => _AddState();
@@ -52,7 +52,7 @@ class _AddState extends State<Add> {
         _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Vui lòng điền đầy đủ thông tin bắt buộc'),
+          content: Text('Please fill in all required information'),
           backgroundColor: Colors.red,
         ),
       );
@@ -62,7 +62,7 @@ class _AddState extends State<Add> {
     // Save transaction logic here
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Giao dịch đã được lưu thành công!'),
+        content: Text('Transaction saved successfully!'),
         backgroundColor: Colors.green,
       ),
     );
@@ -72,7 +72,7 @@ class _AddState extends State<Add> {
 
   @override
   void didChangeDependencies() {
-    // Khởi tạo _selectedCategory và _categories từ AppLocalization
+    // Initialize _selectedCategory and _categories from AppLocalization
     final localization = AppLocalizations.of(context);
     if (_selectedCategory == null) {
       setState(() {
@@ -94,7 +94,8 @@ class _AddState extends State<Add> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
+    // AppLocalizations.of(context) will never be null in a properly configured app
+    final appLocal = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(30.0),
       child: Column(
@@ -106,21 +107,21 @@ class _AddState extends State<Add> {
                   const SizedBox(height: 20),
                   _buildInputField(
                     controller: _groupController,
-                    label: app_local.selectGroup,
+                    label: appLocal.selectGroup,
                     isRequired: true,
                     theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
                     controller: _nameController,
-                    label: app_local.transactionName,
+                    label: appLocal.transactionName,
                     isRequired: true,
                     theme: theme,
                   ),
                   const SizedBox(height: 16),
                   _buildInputField(
                     controller: _amountController,
-                    label: app_local.transactionAmount,
+                    label: appLocal.transactionAmount,
                     isRequired: true,
                     keyboardType: TextInputType.number,
                     theme: theme,
@@ -183,7 +184,7 @@ class _AddState extends State<Add> {
           style: Theme.of(context).textTheme.bodyMedium,
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
           items:
-              [AppLocalizations.of(context)!.addFriend, 'Ăn uống', 'Di chuyển', 'Giải trí', 'Mua sắm'].map((
+              [AppLocalizations.of(context)?.addFriend ?? 'Add Friend', 'Dining', 'Transport', 'Entertainment', 'Shopping'].map((
                 String value,
               ) {
                 return DropdownMenuItem<String>(
@@ -217,7 +218,7 @@ class _AddState extends State<Add> {
         child: Row(
           children: [
             Text(
-              AppLocalizations.of(context)!.dueDate,
+              AppLocalizations.of(context)?.dueDate ?? 'Due Date',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
@@ -252,7 +253,7 @@ class _AddState extends State<Add> {
         expands: true,
         style: Theme.of(context).textTheme.bodyLarge,
         decoration: InputDecoration(
-          labelText: AppLocalizations.of(context)!.note,
+          labelText: AppLocalizations.of(context)?.note ?? 'Note',
           labelStyle: Theme.of(context).textTheme.bodyMedium,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
@@ -278,7 +279,7 @@ class _AddState extends State<Add> {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context)!.cancel,
+              AppLocalizations.of(context)?.cancel ?? 'Cancel',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -301,7 +302,7 @@ class _AddState extends State<Add> {
               ),
             ),
             child: Text(
-              AppLocalizations.of(context)!.save,
+              AppLocalizations.of(context)?.save ?? 'Save',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, use_build_context_synchronously
+
 import 'package:financy_ui/app/cubit/themeCubit.dart';
 import 'package:financy_ui/core/constants/languageOptions.dart';
 import 'package:financy_ui/shared/utils/locale_utils.dart';
@@ -6,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
-  const LanguageSelectionScreen({Key? key}) : super(key: key);
+  const LanguageSelectionScreen({super.key});
 
   @override
   State<LanguageSelectionScreen> createState() =>
@@ -26,6 +28,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     super.initState();
   }
 
+  // Hàm tiện ích
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -40,7 +48,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          AppLocalizations.of(context)!.chooseLanguage,
+          _localText((l) => l.chooseLanguage),
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -136,7 +144,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     // Show confirmation
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(AppLocalizations.of(context)!.languageChanged),
+        content: Text(_localText((l) => l.languageChanged)),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
       ),
@@ -152,8 +160,7 @@ class FlagWidget extends StatelessWidget {
   final String countryCode;
   final double size;
 
-  const FlagWidget({Key? key, required this.countryCode, this.size = 40})
-    : super(key: key);
+  const FlagWidget({super.key, required this.countryCode, this.size = 40});
 
   @override
   Widget build(BuildContext context) {

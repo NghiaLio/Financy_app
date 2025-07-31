@@ -13,10 +13,16 @@ class Spending extends StatefulWidget {
 class _SpendingState extends State<Spending> {
   String selectedBarPeriod = 'Monthly';
   String selectedPiePeriod = 'Monthly';
+
+  // Hàm tiện ích
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -25,7 +31,10 @@ class _SpendingState extends State<Spending> {
           // Summary
           Row(
             children: [
-              Text(app_local.expense, style: theme.textTheme.bodyLarge),
+              Text(
+                _localText((l) => l.expense),
+                style: theme.textTheme.bodyLarge,
+              ),
               SizedBox(width: 16),
               Text(
                 '-10,000,000 VND',
@@ -37,7 +46,7 @@ class _SpendingState extends State<Spending> {
           ),
           SizedBox(height: 8),
           Text(
-            '${app_local.statisticsBy} + thangs',
+            '${_localText((l) => l.statisticsBy)} + thangs',
             style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
           ),
           SizedBox(height: 16),
@@ -45,13 +54,13 @@ class _SpendingState extends State<Spending> {
           // Category Filter
           Row(
             children: [
-              _buildDropdown(app_local.category, () {}),
+              _buildDropdown(_localText((l) => l.category), () {}),
               SizedBox(width: 12),
               _buildDropdown(selectedBarPeriod, () {
                 _showPeriodDialog(true);
               }),
               SizedBox(width: 12),
-              _buildDropdown(app_local.year, () {}),
+              _buildDropdown(_localText((l) => l.year), () {}),
             ],
           ),
           SizedBox(height: 24),
@@ -162,7 +171,7 @@ class _SpendingState extends State<Spending> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                app_local.compareExpenseTypes,
+                _localText((l) => l.compareExpenseTypes),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
@@ -176,7 +185,7 @@ class _SpendingState extends State<Spending> {
                 _showPeriodDialog(false);
               }),
               SizedBox(width: 12),
-              _buildDropdown(app_local.year, () {}),
+              _buildDropdown(_localText((l) => l.year), () {}),
             ],
           ),
           SizedBox(height: 24),
@@ -255,13 +264,13 @@ class _SpendingState extends State<Spending> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLegendItem(Colors.cyan, 'Gia đình'),
+                    _buildLegendItem(Colors.cyan, 'Family'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.blue[800]!, 'Riêng tôi'),
+                    _buildLegendItem(Colors.blue[800]!, 'Personal'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.purple, 'Thú cưng'),
+                    _buildLegendItem(Colors.purple, 'Pets'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.orange, 'Xã giao'),
+                    _buildLegendItem(Colors.orange, 'Social'),
                   ],
                 ),
               ),

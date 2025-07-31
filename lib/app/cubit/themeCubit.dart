@@ -1,4 +1,5 @@
-import 'dart:ui';
+
+// ignore_for_file: file_names
 
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/locale_utils.dart';
@@ -79,13 +80,13 @@ class ThemeCubit extends Cubit<ThemeState> {
     if (color != null) box.put('color', color);
 
     // Lấy giá trị hiện tại nếu tham số là null
-    final String? newLang = lang ?? LocaleUtils.localeToString(state.lang ?? Locale('vi'));
+    final String newLang = lang ?? LocaleUtils.localeToString(state.lang ?? Locale('vi'));
     final String? newFont = font ?? state.fontFamily;
-    final String? newThemeMode =
+    final String newThemeMode =
         themeMode ??
         ThemeUtils.themeModeToString(state.themeMode ?? ThemeMode.light);
     final double? newFontSize = fontSize ?? state.fontSize;
-    final String? newColor =
+    final String newColor =
         color ?? ColorUtils.colorToHex(state.color ?? Color(0xFF2196F3));
 
     emit(

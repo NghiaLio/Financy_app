@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 class LanguageOption {
   final String flag;
   final String name;
@@ -22,7 +24,7 @@ class LangOptions {
     LanguageOption(flag: '🇪🇸', name: 'Spanish', code: 'es'),
     LanguageOption(flag: '🇷🇺', name: 'Rusia', code: 'ru'),
     LanguageOption(flag: '🇮🇹', name: 'Italia', code: 'it'),
-    LanguageOption(flag: '🇵🇹', name: 'Português', code: 'pt'),
+    LanguageOption(flag: '🇵🇹', name: 'Portuguese', code: 'pt'),
     LanguageOption(flag: '🇮🇩', name: 'Indonesia', code: 'id'),
     LanguageOption(flag: '🇲🇾', name: 'Malaysia', code: 'ms'),
   ];

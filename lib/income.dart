@@ -14,10 +14,16 @@ class _IncomeState extends State<Income> {
   String selectedPiePeriod = 'Monthly';
   String selectedIncomeBarPeriod = 'Monthly';
   String selectedIncomePiePeriod = 'Monthly';
+
+  // Hàm tiện ích
+  String _localText(String Function(AppLocalizations) getter) {
+    final appLocal = AppLocalizations.of(context);
+    return appLocal != null ? getter(appLocal) : '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: EdgeInsets.all(16),
       child: Column(
@@ -26,7 +32,10 @@ class _IncomeState extends State<Income> {
           // Summary
           Row(
             children: [
-              Text(app_local.income, style: theme.textTheme.bodyLarge),
+              Text(
+                _localText((l) => l.income),
+                style: theme.textTheme.bodyLarge,
+              ),
               SizedBox(width: 16),
               Text(
                 '+60,000,000 VND',
@@ -39,7 +48,7 @@ class _IncomeState extends State<Income> {
           ),
           SizedBox(height: 8),
           Text(
-            'Thống kê thu nhập theo tháng',
+            _localText((l) => l.month),
             style: theme.textTheme.bodyMedium,
           ),
           SizedBox(height: 16),
@@ -47,13 +56,13 @@ class _IncomeState extends State<Income> {
           // Category Filter
           Row(
             children: [
-              _buildDropdown(app_local.category, () {}),
+              _buildDropdown(_localText((l) => l.category), () {}),
               SizedBox(width: 12),
               _buildDropdown(selectedIncomeBarPeriod, () {
                 _showIncomePeriodDialog(true);
               }),
               SizedBox(width: 12),
-              _buildDropdown(app_local.year, () {}),
+              _buildDropdown(_localText((l) => l.year), () {}),
             ],
           ),
           SizedBox(height: 24),
@@ -162,7 +171,7 @@ class _IncomeState extends State<Income> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'So sánh các loại thu nhập',
+                'Compare income types',
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
@@ -242,11 +251,11 @@ class _IncomeState extends State<Income> {
                   children: [
                     _buildLegendItem(Colors.cyan, 'OT'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.blue[800]!, 'Lãi cho vay'),
+                    _buildLegendItem(Colors.blue[800]!, 'Loan Interest'),
                     SizedBox(height: 8),
                     _buildLegendItem(Colors.purple, 'Parttime'),
                     SizedBox(height: 8),
-                    _buildLegendItem(Colors.orange, 'Tiền lương chính'),
+                    _buildLegendItem(Colors.orange, 'Main Salary'),
                   ],
                 ),
               ),

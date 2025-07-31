@@ -1,37 +1,70 @@
 // ignore_for_file: must_be_immutable
-
 import 'package:financy_ui/app/cubit/themeCubit.dart';
+import 'package:financy_ui/features/Account/models/money_source.dart';
+import 'package:financy_ui/features/Account/screen/account_detail_screen.dart';
+import 'package:financy_ui/features/Account/screen/add_money_source.dart';
+import 'package:financy_ui/features/Account/screen/manageAccount.dart';
+import 'package:financy_ui/features/Users/Views/profile.dart';
+import 'package:financy_ui/features/auth/cubits/authCubit.dart';
+import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
+import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
+import 'package:financy_ui/features/Users/models/userModels.dart';
+import 'package:financy_ui/firebase_options.dart';
+import 'package:financy_ui/interfaceSettings.dart';
 import 'package:financy_ui/l10n/l10n.dart';
+import 'package:financy_ui/languageSettings.dart';
+import 'package:financy_ui/man_Categories_spend.dart';
+import 'package:financy_ui/myApp.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'home.dart';
-import 'wallet.dart';
-import 'settings.dart';
-import 'add.dart';
-import 'statiscal.dart';
-import 'login.dart';
+import 'features/auth/views/login.dart';
 import 'app/theme/app_theme.dart';
 import 'core/constants/colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dir = await getApplicationDocumentsDirectory();
-  Hive.init(dir.path);
+  final appDocDir = await getApplicationDocumentsDirectory();
+  Hive.init(appDocDir.path);
+  
+  // Register Hive adapters
+  Hive.registerAdapter(UserModelAdapter());
+  Hive.registerAdapter(MoneySourceAdapter());
+  Hive.registerAdapter(CurrencyTypeAdapter());
+  Hive.registerAdapter(TypeMoneyAdapter());
+  
+  await Hive.openBox<UserModel>('userBox');
+  await dotenv.load(fileName: ".env");
   await Hive.openBox('settings');
+  await Hive.openBox('jwt');
+  
+  // Initialize local storage for MoneySource
+  await ManageMoneyRepo.initializeLocalStorage();
+  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-      providers: [BlocProvider(create: (_) => ThemeCubit())],
+      providers: [
+        BlocProvider(create: (_) => ThemeCubit()),
+        BlocProvider(create: (_) => Authcubit()),
+        BlocProvider(create: (_) => ManageMoneyCubit()),
+        BlocProvider(create: (_) => UserCubit()),
+      ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
           return MaterialApp(
@@ -44,32 +77,58 @@ class MyApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
 
-            /// 👇 Luôn fallback về tiếng Việt nếu locale không khớp
+            /// 👇 Always fallback to Vietnamese if locale doesn't match
             localeResolutionCallback: (locale, supportedLocales) {
               for (var supportedLocale in supportedLocales) {
                 if (supportedLocale.languageCode == locale?.languageCode) {
                   return supportedLocale;
                 }
               }
-              return const Locale('vi'); // fallback mặc định
+              return const Locale('vi'); // default fallback
             },
             locale: state.lang,
             theme: AppTheme.lightTheme(
-              primaryColor: state.color!,
+              primaryColor: state.color ?? Colors.blue,
               backgroundColor: AppColors.backgroundLight,
-              selectedItemColor: state.color!,
-              fontFamily: state.fontFamily!,
-              fontSize: state.fontSize!,
+              selectedItemColor: state.color ?? Colors.blue,
+              fontFamily: state.fontFamily ?? 'Roboto',
+              fontSize: state.fontSize ?? 14.0,
             ),
             darkTheme: AppTheme.darkTheme(
-              primaryColor: state.color!,
+              primaryColor: state.color ?? Colors.blue,
               backgroundColor: AppColors.backgroundDark,
-              selectedItemColor: state.color!,
-              fontFamily: state.fontFamily!,
-              fontSize: state.fontSize!,
+              selectedItemColor: state.color ?? Colors.blue,
+              fontFamily: state.fontFamily ?? 'Roboto',
+              fontSize: state.fontSize ?? 14.0,
             ),
             themeMode: state.themeMode,
-            home: ExpenseTrackerScreen(),
+            initialRoute: '/',
+            routes: {
+              '/': (context) => const MainApp(),
+              '/addMoneySource': (context) => const AddMoneySourceScreen(),
+              '/login': (context) => Login(),
+              '/expenseTracker': (context) => ExpenseTrackerScreen(),
+              '/manageAccount': (context) => AccountMoneyScreen(),
+              '/interfaceSettings': (context) => InterfaceSettings(),
+              '/manageCategory': (context) => ExpenseCategoriesScreen(),
+              '/languageSelection': (context) => LanguageSelectionScreen(),
+              // Add other routes here
+            },
+            onGenerateRoute: (settings) {
+              if (settings.name == '/accountDetail') {
+                final args = settings.arguments as MoneySource?;
+                return MaterialPageRoute(
+                  builder: (context) => AccountDetailScreen(account: args),
+                );
+              }
+              if (settings.name == '/profile') {
+                final args = settings.arguments as UserModel?;
+                return MaterialPageRoute(
+                  builder: (context) => UserProfileScreen(user: args),
+                );
+              }
+              return null; // Return null if no matching route found
+            },
             debugShowCheckedModeBanner: false,
           );
         },
@@ -78,76 +137,25 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class ExpenseTrackerScreen extends StatefulWidget {
-  const ExpenseTrackerScreen({super.key});
+// MainApp to route
+
+class MainApp extends StatefulWidget {
+  const MainApp({super.key});
 
   @override
-  State<ExpenseTrackerScreen> createState() => _ExpenseTrackerScreenState();
+  State<MainApp> createState() => _MainAppState();
 }
 
-class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
-  int _currentIndex = 0;
-
-  void _toggleBottomNavigationBar(index) {
-    setState(() {
-      _currentIndex = index;
-    });
+class _MainAppState extends State<MainApp> {
+  late bool appState;
+  @override
+  void initState() {
+    appState = Hive.box('settings').get('app_state', defaultValue:false);
+    super.initState();
   }
-
-  final List<Widget> _pages = [
-    Home(),
-    Wallet(),
-    Add(),
-    Statiscal(),
-    Settings(),
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final app_local = AppLocalizations.of(context);
-    return Scaffold(
-      body: SafeArea(child: _pages[_currentIndex]),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
-        selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
-        unselectedItemColor: theme.bottomNavigationBarTheme.unselectedItemColor,
-        currentIndex: _currentIndex,
-        onTap: _toggleBottomNavigationBar,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.timeline),
-            label: app_local?.transactionBook ?? 'Sổ giao dịch',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.wallet),
-            label: app_local?.wallet ?? 'Ví tiền',
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: theme.bottomNavigationBarTheme.selectedItemColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.add,
-                color: theme.bottomNavigationBarTheme.backgroundColor,
-              ),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pie_chart),
-            label: app_local?.statistics ?? 'Thống kê',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: app_local?.settings ?? 'Cài đặt',
-          ),
-        ],
-      ),
-    );
+    return !appState ? Login() : ExpenseTrackerScreen();
   }
 }
