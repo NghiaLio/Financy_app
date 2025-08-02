@@ -13,7 +13,6 @@ import '../../../core/constants/colors.dart';
 import '../models/money_source.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
 
-
 class AccountMoneyScreen extends StatefulWidget {
   const AccountMoneyScreen({super.key});
 
@@ -36,30 +35,36 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
 
   // Get total balance in USD (convert VND to USD)
   double get totalBalanceInUSD {
-    final exchangeRate = double.parse(dotenv.env['EXCHANGE_RATE_USD_TO_VND'] ?? '24500');
-    return moneySources
-        .where((source) => source.isActive == true)
-        .fold(0.0, (sum, source) {
-          if (source.currency == CurrencyType.vnd) {
-            return sum + (source.balance / exchangeRate);
-          } else {
-            return sum + source.balance;
-          }
-        });
+    final exchangeRate = double.parse(
+      dotenv.env['EXCHANGE_RATE_USD_TO_VND'] ?? '24500',
+    );
+    return moneySources.where((source) => source.isActive == true).fold(0.0, (
+      sum,
+      source,
+    ) {
+      if (source.currency == CurrencyType.vnd) {
+        return sum + (source.balance / exchangeRate);
+      } else {
+        return sum + source.balance;
+      }
+    });
   }
 
   // Get total balance in VND (convert USD to VND)
   double get totalBalanceInVND {
-    final exchangeRate = double.parse(dotenv.env['EXCHANGE_RATE_USD_TO_VND'] ?? '24500');
-    return moneySources
-        .where((source) => source.isActive == true)
-        .fold(0.0, (sum, source) {
-          if (source.currency == CurrencyType.usd) {
-            return sum + (source.balance * exchangeRate);
-          } else {
-            return sum + source.balance;
-          }
-        });
+    final exchangeRate = double.parse(
+      dotenv.env['EXCHANGE_RATE_USD_TO_VND'] ?? '24500',
+    );
+    return moneySources.where((source) => source.isActive == true).fold(0.0, (
+      sum,
+      source,
+    ) {
+      if (source.currency == CurrencyType.usd) {
+        return sum + (source.balance * exchangeRate);
+      } else {
+        return sum + source.balance;
+      }
+    });
   }
 
   // Format currency with comma separators and appropriate decimal places
@@ -102,7 +107,10 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
               barrierDismissible: false,
               builder:
                   (context) => AlertDialog(
-                    title: Text(AppLocalizations.of(context)?.notification ?? 'Notification'),
+                    title: Text(
+                      AppLocalizations.of(context)?.notification ??
+                          'Notification',
+                    ),
                     content: Text(state.message ?? 'Unknown error'),
                     actions: [
                       TextButton(
@@ -110,7 +118,9 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                           Navigator.of(context).pop(); // Close dialog
                           Navigator.of(context).pop(); // Pop screen
                         },
-                        child: Text(AppLocalizations.of(context)?.close ?? 'Close'),
+                        child: Text(
+                          AppLocalizations.of(context)?.close ?? 'Close',
+                        ),
                       ),
                     ],
                   ),
@@ -118,7 +128,6 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           });
           return const SizedBox.shrink();
         } else {
-      
           return Scaffold(
             backgroundColor: colorScheme.background,
             appBar: AppBar(
@@ -219,7 +228,8 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        localizations?.sourcesAvailable(moneySources.length) ?? '${moneySources.length} sources available',
+                        localizations?.sourcesAvailable(moneySources.length) ??
+                            '${moneySources.length} sources available',
                         style: textTheme.bodySmall?.copyWith(
                           color: Colors.white70,
                           fontSize: 14,
@@ -297,7 +307,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
   void initState() {
     super.initState();
     // Load initial data if needed
-    BlocProvider.of<ManageMoneyCubit>(context).getAllAccount();
+    context.read<ManageMoneyCubit>().getAllAccount();
   }
 
   void _deleteSource(int index) {
@@ -309,7 +319,8 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           (context) => AlertDialog(
             title: Text(localizations?.deleteSource ?? 'Delete Source'),
             content: Text(
-              localizations?.deleteSourceConfirm(moneySources[index].name) ?? 'Are you sure you want to delete ${moneySources[index].name}?',
+              localizations?.deleteSourceConfirm(moneySources[index].name) ??
+                  'Are you sure you want to delete ${moneySources[index].name}?',
             ),
             actions: [
               TextButton(
@@ -318,7 +329,9 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  context.read<ManageMoneyCubit>().deleteAccount(moneySources[index]);
+                  context.read<ManageMoneyCubit>().deleteAccount(
+                    moneySources[index],
+                  );
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -342,10 +355,7 @@ class _CurrencySwitch extends StatelessWidget {
   final bool isUSD;
   final VoidCallback onToggle;
 
-  const _CurrencySwitch({
-    required this.isUSD,
-    required this.onToggle,
-  });
+  const _CurrencySwitch({required this.isUSD, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -357,10 +367,7 @@ class _CurrencySwitch extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.2),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.3),
-            width: 1,
-          ),
+          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
         ),
         child: Stack(
           children: [
@@ -377,7 +384,7 @@ class _CurrencySwitch extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Currency options
             Row(
               children: [
@@ -396,7 +403,7 @@ class _CurrencySwitch extends StatelessWidget {
                     ),
                   ),
                 ),
-                
+
                 // VND Option
                 Expanded(
                   child: Container(
@@ -474,11 +481,15 @@ class _MoneySourceTile extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: (ColorUtils.parseColor(source.color) ?? AppColors.primaryBlue).withOpacity(0.1),
+            color: (ColorUtils.parseColor(source.color) ??
+                    AppColors.primaryBlue)
+                .withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
-            MoneySourceIconColorMapper.iconFor(source.type?.toString().split('.').last ?? ''),
+            MoneySourceIconColorMapper.iconFor(
+              source.type?.toString().split('.').last ?? '',
+            ),
             color: ColorUtils.parseColor(source.color) ?? AppColors.primaryBlue,
             size: 20,
           ),
@@ -494,9 +505,9 @@ class _MoneySourceTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              isBalanceVisible 
-                ? '${source.currency == CurrencyType.vnd ? '₫' : '\$'}${_formatCurrency(source.balance, isUSD: source.currency == CurrencyType.usd)}' 
-                : '••••••',
+              isBalanceVisible
+                  ? '${source.currency == CurrencyType.vnd ? '₫' : '\$'}${_formatCurrency(source.balance, isUSD: source.currency == CurrencyType.usd)}'
+                  : '••••••',
               style: textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -509,9 +520,10 @@ class _MoneySourceTile extends StatelessWidget {
                   ? localizations?.active ?? 'Active'
                   : localizations?.inactive ?? 'Inactive',
               style: textTheme.bodySmall?.copyWith(
-                color: source.isActive == true
-                    ? AppColors.positiveGreen
-                    : AppColors.negativeRed,
+                color:
+                    source.isActive == true
+                        ? AppColors.positiveGreen
+                        : AppColors.negativeRed,
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
               ),
