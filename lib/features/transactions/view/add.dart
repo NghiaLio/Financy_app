@@ -1,5 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, deprecated_member_use, use_build_context_synchronously, unrelated_type_equality_checks
 
+import 'dart:developer';
+
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
@@ -30,6 +32,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   // For editing mode
   Transactionsmodels? editingTransaction;
+  MoneySource? oldAccount;
   bool isEditing = false;
 
   final List<String> categories = [
@@ -91,6 +94,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final args = ModalRoute.of(context)?.settings.arguments;
       if (args is Transactionsmodels) {
         editingTransaction = args;
+        oldAccount = listAccounts.firstWhere(
+          (e) => e.id == editingTransaction?.accountId,
+          orElse: () => listAccounts.first,
+        );
         isEditing = true;
         _populateFieldsForEditing();
       }
@@ -575,6 +582,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       (e) => e.name == selectedAccount,
       orElse: () => listAccounts.first,
     );
+    log(oldAccount?.name ?? '');
 
     final type =
         selectedTransactionType == 0
@@ -628,18 +636,99 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       await context.read<Transactioncubit>().addTransaction(transaction);
     }
-    final newMoney = MoneySource(
-      id: account.id,
-      name: account.name,
-      balance: newAmonut,
-      type: account.type,
-      currency: account.currency,
-      iconCode: account.iconCode,
-      color: account.color,
-      description: account.description,
-      isActive: account.isActive,
-    );
-    await context.read<ManageMoneyCubit>().updateAccount(newMoney);
+
+    // --- Update account logic ---
+    if (isEditing && editingTransaction != null) {
+      // Nếu đổi tài khoản
+      if (oldAccount?.id != account.id) {
+        // Hoàn số tiền cũ về tài khoản cũ
+        double oldAccBalance = oldAccount?.balance ?? 0;
+        if (editingTransaction!.type == TransactionType.income) {
+          oldAccBalance -= editingTransaction!.amount;
+        } else {
+          oldAccBalance += editingTransaction!.amount;
+        }
+        final newOldAccount = MoneySource(
+          id: oldAccount?.id,
+          name: oldAccount?.name ?? '',
+          balance: oldAccBalance,
+          type: oldAccount?.type,
+          currency: oldAccount?.currency,
+          iconCode: oldAccount?.iconCode,
+          color: oldAccount?.color,
+          description: oldAccount?.description,
+          isActive: oldAccount?.isActive ?? false,
+        );
+
+        // Áp dụng thay đổi cho tài khoản mới
+        double newAccBalance = account.balance;
+        if (selectedTransactionType == 0) {
+          newAccBalance += amount;
+        } else {
+          newAccBalance -= amount;
+        }
+        final newMoney = MoneySource(
+          id: account.id,
+          name: account.name,
+          balance: newAccBalance,
+          type: account.type,
+          currency: account.currency,
+          iconCode: account.iconCode,
+          color: account.color,
+          description: account.description,
+          isActive: account.isActive,
+        );
+
+        await Future.wait([
+          context.read<ManageMoneyCubit>().updateAccount(newMoney),
+          context.read<ManageMoneyCubit>().updateAccount(newOldAccount),
+        ]);
+      } else {
+        // Cùng tài khoản, kiểm tra thay đổi số tiền hoặc loại giao dịch
+        double accBalance = account.balance;
+        double oldAmount = editingTransaction!.amount;
+        TransactionType oldType = editingTransaction!.type;
+
+        // Hoàn lại số dư cũ
+        if (oldType == TransactionType.income) {
+          accBalance -= oldAmount;
+        } else {
+          accBalance += oldAmount;
+        }
+        // Áp dụng số dư mới
+        if (selectedTransactionType == 0) {
+          accBalance += amount;
+        } else {
+          accBalance -= amount;
+        }
+        final newMoney = MoneySource(
+          id: account.id,
+          name: account.name,
+          balance: accBalance,
+          type: account.type,
+          currency: account.currency,
+          iconCode: account.iconCode,
+          color: account.color,
+          description: account.description,
+          isActive: account.isActive,
+        );
+        await context.read<ManageMoneyCubit>().updateAccount(newMoney);
+      }
+    } else {
+      // Thêm mới transaction
+      final newMoney = MoneySource(
+        id: account.id,
+        name: account.name,
+        balance: newAmonut,
+        type: account.type,
+        currency: account.currency,
+        iconCode: account.iconCode,
+        color: account.color,
+        description: account.description,
+        isActive: account.isActive,
+      );
+      await context.read<ManageMoneyCubit>().updateAccount(newMoney);
+    }
   }
 
   void _showResultEvent(
