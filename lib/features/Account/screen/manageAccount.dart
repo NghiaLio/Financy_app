@@ -94,7 +94,12 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
     final textTheme = theme.textTheme;
     // AppLocalizations.of(context) will never be null in a properly configured app
     final localizations = AppLocalizations.of(context);
-    return BlocBuilder<ManageMoneyCubit, ManageMoneyState>(
+    return BlocConsumer<ManageMoneyCubit, ManageMoneyState>(
+      listener: (context, state) {
+        if (state.status == ManageMoneyStatus.success) {
+          context.read<ManageMoneyCubit>().getAllAccount();
+        }
+      },
       builder: (context, state) {
         log(state.status.toString());
         if (state.status == ManageMoneyStatus.loading) {
@@ -300,6 +305,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           );
         }
       },
+
     );
   }
 

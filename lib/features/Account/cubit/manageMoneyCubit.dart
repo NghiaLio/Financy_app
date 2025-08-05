@@ -28,11 +28,8 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   Future<void> createAccount(MoneySource source) async {
     try {
       await _manageMoneyRepo.saveToLocal(source);
+      await getAllAccount(); // Đảm bảo luôn lấy danh sách mới nhất từ local
       emit(ManageMoneyState.success('Account created successfully'));
-      Future.delayed(const Duration(seconds: 1), () {
-        _listAccounts = [...state.listAccounts ?? [], source];
-        emit(ManageMoneyState.loaded([...state.listAccounts ?? [], source]));
-      });
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
@@ -42,7 +39,11 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   Future<void> updateAccount(MoneySource source) async {
     try {
       await _manageMoneyRepo.updateInLocal(source);
-      final updatedList = state.listAccounts?.map((s) => s.id == source.id ? source : s).toList() ?? [];
+      final updatedList =
+          state.listAccounts
+              ?.map((s) => s.id == source.id ? source : s)
+              .toList() ??
+          [];
       _listAccounts = updatedList;
       emit(ManageMoneyState.loaded(updatedList));
       emit(ManageMoneyState.success('Account updated successfully'));

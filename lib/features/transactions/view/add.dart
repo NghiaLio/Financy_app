@@ -734,7 +734,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   void _showResultEvent(
     BuildContext listenerContext,
     bool isSuccess,
-    BuildContext _rootContext,
+    BuildContext rootContext,
   ) async {
     // Show result dialog
     showDialog(
@@ -753,7 +753,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     // Navigate back to manage account
     if (mounted) {
       Navigator.of(
-        _rootContext,
+        rootContext,
       ).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
     }
   }

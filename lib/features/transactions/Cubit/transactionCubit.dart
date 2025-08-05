@@ -23,24 +23,25 @@ class Transactioncubit extends Cubit<TransactionState> {
   Future<void> addTransaction(Transactionsmodels transaction) async {
     try {
       await _transactionsRepo.saveToLocal(transaction);
-      emit(TransactionState.success());
-      Future.delayed(const Duration(seconds: 1), () {
-        // Add the new transaction to the correct date group in the map
-        final updatedMap = Map<DateTime, List<Transactionsmodels>>.from(
-          state.transactionsList,
-        );
-        final txDate = transaction.transactionDate;
-        if (txDate != null) {
-          if (updatedMap.containsKey(txDate)) {
-            updatedMap[txDate] = List<Transactionsmodels>.from(
-              updatedMap[txDate]!,
-            )..add(transaction);
-          } else {
-            updatedMap[txDate] = [transaction];
-          }
+
+      // Add the new transaction to the correct date group in the map
+      final updatedMap = Map<DateTime, List<Transactionsmodels>>.from(
+        state.transactionsList,
+      );
+      final txDate = transaction.transactionDate;
+      if (txDate != null) {
+        if (updatedMap.containsKey(txDate)) {
+          updatedMap[txDate] = List<Transactionsmodels>.from(
+            updatedMap[txDate]!,
+          )..add(transaction);
+        } else {
+          updatedMap[txDate] = [transaction];
         }
-        emit(TransactionState.loaded(updatedMap));
-      });
+      }
+      emit(TransactionState.loaded(updatedMap));
+
+      emit(TransactionState.success());
+
       // Optionally, fetch the latest transactions from the repository instead of updating the map manually:
     } catch (e) {
       emit(TransactionState.error(e.toString()));
@@ -50,7 +51,6 @@ class Transactioncubit extends Cubit<TransactionState> {
   Future<void> updateTransaction(Transactionsmodels transaction) async {
     try {
       await _transactionsRepo.updateInLocal(transaction);
-      emit(TransactionState.success());
       final updatedMap = Map<DateTime, List<Transactionsmodels>>.from(
         state.transactionsList,
       );
@@ -64,6 +64,7 @@ class Transactioncubit extends Cubit<TransactionState> {
         updatedMap[txDate] = updatedList;
       }
       emit(TransactionState.loaded(updatedMap));
+      emit(TransactionState.success());
     } catch (e) {
       emit(TransactionState.error(e.toString()));
     }

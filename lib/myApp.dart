@@ -1,6 +1,5 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/transactions/view/add.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/transactions/view/home.dart';
@@ -39,7 +38,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
   @override
   void initState() {
     context.read<UserCubit>().getUser();
-    context.read<ManageMoneyCubit>().getAllAccount();
+    // context.read<ManageMoneyCubit>().getAllAccount();
     super.initState();
   }
 
