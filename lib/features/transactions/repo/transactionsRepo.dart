@@ -31,25 +31,6 @@ class TransactionsRepo {
   // ==================== LOCAL STORAGE METHODS ====================
 
   Future<void> saveToLocal(Transactionsmodels transaction) async {
-    // double newAmonut;
-    // if (transaction.type == TransactionType.income){
-    //   newAmonut = money.balance + transaction.amount;
-    // }else{
-    //   newAmonut = money.balance - transaction.amount;
-    // }
-    // final newMoney = MoneySource(
-    //   id: money.id,
-    //   name: money.name, 
-    //   balance: newAmonut, 
-    //   type: money.type,
-    //   currency: money.currency,
-    //   iconCode: money.iconCode,
-    //   color: money.color,
-    //   description: money.description,
-    //   isActive: money.isActive,
-
-    // );
-    // await _manageMoneyRepo.updateInLocal(newMoney);
     await _localBox.add(transaction);
   }
 
@@ -74,28 +55,25 @@ class TransactionsRepo {
   }
 
   Future<Map<DateTime, List<Transactionsmodels>>>
-  groupTransactionsByDateAndType(
-    List<Transactionsmodels> transactions,
-    String type,
-  ) async {
-    // Lọc theo type
-    final filtered = transactions.where((tx) => type == tx.type).toList();
+  getAllTransactionByAccount(String accountId) async {
+    final allTransactions = _localBox.values.toList();
+    final groupedTransactions = <DateTime, List<Transactionsmodels>>{};
 
-    // Nhóm theo ngày (loại bỏ giờ/phút/giây)
-    Map<DateTime, List<Transactionsmodels>> grouped = {};
-
-    for (var tx in filtered) {
-      final dateOnly = DateTime(
-        tx.transactionDate?.year ?? 0,
-        tx.transactionDate?.month ?? 0,
-        tx.transactionDate?.day ?? 0,
-      );
-      grouped.putIfAbsent(dateOnly, () => []).add(tx);
+    for (var tx in allTransactions) {
+      if (tx.accountId == accountId) {
+        final dateOnly = DateTime(
+          tx.transactionDate?.year ?? 0,
+          tx.transactionDate?.month ?? 0,
+          tx.transactionDate?.day ?? 0,
+        );
+        groupedTransactions.putIfAbsent(dateOnly, () => []).add(tx);
+      }
     }
 
-    // Sắp xếp theo ngày giảm dần
-    final sortedKeys = grouped.keys.toList()..sort((a, b) => b.compareTo(a));
-    return {for (var key in sortedKeys) key: grouped[key] ?? []};
+    // Sắp xếp theo ngày giảm dần (mới nhất trước)
+    final sortedKeys =
+        groupedTransactions.keys.toList()..sort((a, b) => b.compareTo(a));
+    return {for (var key in sortedKeys) key: groupedTransactions[key] ?? []};
   }
 
   Future<void> updateInLocal(Transactionsmodels transaction) async {

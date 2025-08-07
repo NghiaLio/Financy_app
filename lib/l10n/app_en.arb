@@ -142,7 +142,15 @@
   "pleaseFillRequiredFields": "Please fill in all required fields",
   "invalidEmailFormat": "Invalid email format",
   "profileUpdateSuccess": "Profile updated successfully!",
-  "imagePickerFeatureComingSoon": "Image picker feature will be added later"
+  "imagePickerFeatureComingSoon": "Image picker feature will be added later",
+  "savings": "Savings",
+  "creditCard": "Credit Card",
+  "dining": "Dining",
+  "travel": "Travel",
+  "salary": "Salary",
+  "medical": "Medical",
+  "transport": "Transport",
+  "waterBill": "Water Bill"
 }
 
 

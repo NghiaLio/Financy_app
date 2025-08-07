@@ -20,6 +20,16 @@ class Transactioncubit extends Cubit<TransactionState> {
     }
   }
 
+  Future<void> fetchTransactionsByAccount(String accountId) async {
+    try {
+      emit(TransactionState.loading());
+      final transactions = await _transactionsRepo.getAllTransactionByAccount(accountId);
+      emit(TransactionState.loaded(transactions));
+    } catch (e) {
+      emit(TransactionState.error(e.toString()));
+    }
+  }
+
   Future<void> addTransaction(Transactionsmodels transaction) async {
     try {
       await _transactionsRepo.saveToLocal(transaction);
