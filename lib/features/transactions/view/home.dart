@@ -29,7 +29,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     print(Hive.box('settings').toMap());
-    context.read<Transactioncubit>().fetchTransactionsByDate();
+    context.read<TransactionCubit>().fetchTransactionsByDate();
     super.initState();
   }
 
@@ -228,7 +228,7 @@ class _HomeState extends State<Home> {
             ),
 
             // Transaction List
-            BlocConsumer<Transactioncubit, TransactionState>(
+            BlocConsumer<TransactionCubit, TransactionState>(
               listener: (context, stateTransaction) {
                 if (stateTransaction == TransactionStateStatus.error) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -241,7 +241,7 @@ class _HomeState extends State<Home> {
                   );
                 }
                 if (stateTransaction == TransactionStateStatus.success) {
-                  context.read<Transactioncubit>().fetchTransactionsByDate();
+                  context.read<TransactionCubit>().fetchTransactionsByDate();
                 }
               },
               builder: (context, stateTransaction) {

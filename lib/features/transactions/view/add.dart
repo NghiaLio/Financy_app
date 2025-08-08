@@ -129,7 +129,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         ),
         centerTitle: true,
       ),
-      body: BlocListener<Transactioncubit, TransactionState>(
+      body: BlocListener<TransactionCubit, TransactionState>(
         listener: (listenerContext, state) async {
           if (state.status == TransactionStateStatus.success) {
             _showResultEvent(listenerContext, true, context);
@@ -616,7 +616,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         isSync: false,
       );
 
-      await context.read<Transactioncubit>().updateTransaction(
+      await context.read<TransactionCubit>().updateTransaction(
         updatedTransaction,
       );
     } else {
@@ -634,7 +634,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         isSync: false,
       );
 
-      await context.read<Transactioncubit>().addTransaction(transaction);
+      await context.read<TransactionCubit>().addTransaction(transaction);
     }
 
     // --- Update account logic ---

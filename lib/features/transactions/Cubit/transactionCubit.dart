@@ -5,8 +5,8 @@ import 'package:financy_ui/features/transactions/models/transactionsModels.dart'
 import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class Transactioncubit extends Cubit<TransactionState> {
-  Transactioncubit() : super(TransactionState.initial());
+class TransactionCubit extends Cubit<TransactionState> {
+  TransactionCubit() : super(TransactionState.loading());
 
   final TransactionsRepo _transactionsRepo = TransactionsRepo();
 

@@ -152,7 +152,8 @@
   "salary": "Lương",
   "medical": "Y tế",
   "transport": "Di chuyển",
-  "waterBill": "Tiền nước"
+  "waterBill": "Tiền nước",
+  "noTransactions":"Không có giao dịch nào."
 }
 
 

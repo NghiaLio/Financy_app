@@ -15,41 +15,35 @@ class TransactionState {
     required this.status,
   });
 
-  factory TransactionState.initial() {
-    return TransactionState(
-      transactionsList: {},
-      errorMessage: null,
-      status: TransactionStateStatus.initial,
-    );
-  }
-  factory TransactionState.loading() {
-    return TransactionState(
-      transactionsList: {},
-      errorMessage: null,
-      status: TransactionStateStatus.loading,
-    );
-  }
+  factory TransactionState.initial() => TransactionState(
+    transactionsList: {},
+    errorMessage: null,
+    status: TransactionStateStatus.initial,
+  );
+
+  factory TransactionState.loading() => TransactionState(
+    transactionsList: {},
+    errorMessage: null,
+    status: TransactionStateStatus.loading,
+  );
+
   factory TransactionState.loaded(
     Map<DateTime, List<Transactionsmodels>> transactions,
-  ) {
-    return TransactionState(
-      transactionsList: transactions,
-      errorMessage: null,
-      status: TransactionStateStatus.loaded,
-    );
-  }
-  factory TransactionState.error(String message) {
-    return TransactionState(
-      transactionsList: {},
-      errorMessage: message,
-      status: TransactionStateStatus.error,
-    );
-  }
-  factory TransactionState.success() {
-    return TransactionState(
-      transactionsList: {},
-      errorMessage: null,
-      status: TransactionStateStatus.success,
-    );
-  }
+  ) => TransactionState(
+    transactionsList: transactions,
+    errorMessage: null,
+    status: TransactionStateStatus.loaded,
+  );
+
+  factory TransactionState.error(String message) => TransactionState(
+    transactionsList: {},
+    errorMessage: message,
+    status: TransactionStateStatus.error,
+  );
+
+  factory TransactionState.success() => TransactionState(
+    transactionsList: {},
+    errorMessage: null,
+    status: TransactionStateStatus.success,
+  );
 }

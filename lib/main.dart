@@ -69,7 +69,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => Authcubit()),
         BlocProvider(create: (_) => ManageMoneyCubit()),
         BlocProvider(create: (_) => UserCubit()),
-        BlocProvider(create: (_) => Transactioncubit()),
+        BlocProvider(create: (_) => TransactionCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
