@@ -13,6 +13,9 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   List<MoneySource>? _listAccounts;
   List<MoneySource>? get listAccounts => _listAccounts;
 
+  String? _currentAccountName;
+  String? get currentAccountName => _currentAccountName;
+
   // get accounts
   Future<void> getAllAccount() async {
     try {
@@ -60,6 +63,13 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
       getAllAccount();
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
+    }
+  }
+
+  // set current account name
+  void setCurrentAccountName(String? newId) {
+    if (newId != null) {
+      _currentAccountName = _manageMoneyRepo.getCurrentAccountNameById(newId);
     }
   }
 }

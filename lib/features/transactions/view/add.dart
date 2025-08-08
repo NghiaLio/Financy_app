@@ -4,8 +4,8 @@ import 'dart:developer';
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
+import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
-import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/generateID.dart';
@@ -34,6 +34,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Transactionsmodels? editingTransaction;
   MoneySource? oldAccount;
   bool isEditing = false;
+  String? fromScreen;
 
   final List<String> categories = [
     'Salary',
@@ -92,7 +93,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     // Check if we're in editing mode
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is Transactionsmodels) {
+      if (args is Map) {
+        if (args['transaction'] is Transactionsmodels) {
+          editingTransaction = args['transaction'];
+          oldAccount = listAccounts.firstWhere(
+            (e) => e.id == editingTransaction?.accountId,
+            orElse: () => listAccounts.first,
+          );
+          isEditing = true;
+          _populateFieldsForEditing();
+        }
+        if (args['fromScreen'] is String) {
+          fromScreen = args['fromScreen'];
+        }
+      } else if (args is Transactionsmodels) {
         editingTransaction = args;
         oldAccount = listAccounts.firstWhere(
           (e) => e.id == editingTransaction?.accountId,
@@ -118,7 +132,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
             isEditing
                 ? IconButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    if (fromScreen == 'wallet') {
+                      Navigator.pop(context);
+                    } else {
+                      Navigator.pop(context);
+                    }
                   },
                   icon: Icon(Icons.arrow_back_ios, color: theme.highlightColor),
                 )
@@ -750,11 +768,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     if (Navigator.of(listenerContext).canPop()) {
       Navigator.of(listenerContext).pop();
     }
-    // Navigate back to manage account
+    // Navigate back
     if (mounted) {
-      Navigator.of(
-        rootContext,
-      ).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
+      if (fromScreen == 'wallet') {
+        Navigator.of(rootContext).pop();
+      } else {
+        Navigator.of(rootContext).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
+      }
     }
   }
 }

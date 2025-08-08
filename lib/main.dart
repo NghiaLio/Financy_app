@@ -4,6 +4,7 @@ import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Account/screen/account_detail_screen.dart';
 import 'package:financy_ui/features/Account/screen/add_money_source.dart';
 import 'package:financy_ui/features/Account/screen/manageAccount.dart';
+import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Users/Views/profile.dart';
 import 'package:financy_ui/features/transactions/view/add.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
@@ -11,7 +12,7 @@ import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
-import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
+// ignore: unused_import
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
 import 'package:financy_ui/firebase_options.dart';

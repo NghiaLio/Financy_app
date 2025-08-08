@@ -6,7 +6,7 @@ import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
-import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
+import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/localText.dart';
@@ -31,16 +31,55 @@ class _WalletState extends State<Wallet> {
     return allTransactions;
 
   }
+  String? currentAccountId;
+
+  void changeAccount(String? newId) {
+    if (newId != null) {
+      context.read<TransactionCubit>().fetchTransactionsByAccount(newId);
+      context.read<ManageMoneyCubit>().setCurrentAccountName(newId);
+      setState(() {
+        currentAccountId = newId;
+      });
+    }
+  } 
+
+  @override
+  void initState() {
+    super.initState();
+    // Lấy id tài khoản hiện tại từ ManageMoneyCubit (nếu có)
+    final manageMoneyCubit = context.read<ManageMoneyCubit>();
+    final listAccounts = manageMoneyCubit.listAccounts;
+    if (listAccounts != null && listAccounts.isNotEmpty) {
+      // Nếu đã có currentAccountName (tên), tìm id tương ứng
+      final currentName = manageMoneyCubit.currentAccountName;
+      final found = listAccounts.firstWhere(
+        (acc) => acc.name == currentName,
+        orElse: () => listAccounts.first,
+      );
+      currentAccountId = found.id;
+    } else {
+      currentAccountId = null;
+    }
+    context.read<TransactionCubit>().fetchTransactionsByAccount(currentAccountId ?? listAccounts?.first.id ?? '');
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return BlocBuilder<TransactionCubit, TransactionState>(
+    return BlocConsumer<TransactionCubit, TransactionState>(
+      listener: (context, state) {
+        if (state.status == TransactionStateStatus.loaded) {
+          final currentAccountId = this.currentAccountId;
+          if (currentAccountId != null && currentAccountId.isNotEmpty) {
+            context.read<TransactionCubit>().fetchTransactionsByAccount(currentAccountId);
+          }
+        }
+      },
       builder: (context, state) {
         return Column(
           children: [
             // Balance Card - Redesigned with colorful gradient
-            BalanceCard(),
+            BalanceCard(changeAccount: changeAccount, currentAccountId: currentAccountId),
             // Transaction List
             Expanded(
               child: BlocBuilder<TransactionCubit, TransactionState>(
@@ -74,10 +113,11 @@ class _WalletState extends State<Wallet> {
                             ? '+${transaction.amount} VND'
                             : '-${transaction.amount} VND',
                         isPositive: transaction.type == TransactionType.income,
+                        transaction: transaction,
                       );
                     },
                   );
-                }
+                },
               ),
             ),
           ],
@@ -94,64 +134,72 @@ class _WalletState extends State<Wallet> {
     required String subtitle,
     required String amount,
     bool isPositive = false,
+    required Transactionsmodels transaction,
   }) {
     final theme = Theme.of(context);
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.2),
-              shape: BoxShape.circle,
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, '/add', arguments: {'transaction': transaction, 'fromScreen': 'wallet'});
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 24),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(subtitle, style: theme.textTheme.bodyMedium),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  title,
+                  amount,
                   style: theme.textTheme.bodyLarge?.copyWith(
+                    color:
+                        isPositive
+                            ? AppColors.positiveGreen
+                            : theme.textTheme.bodyLarge?.color,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 4),
-                Text(subtitle, style: theme.textTheme.bodyMedium),
+                Text(
+                  LocalText.localText(context, (l) => l.myWallet),
+                  style: theme.textTheme.bodySmall,
+                ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                amount,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color:
-                      isPositive
-                          ? AppColors.positiveGreen
-                          : theme.textTheme.bodyLarge?.color,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                LocalText.localText(context, (l) => l.myWallet),
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
 class BalanceCard extends StatelessWidget {
-  const BalanceCard({super.key});
+  const BalanceCard({super.key, required this.changeAccount, required this.currentAccountId});
+  final Function(String?) changeAccount;
+  final String? currentAccountId;
 
   @override
   Widget build(BuildContext context) {
@@ -160,12 +208,38 @@ class BalanceCard extends StatelessWidget {
       builder: (context, state) {
         log(state.status.toString());
         List<MoneySource>? listAccounts;
-        // ignore: unrelated_type_equality_checks
         if (state.status == ManageMoneyStatus.loaded) {
           listAccounts = state.listAccounts;
         } else {
           listAccounts = [];
         }
+        // Lấy tên tài khoản hiện tại dựa vào id
+        String currentAccountName = '';
+        if (currentAccountId != null && listAccounts != null && listAccounts.isNotEmpty) {
+          final found = listAccounts.firstWhere(
+            (acc) => acc.id == currentAccountId,
+            orElse: () => listAccounts!.first,
+          );
+          currentAccountName = found.name;
+        }
+
+        // Lấy tổng thu nhập và chi tiêu theo tài khoản hiện tại
+        double totalIncome = 0;
+        double totalExpense = 0;
+        // Lấy transactionsList từ TransactionCubit
+        final transactionState = context.watch<TransactionCubit>().state;
+        final allTransactions = transactionState.transactionsList.values.expand((e) => e).toList();
+        final filteredTransactions = currentAccountId == null
+            ? allTransactions
+            : allTransactions.where((t) => t.accountId == currentAccountId).toList();
+        for (final tx in filteredTransactions) {
+          if (tx.type == TransactionType.income) {
+            totalIncome += tx.amount;
+          } else if (tx.type == TransactionType.expense) {
+            totalExpense += tx.amount;
+          }
+        }
+
         return Container(
           margin: EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -216,7 +290,7 @@ class BalanceCard extends StatelessWidget {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            '50,000,000 VND',
+                            currentAccountName.isNotEmpty ? currentAccountName : '---',
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: AppColors.textDark,
                               fontWeight: FontWeight.bold,
@@ -239,7 +313,7 @@ class BalanceCard extends StatelessWidget {
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
-                          value: listAccounts?.first.id,
+                          value: currentAccountId ?? (listAccounts != null && listAccounts.isNotEmpty ? listAccounts.first.id : null),
                           icon: Icon(
                             Icons.keyboard_arrow_down,
                             color: AppColors.textDark,
@@ -251,9 +325,9 @@ class BalanceCard extends StatelessWidget {
                           ),
                           dropdownColor: theme.cardColor,
                           borderRadius: BorderRadius.circular(16),
-                          items:
-                              listAccounts
-                                  ?.map(
+                          items: listAccounts != null
+                              ? listAccounts
+                                  .map(
                                     (e) => DropdownMenuItem(
                                       value: e.id,
                                       child: Row(
@@ -275,10 +349,9 @@ class BalanceCard extends StatelessWidget {
                                       ),
                                     ),
                                   )
-                                  .toList(),
-                          onChanged: (String? newValue) {
-                            // Handle account change
-                          },
+                                  .toList()
+                              : [],
+                          onChanged: changeAccount,
                         ),
                       ),
                     ),
@@ -335,7 +408,7 @@ class BalanceCard extends StatelessWidget {
                             ),
                             SizedBox(height: 6),
                             Text(
-                              '+100M VND',
+                              '+${totalIncome.toStringAsFixed(0)} VND',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: AppColors.positiveGreen,
                                 fontWeight: FontWeight.bold,
@@ -392,7 +465,7 @@ class BalanceCard extends StatelessWidget {
                             ),
                             SizedBox(height: 6),
                             Text(
-                              '-10M VND',
+                              '-${totalExpense.toStringAsFixed(0)} VND',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: AppColors.negativeRed,
                                 fontWeight: FontWeight.bold,
@@ -411,4 +484,6 @@ class BalanceCard extends StatelessWidget {
       },
     );
   }
+
+  
 }
