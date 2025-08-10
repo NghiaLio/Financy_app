@@ -233,5 +233,13 @@
   "pleaseFillRequiredFields": "Пожалуйста, заполните все обязательные поля",
   "invalidEmailFormat": "Неверный формат электронной почты",
   "profileUpdateSuccess": "Профиль успешно обновлен!",
-  "imagePickerFeatureComingSoon": "Функция выбора изображений будет добавлена позже"
+  "imagePickerFeatureComingSoon": "Функция выбора изображений будет добавлена позже",
+  "savings": "Сбережения",
+  "creditCard": "Кредитная карта",
+  "dining": "Питание",
+  "travel": "Путешествие",
+  "salary": "Зарплата",
+  "medical": "Медицинские расходы",
+  "transport": "Транспорт",
+  "waterBill": "Счет за воду"
 }

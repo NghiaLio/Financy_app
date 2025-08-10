@@ -93,6 +93,19 @@ class ManageMoneyRepo {
     await _localBox.clear();
   }
 
+  /// Get current account name by id from local storage
+  String? getCurrentAccountNameById(String id) {
+    return _localBox.values.firstWhere((source) => source.id == id).name;
+  }
+
+  MoneySource? getCurrentAccountByName(String name) {
+    try {
+      return _localBox.values.firstWhere((source) => source.name == name);
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ==================== SERVER API METHODS ====================
 
   Future<MoneySource?> addMoneySource(MoneySource source) async {

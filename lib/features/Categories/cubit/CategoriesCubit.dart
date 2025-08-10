@@ -1,0 +1,81 @@
+// ignore_for_file: file_names
+
+import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
+import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class Categoriescubit extends Cubit<CategoriesState> {
+  Categoriescubit() : super(CategoriesState.initial());
+  final Categorierepo _categorierepo = Categorierepo();
+
+  Future<void> loadCategories() async {
+    emit(CategoriesState.loading());
+    try {
+      final categories = await _categorierepo.getCategories();
+      final categoriesExpense = categories.where((c) => c.type == 'expense').toList();
+      final categoriesIncome = categories.where((c) => c.type == 'income').toList();
+      emit(CategoriesState.loaded(categoriesExpense, categoriesIncome));
+    } catch (e) {
+      emit(CategoriesState.failure(e.toString()));
+    }
+  }
+
+  Future<void> addCategory(Category category) async {
+    try {
+      await _categorierepo.addCategory(category);
+      if (category.type == 'income') {
+        final categoriesIncome = [...state.categoriesIncome, category];
+        emit(CategoriesState.success(state.categoriesExpense, categoriesIncome));
+        return;
+      }else{
+        final categoriesExpense = [...state.categoriesExpense, category];
+      emit(CategoriesState.success(categoriesExpense, state.categoriesIncome));
+      }
+      
+    } catch (e) {
+      emit(CategoriesState.failure(e.toString()));
+    }
+  }
+
+  Future<void> updateCategory(int index, Category category) async {
+    try {
+      await _categorierepo.updateCategory(index, category);
+      if (category.type == 'income') {
+        final categoriesIncome = [...state.categoriesIncome]
+          ..removeAt(index)
+          ..add(category);
+        emit(CategoriesState.success(state.categoriesExpense, categoriesIncome));
+        return;
+      }else{
+          final categoriesExpense =
+            [...state.categoriesExpense]
+              ..removeAt(index)
+              ..add(category);
+        emit(CategoriesState.success(categoriesExpense, state.categoriesIncome));
+      }
+      
+    } catch (e) {
+      emit(CategoriesState.failure(e.toString()));
+    }
+  }
+
+  Future<void> deleteCategory(int index, Category category) async {
+    try {
+      await _categorierepo.deleteCategory(index);
+      if (category.type == 'income') {
+        final categoriesIncome = [...state.categoriesIncome]..removeAt(index);
+        emit(CategoriesState.success(state.categoriesExpense, categoriesIncome));
+        return;
+      }
+      final categoriesExpense = [...state.categoriesExpense]..removeAt(index);
+      emit(CategoriesState.success(categoriesExpense, state.categoriesIncome));
+    } catch (e) {
+      emit(CategoriesState.failure(e.toString()));
+    }
+  }
+
+  Future<int> getIndexOfCategory(Category category)async {
+    return await _categorierepo.getIndexOfCategory(category);
+  }
+}

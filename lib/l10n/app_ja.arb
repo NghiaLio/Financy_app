@@ -252,6 +252,14 @@
   "pleaseFillRequiredFields": "必須項目をすべて入力してください",
   "invalidEmailFormat": "メール形式が無効です",
   "profileUpdateSuccess": "プロフィールが正常に更新されました！",
-  "imagePickerFeatureComingSoon": "画像選択機能は後で追加されます"
+  "imagePickerFeatureComingSoon": "画像選択機能は後で追加されます",
+  "savings": "貯金",
+  "creditCard": "クレジットカード",
+  "dining": "外食",
+  "travel": "旅行",
+  "salary": "給料",
+  "medical": "医療",
+  "transport": "交通",
+  "waterBill": "水道料金"
 }
   

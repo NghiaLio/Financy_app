@@ -31,5 +31,25 @@ class AppColors {
   static const Color grey = Colors.grey;
   static const Color black = Colors.black;
 
-  
+
+  static const List<Color> listIconColors = [
+    AppColors.blue,
+    AppColors.green,
+    AppColors.red,
+    AppColors.orange,
+    AppColors.purple,
+    AppColors.cyan,
+    AppColors.pink,
+    AppColors.indigo,
+    AppColors.brown,
+    AppColors.grey,
+    AppColors.amber,
+    AppColors.lightGreen,
+    AppColors.deepOrange,
+    AppColors.deepPurple,
+    AppColors.teal,
+    AppColors.lime,
+  ];
 }
+
+

@@ -1,11 +1,12 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/add.dart';
+import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/features/transactions/view/add.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
-import 'package:financy_ui/home.dart';
+import 'package:financy_ui/features/transactions/view/home.dart';
 import 'package:financy_ui/settings.dart';
 import 'package:financy_ui/statiscal.dart';
-import 'package:financy_ui/wallet.dart';
+import 'package:financy_ui/features/Transactions/view/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -30,7 +31,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
   final List<Widget> _pages = [
     Home(),
     Wallet(),
-    Add(),
+    AddTransactionScreen(),
     Statiscal(),
     Settings(),
   ];
@@ -38,6 +39,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
   @override
   void initState() {
     context.read<UserCubit>().getUser();
+    context.read<ManageMoneyCubit>().getAllAccount();
     super.initState();
   }
 

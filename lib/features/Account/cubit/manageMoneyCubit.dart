@@ -5,15 +5,22 @@ import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 
-class ManageMoneyCubit extends Cubit<ManageMoneyState>{
+class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   final ManageMoneyRepo _manageMoneyRepo = ManageMoneyRepo();
 
-  ManageMoneyCubit() :super(ManageMoneyState.loading());
+  ManageMoneyCubit() : super(ManageMoneyState.loading());
 
-  // get accounts 
-  Future<void> getAllAccount() async{
+  List<MoneySource>? _listAccounts;
+  List<MoneySource>? get listAccounts => _listAccounts;
+
+  String? _currentAccountName;
+  String? get currentAccountName => _currentAccountName;
+
+  // get accounts
+  Future<void> getAllAccount() async {
     try {
       final List<MoneySource> listAccount = _manageMoneyRepo.getAllFromLocal();
+      _listAccounts = listAccount;
       emit(ManageMoneyState.loaded(listAccount));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
@@ -24,8 +31,8 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
   Future<void> createAccount(MoneySource source) async {
     try {
       await _manageMoneyRepo.saveToLocal(source);
+      await getAllAccount(); // Đảm bảo luôn lấy danh sách mới nhất từ local
       emit(ManageMoneyState.success('Account created successfully'));
-      getAllAccount();
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
@@ -35,7 +42,13 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
   Future<void> updateAccount(MoneySource source) async {
     try {
       await _manageMoneyRepo.updateInLocal(source);
-      getAllAccount();
+      final updatedList =
+          state.listAccounts
+              ?.map((s) => s.id == source.id ? source : s)
+              .toList() ??
+          [];
+      _listAccounts = updatedList;
+      emit(ManageMoneyState.loaded(updatedList));
       emit(ManageMoneyState.success('Account updated successfully'));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
@@ -51,5 +64,17 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState>{
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
+  }
+
+  // set current account name
+  void setCurrentAccountName(String? newId) {
+    if (newId != null) {
+      _currentAccountName = _manageMoneyRepo.getCurrentAccountNameById(newId);
+    }
+  }
+
+  MoneySource? getAccountByName(String name) {
+    final currentAccount = _manageMoneyRepo.getCurrentAccountByName(name);
+    return currentAccount;
   }
 }

@@ -176,6 +176,14 @@
   "pleaseFillRequiredFields": "Veuillez remplir tous les champs obligatoires",
   "invalidEmailFormat": "Format d'email invalide",
   "profileUpdateSuccess": "Profil mis à jour avec succès !",
-  "imagePickerFeatureComingSoon": "La fonctionnalité de sélection d'image sera ajoutée plus tard"
+  "imagePickerFeatureComingSoon": "La fonctionnalité de sélection d'image sera ajoutée plus tard",
+  "savings": "Épargne",
+  "creditCard": "Carte de crédit",
+  "dining": "Restauration",
+  "travel": "Voyage",
+  "salary": "Salaire",
+  "medical": "Médical",
+  "transport": "Transport",
+  "waterBill": "Facture d'eau"
 }
   
