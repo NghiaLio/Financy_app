@@ -150,9 +150,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       body: BlocListener<TransactionCubit, TransactionState>(
         listener: (listenerContext, state) async {
           if (state.status == TransactionStateStatus.success) {
+            final accountID = context.read<ManageMoneyCubit>().getAccountByName(selectedAccount)?.id ?? '';
+            await context.read<TransactionCubit>().fetchTransactionsByAccount(accountID);
+            context.read<ManageMoneyCubit>().setCurrentAccountName(accountID);
             _showResultEvent(listenerContext, true, context);
             amountController.clear();
             noteController.clear();
+            
           }
           if (state.status == TransactionStateStatus.error) {
             _showResultEvent(listenerContext, false, context);

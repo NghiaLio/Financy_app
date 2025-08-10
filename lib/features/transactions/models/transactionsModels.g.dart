@@ -1,7 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: file_names
-
 part of 'transactionsModels.dart';
 
 // **************************************************************************

@@ -72,4 +72,9 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
       _currentAccountName = _manageMoneyRepo.getCurrentAccountNameById(newId);
     }
   }
+
+  MoneySource? getAccountByName(String name) {
+    final currentAccount = _manageMoneyRepo.getCurrentAccountByName(name);
+    return currentAccount;
+  }
 }
