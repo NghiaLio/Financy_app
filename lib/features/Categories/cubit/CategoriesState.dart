@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 
 enum CategoriesStatus { initial, loading, loaded, failure,success }

@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, use_build_context_synchronously, library_private_types_in_public_api
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously, library_private_types_in_public_api, non_constant_identifier_names
 
 import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
@@ -6,6 +6,7 @@ import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddEditCategoryScreen extends StatefulWidget {
@@ -29,12 +30,13 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   final Map<String, List<IconData>> _iconCategories =
       IconMapping.groupIconsByCategory();
 
-  final List<Color> _availableColors = AppColors.listIconColors;
+  late List<Color> _availableColors;
 
   @override
   void initState() {
     super.initState();
     // _initializeForm();
+    _availableColors = List<Color>.from(AppColors.listIconColors);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final args = ModalRoute.of(context)?.settings.arguments;
@@ -54,39 +56,40 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       _selectedColor =
           ColorUtils.parseColor(category?.color ?? '#0000FF') ??
           _availableColors[0];
+      // Ensure the category's color appears in the palette and is selectable
+      if (_selectedColor != null && !_availableColors.contains(_selectedColor)) {
+        _availableColors.insert(0, _selectedColor!);
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     bool isEditing = category != null;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0.5,
         leading: IconButton(
-          icon: Icon(Icons.close, color: Colors.black),
+          icon: Icon(Icons.close, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          isEditing ? 'Edit Category' : 'Add Category',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          l10n?.manageCategory ?? 'Manage categories',
+          style: theme.textTheme.titleLarge,
         ),
         centerTitle: true,
         actions: [
           TextButton(
             onPressed: _isLoading ? null : () => _saveCategory(isEditing),
             child: Text(
-              'Save',
-              style: TextStyle(
-                color: _isLoading ? Colors.grey : Colors.blue,
-                fontSize: 16,
+              l10n?.save ?? 'Save',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: _isLoading ? theme.disabledColor : theme.primaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -139,15 +142,16 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   }
 
   Widget _buildPreviewCard() {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: theme.shadowColor.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 10,
             offset: Offset(0, 2),
@@ -158,9 +162,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         children: [
           Text(
             'Preview',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.hintColor,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -171,7 +174,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             decoration: BoxDecoration(
               color:
                   _selectedColor?.withOpacity(0.1) ??
-                  Theme.of(context).colorScheme.surface.withOpacity(0.1),
+                  theme.colorScheme.surface.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(_selectedIcon, color: _selectedColor, size: 40),
@@ -181,13 +184,12 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             _nameController.text.isEmpty
                 ? 'Category Name'
                 : _nameController.text,
-            style: TextStyle(
-              fontSize: 18,
+            style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color:
                   _nameController.text.isEmpty
-                      ? Colors.grey[400]
-                      : Colors.black,
+                      ? theme.disabledColor
+                      : theme.textTheme.titleMedium?.color,
             ),
           ),
           SizedBox(height: 4),
@@ -196,15 +198,19 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
             decoration: BoxDecoration(
               color:
                   _selectedType == 'income'
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.red.withOpacity(0.1),
+                      ? theme.colorScheme.primary.withOpacity(0.1)
+                      : theme.colorScheme.error.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              _selectedType?.toUpperCase() ?? '',
-              style: TextStyle(
-                color: _selectedType == 'income' ? Colors.green : Colors.red,
-                fontSize: 12,
+              (_selectedType == 'income'
+                      ? (AppLocalizations.of(context)?.income ?? 'Income')
+                      : (AppLocalizations.of(context)?.expense ?? 'Expense'))
+                  .toUpperCase(),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _selectedType == 'income'
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.error,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -217,38 +223,38 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
+      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
     );
   }
 
   Widget _buildNameField() {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return TextFormField(
       controller: _nameController,
       decoration: InputDecoration(
         hintText: 'Enter category name',
         filled: true,
-        fillColor: Colors.white,
+        fillColor: theme.cardColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: theme.dividerColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderSide: BorderSide(color: theme.dividerColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.blue, width: 2),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Please enter a category name';
+          return l10n?.pleaseEnterName ?? 'Please enter a name';
         }
         return null;
       },
@@ -257,11 +263,12 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   }
 
   Widget _buildTypeSelector() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Row(
         children: [
@@ -273,7 +280,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                 decoration: BoxDecoration(
                   color:
                       _selectedType == 'income'
-                          ? Colors.green
+                          ? theme.primaryColor
                           : Colors.transparent,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(12),
@@ -287,27 +294,26 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                       Icons.trending_up,
                       color:
                           _selectedType == 'income'
-                              ? Colors.white
-                              : Colors.grey[600],
+                              ? theme.colorScheme.onPrimary
+                              : theme.hintColor,
                       size: 20,
                     ),
                     SizedBox(width: 8),
                     Text(
-                      'Income',
-                      style: TextStyle(
-                        color:
-                            _selectedType == 'income'
-                                ? Colors.white
-                                : Colors.grey[600],
-                        fontWeight: FontWeight.w600,
-                      ),
+                      AppLocalizations.of(context)?.income ?? 'Income',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: _selectedType == 'income'
+                                ? theme.colorScheme.onPrimary
+                                : theme.hintColor,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          Container(width: 1, height: 20, color: Colors.grey[300]),
+          Container(width: 1, height: 20, color: Theme.of(context).dividerColor),
           Expanded(
             child: GestureDetector(
               onTap: () => setState(() => _selectedType = 'expense'),
@@ -316,7 +322,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                 decoration: BoxDecoration(
                   color:
                       _selectedType == 'expense'
-                          ? Colors.red
+                          ? theme.colorScheme.error
                           : Colors.transparent,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(12),
@@ -330,20 +336,19 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                       Icons.trending_down,
                       color:
                           _selectedType == 'expense'
-                              ? Colors.white
-                              : Colors.grey[600],
+                              ? theme.colorScheme.onError
+                              : theme.hintColor,
                       size: 20,
                     ),
                     SizedBox(width: 8),
                     Text(
-                      'Expense',
-                      style: TextStyle(
-                        color:
-                            _selectedType == 'expense'
-                                ? Colors.white
-                                : Colors.grey[600],
-                        fontWeight: FontWeight.w600,
-                      ),
+                      AppLocalizations.of(context)?.expense ?? 'Expense',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: _selectedType == 'expense'
+                                ? theme.colorScheme.onError
+                                : theme.hintColor,
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                   ],
                 ),
@@ -356,11 +361,12 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   }
 
   Widget _buildIconSelector() {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: ExpansionTile(
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
@@ -370,13 +376,13 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: _selectedColor?.withOpacity(0.1) ?? Colors.transparent,
+                color: _selectedColor?.withOpacity(0.1) ?? theme.primaryColor,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(_selectedIcon, color: _selectedColor, size: 20),
             ),
             SizedBox(width: 12),
-            Text('Select Icon'),
+            Text(AppLocalizations.of(context)?.chooseIcon ?? 'Choose Icon'),
           ],
         ),
         children:
@@ -388,10 +394,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
                     child: Text(
                       entry.key,
-                      style: TextStyle(
+                      style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey[700],
-                        fontSize: 14,
+                        color: theme.textTheme.bodyMedium?.color,
                       ),
                     ),
                   ),
@@ -412,32 +417,24 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                                   color:
                                       isSelected
                                           ? _selectedColor?.withOpacity(0.2) ??
-                                              Theme.of(context)
-                                                  .colorScheme
-                                                  .primary
-                                                  .withOpacity(0.2)
-                                          : Colors.grey[100],
+                                              theme.colorScheme.primary.withOpacity(0.2)
+                                          : theme.colorScheme.surfaceVariant.withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(8),
                                   border:
                                       isSelected
                                           ? Border.all(
                                             color:
-                                                _selectedColor ??
-                                                Theme.of(
-                                                  context,
-                                                ).colorScheme.primary,
+                                                _selectedColor ?? theme.colorScheme.primary,
                                             width: 2,
                                           )
                                           : Border.all(
-                                            color: Colors.grey[300]!,
+                                            color: theme.dividerColor,
                                           ),
                                 ),
                                 child: Icon(
                                   icon,
                                   color:
-                                      isSelected
-                                          ? _selectedColor
-                                          : Colors.grey[600],
+                                      isSelected ? _selectedColor : theme.hintColor,
                                   size: 20,
                                 ),
                               ),
@@ -453,12 +450,13 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   }
 
   Widget _buildColorSelector() {
+    final theme = Theme.of(context);
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: theme.dividerColor),
       ),
       child: Wrap(
         spacing: 16,
@@ -476,12 +474,12 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     shape: BoxShape.circle,
                     border:
                         isSelected
-                            ? Border.all(color: Colors.grey[800]!, width: 3)
-                            : Border.all(color: Colors.grey[300]!, width: 1),
+                            ? Border.all(color: theme.colorScheme.onSurface, width: 3)
+                            : Border.all(color: theme.dividerColor, width: 1),
                   ),
                   child:
                       isSelected
-                          ? Icon(Icons.check, color: Colors.white, size: 20)
+                          ? Icon(Icons.check, color: theme.colorScheme.onPrimary, size: 20)
                           : null,
                 ),
               );
@@ -491,12 +489,14 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   }
 
   Widget _buildDeleteButton() {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
         onPressed: _showDeleteConfirmDialog,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Colors.red),
+          side: BorderSide(color: theme.colorScheme.error),
           padding: EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -505,11 +505,14 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.delete_outline, color: Colors.red),
+            Icon(Icons.delete_outline, color: theme.colorScheme.error),
             SizedBox(width: 8),
             Text(
-              'Delete Category',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+              '${l10n?.delete ?? 'Delete'} ${l10n?.category ?? 'Category'}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -539,10 +542,11 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       if (index != -1) {
         await context.read<Categoriescubit>().updateCategory(index, category!);
       } else {
+        final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Category not found'),
-            backgroundColor: Colors.red,
+            content: Text('Category not found', style: theme.textTheme.bodyMedium),
+            backgroundColor: theme.colorScheme.error,
           ),
         );
       }
@@ -560,22 +564,22 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   }
 
   void _showDeleteConfirmDialog() {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Text('Delete Category'),
-          content: Text(
-            'Are you sure you want to delete "${category!.name}"? This action cannot be undone.',
-          ),
+          title: Text('${l10n?.delete ?? 'Delete'} ${l10n?.category ?? 'Category'}'),
+          content: Text('Are you sure you want to delete "${category!.name}"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('Cancel'),
+              child: Text(l10n?.cancel ?? 'Cancel'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -586,12 +590,17 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                 }); // Return to previous screen with delete action
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
+                backgroundColor: theme.colorScheme.error,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: Text('Delete', style: TextStyle(color: Colors.white)),
+              child: Text(
+                l10n?.delete ?? 'Delete',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onError,
+                ),
+              ),
             ),
           ],
         );

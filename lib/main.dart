@@ -36,6 +36,7 @@ import 'app/theme/app_theme.dart';
 import 'core/constants/colors.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -167,7 +168,7 @@ class _MainAppState extends State<MainApp> {
   late bool appState;
   @override
   void initState() {
-    appState = Hive.box('settings').get('app_state', defaultValue: false);
+    appState = SettingsService.getAppState();
     super.initState();
   }
 

@@ -10,12 +10,16 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/colors.dart';
+import '../../../core/constants/icons.dart';
+import '../../../shared/utils/color_utils.dart';
+import '../../../shared/utils/mappingIcon.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Home extends StatefulWidget {
@@ -48,6 +52,46 @@ class _HomeState extends State<Home> {
       final formatter = NumberFormat('#,###', 'vi_VN');
       return '${formatter.format(amount.toInt())} ₫';
     }
+  }
+
+  // Helper method to get category info by name
+  Category? _getCategoryByName(String categoryName) {
+    // First check in default expense categories
+    final expenseCategory = defaultExpenseCategories.firstWhere(
+      (category) => category.name == categoryName,
+      orElse: () => Category(
+        id: '',
+        name: '',
+        type: '',
+        icon: '',
+        color: '',
+        createdAt: DateTime.now(),
+      ),
+    );
+    
+    if (expenseCategory.name.isNotEmpty) {
+      return expenseCategory;
+    }
+
+    // Then check in default income categories
+    final incomeCategory = defaultIncomeCategories.firstWhere(
+      (category) => category.name == categoryName,
+      orElse: () => Category(
+        id: '',
+        name: '',
+        type: '',
+        icon: '',
+        color: '',
+        createdAt: DateTime.now(),
+      ),
+    );
+    
+    if (incomeCategory.name.isNotEmpty) {
+      return incomeCategory;
+    }
+
+    // If not found in defaults, return null
+    return null;
   }
 
   @override
@@ -300,10 +344,19 @@ class _HomeState extends State<Home> {
                                               ),
                                         );
 
+                                    // Get category info
+                                    final category = _getCategoryByName(transaction.categoriesId);
+                                    final categoryIcon = category != null 
+                                        ? IconMapping.stringToIcon(category.icon)
+                                        : Icons.category;
+                                    final categoryColor = category != null 
+                                        ? ColorUtils.parseColor(category.color) ?? AppColors.primaryBlue
+                                        : AppColors.primaryBlue;
+
                                     return _buildTransactionItem(
                                       context: context,
-                                      icon: Icons.monetization_on,
-                                      iconColor: Colors.green,
+                                      icon: categoryIcon,
+                                      iconColor: categoryColor,
                                       title: transaction.categoriesId,
                                       subtitle: transaction.note ?? '',
                                       amount: _formatAmount(
@@ -315,7 +368,7 @@ class _HomeState extends State<Home> {
                                       isPositive:
                                           transaction.type ==
                                           TransactionType.income,
-                                      typeAccount: transaction.accountId,
+                                      accountName: account?.name ?? '',
                                       transaction: transaction,
                                     );
                                   }),
@@ -362,7 +415,7 @@ class _HomeState extends State<Home> {
     required String title,
     required String subtitle,
     required String amount,
-    required String typeAccount,
+    required String accountName,
     bool isPositive = false,
     required Transactionsmodels transaction,
   }) {
@@ -413,7 +466,7 @@ class _HomeState extends State<Home> {
                   ),
                 ),
                 Text(
-                  typeAccount,
+                  accountName,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppColors.textGrey,
                   ),

@@ -10,10 +10,29 @@ import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/generateID.dart';
 import 'package:financy_ui/shared/widgets/resultDialogAnimation.dart';
+import 'package:financy_ui/shared/utils/mappingIcon.dart';
+import 'package:financy_ui/core/constants/icons.dart';
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
+import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:financy_ui/core/constants/colors.dart';
+
+// Helper class for validation results
+class ValidationResult {
+  final bool isValid;
+  final double? amount;
+  final DateTime? date;
+  final MoneySource? account;
+
+  ValidationResult({
+    required this.isValid,
+    this.amount,
+    this.date,
+    this.account,
+  });
+}
 
 class AddTransactionScreen extends StatefulWidget {
   const AddTransactionScreen({super.key});
@@ -36,15 +55,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   bool isEditing = false;
   String? fromScreen;
 
-  final List<String> categories = [
-    'Salary',
-    'Business',
-    'Investment',
-    'Bonus',
-    'Freelance',
-    'Gift',
-    'Other Income',
-  ];
+  // Get default categories based on transaction type
+  late List<Category> availableCategories;
+  
+  // Default colors for each category group
+  final Map<String, Color> categoryColors = {
+    'Expense': AppColors.red,
+    'Income': AppColors.green,
+  };
 
   late List<MoneySource> listAccounts;
 
@@ -89,6 +107,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     listAccounts = context.read<ManageMoneyCubit>().listAccounts ?? [];
+    // Initialize with expense categories by default
+    availableCategories = defaultExpenseCategories;
 
     // Check if we're in editing mode
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -297,6 +317,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         onTap: () {
           setState(() {
             selectedTransactionType = index;
+            // Update available categories based on transaction type
+            availableCategories = index == 0 ? defaultIncomeCategories : defaultExpenseCategories;
+            // Reset selected category when switching types
+            selectedCategory = 'Select Category';
           });
         },
         child: Container(
@@ -407,6 +431,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       builder: (context) {
         return Container(
           padding: EdgeInsets.all(20),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.5,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -419,22 +446,89 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
 
               Text(
                 _localText((l) => l.category),
                 style: theme.textTheme.titleLarge,
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
 
-              ...categories.map(
-                (category) => ListTile(
-                  title: Text(category, style: theme.textTheme.bodyMedium),
-                  onTap: () {
-                    setState(() {
-                      selectedCategory = category;
-                    });
-                    Navigator.pop(context);
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 5,
+                    crossAxisSpacing: 6,
+                    mainAxisSpacing: 6,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: availableCategories.length,
+                  itemBuilder: (context, index) {
+                    final category = availableCategories[index];
+                    final categoryColor = ColorUtils.parseColor(category.color);
+                    final isSelected = selectedCategory == category.name;
+                    
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedCategory = category.name;
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? categoryColor?.withOpacity(0.2)
+                              : theme.cardColor,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected
+                                ? categoryColor ?? theme.colorScheme.primary
+                                : theme.dividerColor,
+                            width: isSelected ? 2 : 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: theme.shadowColor.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 24,
+                              height: 24,
+                              decoration: BoxDecoration(
+                                color: categoryColor?.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                IconMapping.stringToIcon(category.icon),
+                                color: categoryColor,
+                                size: 16,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              category.name,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                color: isSelected
+                                    ? categoryColor
+                                    : theme.textTheme.bodySmall?.color,
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -547,7 +641,20 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       return false;
     }
 
-    if (selectedTransactionType == 1 && amount > account.balance) {
+    // Calculate effective balance for validation
+    double effectiveBalance = account.balance;
+    
+    // If editing and same account, calculate balance after reverting old transaction
+    if (isEditing && editingTransaction != null && oldAccount?.id == account.id) {
+      if (editingTransaction!.type == TransactionType.income) {
+        effectiveBalance -= editingTransaction!.amount; // Revert income
+      } else {
+        effectiveBalance += editingTransaction!.amount; // Revert expense
+      }
+    }
+
+    // Only validate balance for expense transactions
+    if (selectedTransactionType == 1 && amount > effectiveBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Insufficient balance in account')),
       );
@@ -571,16 +678,59 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return true;
   }
 
-  void addTrans() async {
-    // Parse amount
+    void addTrans() async {
+    try {
+      // Validate and parse input
+      final validationResult = await _validateAndParseInput();
+      if (!validationResult.isValid) {
+        return;
+      }
+
+      final amount = validationResult.amount!;
+      final date = validationResult.date!;
+      final account = validationResult.account!;
+      final type = selectedTransactionType == 0 
+          ? TransactionType.income 
+          : TransactionType.expense;
+      final uid = context.read<UserCubit>().state.user?.uid ?? '';
+
+      // Create or update transaction
+      if (isEditing && editingTransaction != null) {
+        await _updateExistingTransaction(amount, date, account, type);
+      } else {
+        await _createNewTransaction(amount, date, account, type, uid);
+      }
+
+      // Update account balances
+      await _updateAccountBalances(amount, account, type);
+
+    } catch (e) {
+      log('Error in addTrans: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  }
+
+  // Helper method to validate and parse input
+  Future<ValidationResult> _validateAndParseInput() async {
+    // Validate amount
     if (amountController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Please enter an amount')));
-      return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter an amount')),
+      );
+      return ValidationResult(isValid: false);
     }
 
-    final amount = double.parse(amountController.text.trim());
+    double amount;
+    try {
+      amount = double.parse(amountController.text.trim());
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Invalid amount format')),
+      );
+      return ValidationResult(isValid: false);
+    }
 
     // Parse date
     DateTime date;
@@ -604,153 +754,184 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       (e) => e.name == selectedAccount,
       orElse: () => listAccounts.first,
     );
-    log(oldAccount?.name ?? '');
-
-    final type =
-        selectedTransactionType == 0
-            ? TransactionType.income
-            : TransactionType.expense;
-    final uid = context.read<UserCubit>().state.user?.uid ?? '';
 
     // Validate input
     if (!_validate(amount, account)) {
-      return;
-    }
-    double newAmonut;
-    if (selectedTransactionType == 0) {
-      newAmonut = account.balance + amount;
-    } else {
-      newAmonut = account.balance - amount;
+      return ValidationResult(isValid: false);
     }
 
+    return ValidationResult(
+      isValid: true,
+      amount: amount,
+      date: date,
+      account: account,
+    );
+  }
+
+  // Helper method to create new transaction
+  Future<void> _createNewTransaction(
+    double amount,
+    DateTime date,
+    MoneySource account,
+    TransactionType type,
+    String uid,
+  ) async {
+    final transaction = Transactionsmodels(
+      id: GenerateID.newID(),
+      uid: uid,
+      accountId: account.id ?? '',
+      categoriesId: selectedCategory,
+      type: type,
+      amount: amount,
+      note: noteController.text.trim(),
+      transactionDate: date,
+      createdAt: DateTime.now(),
+      isSync: false,
+    );
+
+    await context.read<TransactionCubit>().addTransaction(transaction);
+  }
+
+  // Helper method to update existing transaction
+  Future<void> _updateExistingTransaction(
+    double amount,
+    DateTime date,
+    MoneySource account,
+    TransactionType type,
+  ) async {
+    final updatedTransaction = Transactionsmodels(
+      id: editingTransaction?.id ?? '',
+      uid: editingTransaction?.uid ?? '',
+      accountId: account.id ?? '',
+      categoriesId: selectedCategory,
+      type: type,
+      amount: amount,
+      note: noteController.text.trim(),
+      transactionDate: date,
+      createdAt: editingTransaction!.createdAt,
+      isSync: false,
+    );
+
+    await context.read<TransactionCubit>().updateTransaction(updatedTransaction);
+  }
+
+  // Helper method to update account balances
+  Future<void> _updateAccountBalances(
+    double amount,
+    MoneySource account,
+    TransactionType type,
+  ) async {
     if (isEditing && editingTransaction != null) {
-      // Update existing transaction
-      final updatedTransaction = Transactionsmodels(
-        id: editingTransaction?.id ?? '',
-        uid: editingTransaction?.uid ?? '',
-        accountId: account.id ?? '',
-        categoriesId: selectedCategory,
-        type: type,
-        amount: amount,
-        note: noteController.text.trim(),
-        transactionDate: date,
-        createdAt: editingTransaction!.createdAt,
-        isSync: false,
-      );
-
-      await context.read<TransactionCubit>().updateTransaction(
-        updatedTransaction,
-      );
+      await _updateAccountBalancesForEdit(amount, account, type);
     } else {
-      // Create new transaction
-      final transaction = Transactionsmodels(
-        id: GenerateID.newID(),
-        uid: uid,
-        accountId: account.id ?? '',
-        categoriesId: selectedCategory,
-        type: type,
-        amount: amount,
-        note: noteController.text.trim(),
-        transactionDate: date,
-        createdAt: DateTime.now(),
-        isSync: false,
-      );
+      await _updateAccountBalanceForNew(amount, account, type);
+    }
+  }
 
-      await context.read<TransactionCubit>().addTransaction(transaction);
+  // Helper method to update account balances when editing
+  Future<void> _updateAccountBalancesForEdit(
+    double amount,
+    MoneySource account,
+    TransactionType type,
+  ) async {
+    // If account changed
+    if (oldAccount?.id != account.id) {
+      await _handleAccountChange(amount, account, type);
+    } else {
+      await _handleSameAccountUpdate(amount, account, type);
+    }
+  }
+
+  // Helper method to handle account change during edit
+  Future<void> _handleAccountChange(
+    double amount,
+    MoneySource account,
+    TransactionType type,
+  ) async {
+    // Revert old account balance
+    double oldAccBalance = oldAccount?.balance ?? 0;
+    if (editingTransaction!.type == TransactionType.income) {
+      oldAccBalance -= editingTransaction!.amount;
+    } else {
+      oldAccBalance += editingTransaction!.amount;
     }
 
-    // --- Update account logic ---
-    if (isEditing && editingTransaction != null) {
-      // Nếu đổi tài khoản
-      if (oldAccount?.id != account.id) {
-        // Hoàn số tiền cũ về tài khoản cũ
-        double oldAccBalance = oldAccount?.balance ?? 0;
-        if (editingTransaction!.type == TransactionType.income) {
-          oldAccBalance -= editingTransaction!.amount;
-        } else {
-          oldAccBalance += editingTransaction!.amount;
-        }
-        final newOldAccount = MoneySource(
-          id: oldAccount?.id,
-          name: oldAccount?.name ?? '',
-          balance: oldAccBalance,
-          type: oldAccount?.type,
-          currency: oldAccount?.currency,
-          iconCode: oldAccount?.iconCode,
-          color: oldAccount?.color,
-          description: oldAccount?.description,
-          isActive: oldAccount?.isActive ?? false,
-        );
+    final newOldAccount = _createUpdatedMoneySource(oldAccount!, oldAccBalance);
 
-        // Áp dụng thay đổi cho tài khoản mới
-        double newAccBalance = account.balance;
-        if (selectedTransactionType == 0) {
-          newAccBalance += amount;
-        } else {
-          newAccBalance -= amount;
-        }
-        final newMoney = MoneySource(
-          id: account.id,
-          name: account.name,
-          balance: newAccBalance,
-          type: account.type,
-          currency: account.currency,
-          iconCode: account.iconCode,
-          color: account.color,
-          description: account.description,
-          isActive: account.isActive,
-        );
-
-        await Future.wait([
-          context.read<ManageMoneyCubit>().updateAccount(newMoney),
-          context.read<ManageMoneyCubit>().updateAccount(newOldAccount),
-        ]);
-      } else {
-        // Cùng tài khoản, kiểm tra thay đổi số tiền hoặc loại giao dịch
-        double accBalance = account.balance;
-        double oldAmount = editingTransaction!.amount;
-        TransactionType oldType = editingTransaction!.type;
-
-        // Hoàn lại số dư cũ
-        if (oldType == TransactionType.income) {
-          accBalance -= oldAmount;
-        } else {
-          accBalance += oldAmount;
-        }
-        // Áp dụng số dư mới
-        if (selectedTransactionType == 0) {
-          accBalance += amount;
-        } else {
-          accBalance -= amount;
-        }
-        final newMoney = MoneySource(
-          id: account.id,
-          name: account.name,
-          balance: accBalance,
-          type: account.type,
-          currency: account.currency,
-          iconCode: account.iconCode,
-          color: account.color,
-          description: account.description,
-          isActive: account.isActive,
-        );
-        await context.read<ManageMoneyCubit>().updateAccount(newMoney);
-      }
+    // Apply changes to new account
+    double newAccBalance = account.balance;
+    if (type == TransactionType.income) {
+      newAccBalance += amount;
     } else {
-      // Thêm mới transaction
-      final newMoney = MoneySource(
-        id: account.id,
-        name: account.name,
-        balance: newAmonut,
-        type: account.type,
-        currency: account.currency,
-        iconCode: account.iconCode,
-        color: account.color,
-        description: account.description,
-        isActive: account.isActive,
-      );
-      await context.read<ManageMoneyCubit>().updateAccount(newMoney);
+      newAccBalance -= amount;
     }
+
+    final newMoney = _createUpdatedMoneySource(account, newAccBalance);
+
+    await Future.wait([
+      context.read<ManageMoneyCubit>().updateAccount(newMoney),
+      context.read<ManageMoneyCubit>().updateAccount(newOldAccount),
+    ]);
+  }
+
+  // Helper method to handle same account update
+  Future<void> _handleSameAccountUpdate(
+    double amount,
+    MoneySource account,
+    TransactionType type,
+  ) async {
+    double accBalance = account.balance;
+    double oldAmount = editingTransaction!.amount;
+    TransactionType oldType = editingTransaction!.type;
+
+    // Revert old transaction
+    if (oldType == TransactionType.income) {
+      accBalance -= oldAmount;
+    } else {
+      accBalance += oldAmount;
+    }
+
+    // Apply new transaction
+    if (type == TransactionType.income) {
+      accBalance += amount;
+    } else {
+      accBalance -= amount;
+    }
+
+    final newMoney = _createUpdatedMoneySource(account, accBalance);
+    await context.read<ManageMoneyCubit>().updateAccount(newMoney);
+  }
+
+  // Helper method to update account balance for new transaction
+  Future<void> _updateAccountBalanceForNew(
+    double amount,
+    MoneySource account,
+    TransactionType type,
+  ) async {
+    double newBalance = account.balance;
+    if (type == TransactionType.income) {
+      newBalance += amount;
+    } else {
+      newBalance -= amount;
+    }
+
+    final newMoney = _createUpdatedMoneySource(account, newBalance);
+    await context.read<ManageMoneyCubit>().updateAccount(newMoney);
+  }
+
+  // Helper method to create updated MoneySource
+  MoneySource _createUpdatedMoneySource(MoneySource original, double newBalance) {
+    return MoneySource(
+      id: original.id,
+      name: original.name,
+      balance: newBalance,
+      type: original.type,
+      currency: original.currency,
+      iconCode: original.iconCode,
+      color: original.color,
+      description: original.description,
+      isActive: original.isActive,
+    );
   }
 
   void _showResultEvent(

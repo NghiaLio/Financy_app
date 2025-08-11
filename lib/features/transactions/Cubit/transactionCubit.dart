@@ -49,8 +49,12 @@ class TransactionCubit extends Cubit<TransactionState> {
         }
       }
       emit(TransactionState.loaded(updatedMap));
-
-      emit(TransactionState.success());
+      // Keep current data in success so listeners can react without losing list
+      emit(TransactionState(
+        transactionsList: updatedMap,
+        errorMessage: null,
+        status: TransactionStateStatus.success,
+      ));
 
       // Optionally, fetch the latest transactions from the repository instead of updating the map manually:
     } catch (e) {
@@ -74,7 +78,11 @@ class TransactionCubit extends Cubit<TransactionState> {
         updatedMap[txDate] = updatedList;
       }
       emit(TransactionState.loaded(updatedMap));
-      emit(TransactionState.success());
+      emit(TransactionState(
+        transactionsList: updatedMap,
+        errorMessage: null,
+        status: TransactionStateStatus.success,
+      ));
     } catch (e) {
       emit(TransactionState.error(e.toString()));
     }
@@ -92,7 +100,11 @@ class TransactionCubit extends Cubit<TransactionState> {
       // Remove any empty lists from the map
       updatedMap.removeWhere((date, txList) => txList.isEmpty);
       emit(TransactionState.loaded(updatedMap));
-      emit(TransactionState.success());
+      emit(TransactionState(
+        transactionsList: updatedMap,
+        errorMessage: null,
+        status: TransactionStateStatus.success,
+      ));
     } catch (e) {
       emit(TransactionState.error(e.toString()));
     }

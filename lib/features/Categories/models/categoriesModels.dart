@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:hive/hive.dart';
 
 part 'categoriesModels.g.dart';

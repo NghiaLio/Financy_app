@@ -1,5 +1,4 @@
 // ignore_for_file: file_names, deprecated_member_use
-import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/core/constants/icons.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
@@ -7,7 +6,9 @@ import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 class ExpenseCategoriesScreen extends StatefulWidget {
   const ExpenseCategoriesScreen({super.key});
@@ -20,6 +21,7 @@ class ExpenseCategoriesScreen extends StatefulWidget {
 class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late bool _isGridView; // Toggle between grid and list view
 
   List<Category> expenseCategories = defaultExpenseCategories;
   List<Category> incomeCategories = defaultIncomeCategories;
@@ -28,6 +30,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    // Load view mode from settings
+    _isGridView = SettingsService.getCategoryViewMode();
   }
 
   @override
@@ -39,18 +43,19 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: AppColors.textLight),
+          icon: Icon(Icons.arrow_back_ios, color: theme.iconTheme.color),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: AppColors.textLight),
+            icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
             onPressed: () {
               _showOptionsMenu(context, theme);
             },
@@ -58,11 +63,14 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
-          labelColor: AppColors.textLight,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: AppColors.textLight,
+          labelColor: theme.textTheme.bodyMedium?.color,
+          unselectedLabelColor: theme.hintColor,
+          indicatorColor: theme.primaryColor,
           indicatorWeight: 2,
-          tabs: const [Tab(text: 'Expenses'), Tab(text: 'Income')],
+          tabs: [
+            Tab(text: l10n?.expense ?? 'Expense'),
+            Tab(text: l10n?.income ?? 'Income'),
+          ],
         ),
       ),
       body: BlocConsumer<Categoriescubit, CategoriesState>(
@@ -74,15 +82,15 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
             });
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Categories loaded successfully'),
-                backgroundColor: Colors.green,
+                content: Text(l10n?.success ?? 'Success', style: theme.textTheme.bodyMedium),
+                backgroundColor: theme.colorScheme.secondary,
               ),
             );
           } else if (state.status == CategoriesStatus.failure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Failed to load categories: ${state.errorMessage}'),
-                backgroundColor: Colors.red,
+                content: Text(l10n?.error ?? 'Error', style: theme.textTheme.bodyMedium),
+                backgroundColor: theme.colorScheme.error,
               ),
             );
           }
@@ -93,8 +101,10 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           } else if (state.status == CategoriesStatus.failure) {
             return Center(
               child: Text(
-                'Error loading categories',
-                style: TextStyle(color: Colors.red),
+                l10n?.error ?? 'Error',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.error,
+                ),
               ),
             );
           }
@@ -106,8 +116,12 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildCategoryGrid(expenseCategories),
-                    _buildCategoryGrid(incomeCategories),
+                    _isGridView 
+                        ? _buildCategoryGrid(expenseCategories)
+                        : _buildCategoryList(expenseCategories),
+                    _isGridView 
+                        ? _buildCategoryGrid(incomeCategories)
+                        : _buildCategoryList(incomeCategories),
                   ],
                 ),
               ),
@@ -142,6 +156,24 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
+  Widget _buildCategoryList(List<Category> categories) {
+    // Add the "+" button at the end
+    final categoriesWithAdd = [...categories];
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView.builder(
+        itemCount: categoriesWithAdd.length + 1, // +1 for add button
+        itemBuilder: (context, index) {
+          if (index == categoriesWithAdd.length) {
+            return _buildAddListItem();
+          }
+          return _buildCategoryListItem(categoriesWithAdd[index]);
+        },
+      ),
+    );
+  }
+
   Widget _buildCategoryItem(Category category) {
     return GestureDetector(
       onTap: () {
@@ -149,11 +181,11 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Theme.of(context).shadowColor.withOpacity(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -180,11 +212,9 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
             const SizedBox(height: 8),
             Text(
               category.name,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -196,34 +226,33 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   }
 
   Widget _buildAddButton() {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () {
         _showAddCategoryDialog();
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Theme.of(context).shadowColor.withOpacity(0.1),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
           ],
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle, color: Colors.blue, size: 50),
-            SizedBox(height: 8),
+            Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 50),
+            const SizedBox(height: 8),
             Text(
-              'Add Category',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
+              l10n?.manageCategory ?? 'Manage categories',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
               textAlign: TextAlign.center,
             ),
           ],
@@ -250,12 +279,28 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const Icon(Icons.edit, color: AppColors.textLight),
+                  leading: Icon(
+                    _isGridView ? Icons.view_list : Icons.grid_view,
+                    color: theme.iconTheme.color,
+                  ),
                   title: Text(
-                    'Edit Categories',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textLight,
-                    ),
+                    _isGridView ? 'List View' : 'Grid View',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    setState(() {
+                      _isGridView = !_isGridView;
+                    });
+                    // Save view mode to settings
+                    await SettingsService.setCategoryViewMode(_isGridView);
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.edit, color: theme.iconTheme.color),
+                  title: Text(
+                    AppLocalizations.of(context)?.manageCategory ?? 'Manage categories',
+                    style: theme.textTheme.bodyLarge,
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -263,15 +308,13 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                   },
                 ),
                 ListTile(
-                  leading: const Icon(
+                  leading: Icon(
                     Icons.restore,
-                    color: AppColors.textLight,
+                    color: theme.iconTheme.color,
                   ),
                   title: Text(
                     'Restore Default',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textLight,
-                    ),
+                    style: theme.textTheme.bodyLarge,
                   ),
                   onTap: () {
                     Navigator.pop(context);
@@ -289,53 +332,160 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   }
 
   void _showEditCategoriesDialog() {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Edit categories feature'),
-        backgroundColor: Colors.blue,
+      SnackBar(
+        content: Text(
+          AppLocalizations.of(context)?.manageCategory ?? 'Manage categories',
+          style: theme.textTheme.bodyMedium,
+        ),
+        backgroundColor: theme.colorScheme.primary,
       ),
     );
   }
 
   void _showRestoreDefaultDialog() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder:
           (context) => AlertDialog(
-            backgroundColor: const Color(0xFF2A2A3E),
-            title: const Text(
+            backgroundColor: theme.cardColor,
+            title: Text(
               'Restore Default',
-              style: TextStyle(color: Colors.white),
+              style: theme.textTheme.titleLarge,
             ),
-            content: const Text(
+            content: Text(
               'Do you want to restore all categories to default?',
-              style: TextStyle(color: Colors.white),
+              style: theme.textTheme.bodyMedium,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(color: Colors.grey),
+                child: Text(
+                  AppLocalizations.of(context)?.cancel ?? 'Cancel',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.hintColor,
+                  ),
                 ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Restored default categories'),
-                      backgroundColor: Colors.green,
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)?.success ?? 'Success',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      backgroundColor: theme.colorScheme.secondary,
                     ),
                   );
                 },
-                child: const Text(
+                child: Text(
                   'Restore',
-                  style: TextStyle(color: Colors.red),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
                 ),
               ),
             ],
           ),
+    );
+  }
+
+  Widget _buildCategoryListItem(Category category) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tileColor: theme.cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
+                theme.colorScheme.primary.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            IconMapping.stringToIcon(category.icon),
+            color: ColorUtils.parseColor(category.color),
+            size: 24,
+          ),
+        ),
+        title: Text(
+          category.name,
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        subtitle: Text(
+          category.type == 'income' 
+              ? (AppLocalizations.of(context)?.income ?? 'Income')
+              : (AppLocalizations.of(context)?.expense ?? 'Expense'),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.hintColor,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: theme.hintColor,
+          size: 16,
+        ),
+        onTap: () => _onCategorySelected(category),
+      ),
+    );
+  }
+
+  Widget _buildAddListItem() {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tileColor: theme.cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: theme.primaryColor.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.add,
+            color: theme.primaryColor,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          l10n?.manageCategory ?? 'Manage categories',
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            color: theme.primaryColor,
+          ),
+        ),
+        subtitle: Text(
+          'Add new category',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.hintColor,
+          ),
+        ),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: theme.primaryColor,
+          size: 16,
+        ),
+        onTap: () => _showAddCategoryDialog(),
+      ),
     );
   }
 }

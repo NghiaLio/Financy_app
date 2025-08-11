@@ -157,12 +157,20 @@ class _WalletState extends State<Wallet> {
   }) {
     final theme = Theme.of(context);
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
+      onTap: () async {
+        await Navigator.pushNamed(
           context,
           '/add',
           arguments: {'transaction': transaction, 'fromScreen': 'wallet'},
         );
+        // Refresh transactions for the current account after returning
+        final String? accountIdToRefresh = currentAccountId ??
+            context.read<ManageMoneyCubit>().listAccounts?.first.id;
+        if (accountIdToRefresh != null && accountIdToRefresh.isNotEmpty) {
+          context
+              .read<TransactionCubit>()
+              .fetchTransactionsByAccount(accountIdToRefresh);
+        }
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 16),

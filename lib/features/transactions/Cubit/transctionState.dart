@@ -41,8 +41,12 @@ class TransactionState {
     status: TransactionStateStatus.error,
   );
 
-  factory TransactionState.success() => TransactionState(
-    transactionsList: {},
+
+  // Success state that preserves current transactions
+  factory TransactionState.successWith(
+    Map<DateTime, List<Transactionsmodels>> transactions,
+  ) => TransactionState(
+    transactionsList: transactions,
     errorMessage: null,
     status: TransactionStateStatus.success,
   );
