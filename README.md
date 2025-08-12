@@ -59,7 +59,7 @@ graph TD
     API --> DB
     UI --> SecureStore
     GoogleAuth --> Auth
-
+```
 ### 🔐 Xác thực & token
 - Đăng nhập bằng Google → lấy idToken → gửi backend → nhận accessToken
 - accessToken được lưu bằng flutter_secure_storage
@@ -117,4 +117,5 @@ flutter run
 📌 Ghi chú:
 - App hiện tại đang ở giai đoạn 1: CRUD + Auth
 - Giai đoạn 2: thêm sync, ngân hàng, báo cáo nâng cao
+
 
