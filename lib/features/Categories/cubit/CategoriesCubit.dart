@@ -1,5 +1,6 @@
 // ignore_for_file: file_names
 
+import 'package:financy_ui/core/constants/icons.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';
@@ -13,9 +14,26 @@ class Categoriescubit extends Cubit<CategoriesState> {
     emit(CategoriesState.loading());
     try {
       final categories = await _categorierepo.getCategories();
+      if (categories.isEmpty) {
+        await addDefaultCategory(defaultExpenseCategories);
+        await addDefaultCategory(defaultIncomeCategories);
+
+        emit(CategoriesState.loaded(defaultExpenseCategories, defaultIncomeCategories));
+        return;
+      }
       final categoriesExpense = categories.where((c) => c.type == 'expense').toList();
       final categoriesIncome = categories.where((c) => c.type == 'income').toList();
       emit(CategoriesState.loaded(categoriesExpense, categoriesIncome));
+    } catch (e) {
+      emit(CategoriesState.failure(e.toString()));
+    }
+  }
+
+  Future<void> addDefaultCategory(List<Category> listDefaultCategory) async {
+    try {
+      for (var category in listDefaultCategory) {
+        await _categorierepo.addCategory(category);
+      }
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
     }

@@ -23,8 +23,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   late TabController _tabController;
   late bool _isGridView; // Toggle between grid and list view
 
-  List<Category> expenseCategories = defaultExpenseCategories;
-  List<Category> incomeCategories = defaultIncomeCategories;
+  List<Category> expenseCategories = [];
+  List<Category> incomeCategories = [];
 
   @override
   void initState() {
@@ -32,6 +32,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     _tabController = TabController(length: 2, vsync: this);
     // Load view mode from settings
     _isGridView = SettingsService.getCategoryViewMode();
+    context.read<Categoriescubit>().loadCategories();
   }
 
   @override
@@ -74,22 +75,26 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
         ),
       ),
       body: BlocConsumer<Categoriescubit, CategoriesState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state.status == CategoriesStatus.success) {
-            setState(() {
-              expenseCategories.addAll(state.categoriesExpense);
-              incomeCategories.addAll(state.categoriesIncome);
-            });
+            expenseCategories = state.categoriesExpense;
+            incomeCategories = state.categoriesIncome;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(l10n?.success ?? 'Success', style: theme.textTheme.bodyMedium),
+                content: Text(
+                  l10n?.success ?? 'Success',
+                  style: theme.textTheme.bodyMedium,
+                ),
                 backgroundColor: theme.colorScheme.secondary,
               ),
             );
           } else if (state.status == CategoriesStatus.failure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(l10n?.error ?? 'Error', style: theme.textTheme.bodyMedium),
+                content: Text(
+                  l10n?.error ?? 'Error',
+                  style: theme.textTheme.bodyMedium,
+                ),
                 backgroundColor: theme.colorScheme.error,
               ),
             );
@@ -108,18 +113,20 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
               ),
             );
           }
-          expenseCategories.addAll(state.categoriesExpense);
-          incomeCategories.addAll(state.categoriesIncome);
+
+          expenseCategories = state.categoriesExpense;
+          incomeCategories = state.categoriesIncome;
+
           return Column(
             children: [
               Expanded(
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _isGridView 
+                    _isGridView
                         ? _buildCategoryGrid(expenseCategories)
                         : _buildCategoryList(expenseCategories),
-                    _isGridView 
+                    _isGridView
                         ? _buildCategoryGrid(incomeCategories)
                         : _buildCategoryList(incomeCategories),
                   ],
@@ -212,9 +219,9 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
             const SizedBox(height: 8),
             Text(
               category.name,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -246,13 +253,17 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle, color: Theme.of(context).primaryColor, size: 50),
+            Icon(
+              Icons.add_circle,
+              color: Theme.of(context).primaryColor,
+              size: 50,
+            ),
             const SizedBox(height: 8),
             Text(
               l10n?.manageCategory ?? 'Manage categories',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -299,7 +310,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                 ListTile(
                   leading: Icon(Icons.edit, color: theme.iconTheme.color),
                   title: Text(
-                    AppLocalizations.of(context)?.manageCategory ?? 'Manage categories',
+                    AppLocalizations.of(context)?.manageCategory ??
+                        'Manage categories',
                     style: theme.textTheme.bodyLarge,
                   ),
                   onTap: () {
@@ -308,10 +320,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                   },
                 ),
                 ListTile(
-                  leading: Icon(
-                    Icons.restore,
-                    color: theme.iconTheme.color,
-                  ),
+                  leading: Icon(Icons.restore, color: theme.iconTheme.color),
                   title: Text(
                     'Restore Default',
                     style: theme.textTheme.bodyLarge,
@@ -351,10 +360,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
       builder:
           (context) => AlertDialog(
             backgroundColor: theme.cardColor,
-            title: Text(
-              'Restore Default',
-              style: theme.textTheme.titleLarge,
-            ),
+            title: Text('Restore Default', style: theme.textTheme.titleLarge),
             content: Text(
               'Do you want to restore all categories to default?',
               style: theme.textTheme.bodyMedium,
@@ -401,14 +407,13 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         tileColor: theme.cardColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         leading: Container(
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
+            color:
+                ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
                 theme.colorScheme.primary.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
@@ -425,12 +430,10 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           ),
         ),
         subtitle: Text(
-          category.type == 'income' 
+          category.type == 'income'
               ? (AppLocalizations.of(context)?.income ?? 'Income')
               : (AppLocalizations.of(context)?.expense ?? 'Expense'),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.hintColor,
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,
@@ -450,9 +453,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         tileColor: theme.cardColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         leading: Container(
           width: 48,
           height: 48,
@@ -460,11 +461,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
             color: theme.primaryColor.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(
-            Icons.add,
-            color: theme.primaryColor,
-            size: 24,
-          ),
+          child: Icon(Icons.add, color: theme.primaryColor, size: 24),
         ),
         title: Text(
           l10n?.manageCategory ?? 'Manage categories',
@@ -475,9 +472,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
         ),
         subtitle: Text(
           'Add new category',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.hintColor,
-          ),
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,
