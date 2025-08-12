@@ -9,9 +9,8 @@
 - Flutter 3.x
 - Dio (API client)
 - Firebase Auth (Google Sign-in)
-- flutter_secure_storage (lưu token)
 - Bloc/Cubit (State management)
-- Hive / SQLite (dữ liệu offline)
+- Hive (dữ liệu offline, dữ liệu key value)
 
 ---
 
@@ -25,11 +24,41 @@ lib/
 │   ├── auth/
 │   ├── accounts/
 │   ├── transactions/
-│   └── budgets/
+│   └── categories/
 └── widgets/
 ```
 
 ---
+
+### 🏗️ Kiến trúc hệ thống
+ ```mermaid
+graph TD
+    subgraph "📱 Flutter App"
+        UI[UI Layer]
+        Cubit[Bloc/Cubit State Management]
+        LocalDB[Hive/SQLite]
+        SecureStore[flutter_secure_storage]
+        DioClient[Dio HTTP Client]
+    end
+
+    subgraph "☁️ Backend API"
+        API[REST API - Node.js/NestJS]
+        Auth[JWT Auth Service]
+        DB[(PostgreSQL/MongoDB)]
+    end
+
+    subgraph "🔹 Firebase"
+        GoogleAuth[Google Sign-In]
+    end
+
+    UI --> Cubit
+    Cubit --> LocalDB
+    Cubit --> DioClient
+    DioClient --> API
+    API --> Auth
+    API --> DB
+    UI --> SecureStore
+    GoogleAuth --> Auth
 
 ### 🔐 Xác thực & token
 - Đăng nhập bằng Google → lấy idToken → gửi backend → nhận accessToken
@@ -54,10 +83,10 @@ void setToken(String? token) {
 - [x] Quản lý trạng thái auth (cubit)
 - [x] CRUD Account (hiện tại là thủ công)
 - [x] Giao diện account + chi tiết + xoá/sửa
-- [ ] Transaction list + add
-- [ ] Budget
+- [x] Transaction list + add
+- [x] Categories CRUD
 - [ ] Dashboard báo cáo
-- [ ] Offline mode (guest)
+- [x] Offline mode (guest)
 - [ ] Tự động sync khi login lại
 
 ---
@@ -79,8 +108,6 @@ flutter run
 ---
 
 ### ⏳ TODO tiếp theo
-- [ ] Transaction CRUD
-- [ ] Thêm category
 - [ ] Báo cáo tổng thu/chi
 - [ ] Tự động refresh token
 - [ ] Tích hợp ngân hàng sau
@@ -90,3 +117,4 @@ flutter run
 📌 Ghi chú:
 - App hiện tại đang ở giai đoạn 1: CRUD + Auth
 - Giai đoạn 2: thêm sync, ngân hàng, báo cáo nâng cao
+
