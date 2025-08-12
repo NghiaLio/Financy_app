@@ -540,7 +540,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       );
       // updateCategory
       if (index != -1) {
-        await context.read<Categoriescubit>().updateCategory(index, category!);
+        await context.read<Categoriescubit>().updateCategory(index, new_category);
       } else {
         final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(

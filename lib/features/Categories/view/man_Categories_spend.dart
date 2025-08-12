@@ -74,6 +74,13 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddCategoryDialog(),
+        backgroundColor: theme.primaryColor,
+        foregroundColor: theme.colorScheme.onPrimary,
+        elevation: 6,
+        child: Icon(Icons.add, size: 28),
+      ),
       body: BlocConsumer<Categoriescubit, CategoriesState>(
         listener: (context, state) async {
           if (state.status == CategoriesStatus.success) {
@@ -124,11 +131,11 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                   controller: _tabController,
                   children: [
                     _isGridView
-                        ? _buildCategoryGrid(expenseCategories)
-                        : _buildCategoryList(expenseCategories),
+                        ? _buildCategoryGridGrouped(expenseCategories)
+                        : _buildCategoryListGrouped(expenseCategories),
                     _isGridView
-                        ? _buildCategoryGrid(incomeCategories)
-                        : _buildCategoryList(incomeCategories),
+                        ? _buildCategoryGridGrouped(incomeCategories)
+                        : _buildCategoryListGrouped(incomeCategories),
                   ],
                 ),
               ),
@@ -140,42 +147,111 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   }
 
   Widget _buildCategoryGrid(List<Category> categories) {
-    // Add the "+" button at the end
-    final categoriesWithAdd = [...categories];
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 1.0,
+          crossAxisCount: 4, // Tăng từ 3 lên 4 items trên 1 hàng
+          crossAxisSpacing: 8, // Giảm từ 12 xuống 8 để vừa 4 items
+          mainAxisSpacing: 8,  // Giảm từ 12 xuống 8 để vừa 4 items
+          childAspectRatio: 1.0, // Giảm từ 1.2 xuống 1.0 để items vuông hơn
         ),
-        itemCount: categoriesWithAdd.length + 1, // +1 for add button
+        itemCount: categories.length,
         itemBuilder: (context, index) {
-          if (index == categoriesWithAdd.length) {
-            return _buildAddButton();
-          }
-          return _buildCategoryItem(categoriesWithAdd[index]);
+          return _buildCategoryItem(categories[index]);
         },
       ),
     );
   }
 
   Widget _buildCategoryList(List<Category> categories) {
-    // Add the "+" button at the end
-    final categoriesWithAdd = [...categories];
-
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView.builder(
-        itemCount: categoriesWithAdd.length + 1, // +1 for add button
+        itemCount: categories.length,
         itemBuilder: (context, index) {
-          if (index == categoriesWithAdd.length) {
-            return _buildAddListItem();
-          }
-          return _buildCategoryListItem(categoriesWithAdd[index]);
+          return _buildCategoryListItem(categories[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryGridGrouped(List<Category> categories) {
+    final groupedCategories = IconMapping.groupCategoriesByType(categories);
+    
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView.builder(
+        itemCount: groupedCategories.length,
+        itemBuilder: (context, index) {
+          final groupEntry = groupedCategories.entries.elementAt(index);
+          final groupName = groupEntry.key;
+          final groupCategories = groupEntry.value;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                child: Text(
+                  groupName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 4, // Tăng từ 3 lên 4 items trên 1 hàng
+                  crossAxisSpacing: 8, // Giảm từ 12 xuống 8 để vừa 4 items
+                  mainAxisSpacing: 8,  // Giảm từ 12 xuống 8 để vừa 4 items
+                  childAspectRatio: 1.0, // Giảm từ 1.2 xuống 1.0 để items vuông hơn
+                ),
+                itemCount: groupCategories.length,
+                itemBuilder: (context, gridIndex) {
+                  return _buildCategoryItem(groupCategories[gridIndex]);
+                },
+              ),
+              SizedBox(height: 16),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+    Widget _buildCategoryListGrouped(List<Category> categories) {
+    final groupedCategories = IconMapping.groupCategoriesByType(categories);
+    
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ListView.builder(
+        itemCount: groupedCategories.length,
+        itemBuilder: (context, index) {
+          final groupEntry = groupedCategories.entries.elementAt(index);
+          final groupName = groupEntry.key;
+          final groupCategories = groupEntry.value;
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                child: Text(
+                  groupName,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+              ...groupCategories.map((category) => _buildCategoryListItem(category)),
+              SizedBox(height: 8),
+            ],
+          );
         },
       ),
     );
@@ -202,8 +278,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 50,
-              height: 50,
+              width: 40, // Giảm từ 50 xuống 40 (20% giảm)
+              height: 40, // Giảm từ 50 xuống 40 (20% giảm)
               decoration: BoxDecoration(
                 color:
                     ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
@@ -213,7 +289,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
               child: Icon(
                 IconMapping.stringToIcon(category.icon),
                 color: ColorUtils.parseColor(category.color),
-                size: 28,
+                size: 22, // Giảm từ 28 xuống 22 (21% giảm)
               ),
             ),
             const SizedBox(height: 8),
@@ -232,48 +308,15 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-  Widget _buildAddButton() {
-    final l10n = AppLocalizations.of(context);
-    return GestureDetector(
-      onTap: () {
-        _showAddCategoryDialog();
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.add_circle,
-              color: Theme.of(context).primaryColor,
-              size: 50,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n?.manageCategory ?? 'Manage categories',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  void _onCategorySelected(Category category) {
-    Navigator.pushNamed(context, '/editCategory', arguments: category);
+
+  void _onCategorySelected(Category category) async {
+    final result = await Navigator.pushNamed(context, '/editCategory', arguments: category);
+    
+    // Refresh categories if there was an edit/add/delete action
+    if (result != null && result is Map<String, dynamic>) {
+      context.read<Categoriescubit>().loadCategories();
+    }
   }
 
   void _showOptionsMenu(BuildContext context, ThemeData theme) {
@@ -336,8 +379,13 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-  void _showAddCategoryDialog() {
-    Navigator.pushNamed(context, '/editCategory');
+  void _showAddCategoryDialog() async {
+    final result = await Navigator.pushNamed(context, '/editCategory');
+    
+    // Refresh categories if there was an add action
+    if (result != null && result is Map<String, dynamic>) {
+      context.read<Categoriescubit>().loadCategories();
+    }
   }
 
   void _showEditCategoriesDialog() {
@@ -409,8 +457,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
         tileColor: theme.cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         leading: Container(
-          width: 48,
-          height: 48,
+          width: 43, // Giảm từ 48 xuống 43 (10% giảm)
+          height: 43, // Giảm từ 48 xuống 43 (10% giảm)
           decoration: BoxDecoration(
             color:
                 ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
@@ -420,7 +468,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           child: Icon(
             IconMapping.stringToIcon(category.icon),
             color: ColorUtils.parseColor(category.color),
-            size: 24,
+            size: 22, // Giảm từ 24 xuống 22 (8% giảm)
           ),
         ),
         title: Text(
@@ -445,42 +493,5 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-  Widget _buildAddListItem() {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        tileColor: theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        leading: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            color: theme.primaryColor.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.add, color: theme.primaryColor, size: 24),
-        ),
-        title: Text(
-          l10n?.manageCategory ?? 'Manage categories',
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: theme.primaryColor,
-          ),
-        ),
-        subtitle: Text(
-          'Add new category',
-          style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          color: theme.primaryColor,
-          size: 16,
-        ),
-        onTap: () => _showAddCategoryDialog(),
-      ),
-    );
-  }
+
 }

@@ -59,19 +59,9 @@ class Categoriescubit extends Cubit<CategoriesState> {
   Future<void> updateCategory(int index, Category category) async {
     try {
       await _categorierepo.updateCategory(index, category);
-      if (category.type == 'income') {
-        final categoriesIncome = [...state.categoriesIncome]
-          ..removeAt(index)
-          ..add(category);
-        emit(CategoriesState.success(state.categoriesExpense, categoriesIncome));
-        return;
-      }else{
-          final categoriesExpense =
-            [...state.categoriesExpense]
-              ..removeAt(index)
-              ..add(category);
-        emit(CategoriesState.success(categoriesExpense, state.categoriesIncome));
-      }
+      
+      // Reload categories to get the updated state
+      await loadCategories();
       
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));

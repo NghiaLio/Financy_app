@@ -35,7 +35,13 @@ class Categorierepo {
   }
 
   Future<int> getIndexOfCategory(Category category) async {
-    return _localBox.values.toList().indexOf(category);
+    final categories = _localBox.values.toList();
+    for (int i = 0; i < categories.length; i++) {
+      if (categories[i].id == category.id) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   Future<void> deleteCategory(int index) async {

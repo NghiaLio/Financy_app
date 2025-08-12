@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:financy_ui/core/constants/icons.dart';
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 
 class IconMapping {
   /// Convert IconData → String
@@ -19,8 +20,14 @@ class IconMapping {
     return iconMap[key] ?? Icons.more_horiz;
   }
 
-  static Map<String, List<IconData>> groupIconsByCategory() {
-    final Map<String, List<IconData>> grouped = {
+
+
+  /// Generic method to group items by icon category
+  static Map<String, List<T>> _groupByIconCategory<T>(
+    List<T> items,
+    String Function(T) getIconName,
+  ) {
+    final Map<String, List<T>> grouped = {
       'Home & Utilities': [],
       'Food & Drink': [],
       'Shopping': [],
@@ -33,8 +40,10 @@ class IconMapping {
       'Other': [],
     };
 
-    iconMap.forEach((name, icon) {
-      switch (name) {
+    for (var item in items) {
+      String iconName = getIconName(item);
+      
+      switch (iconName) {
         // Home & Utilities
         case 'home':
         case 'local_grocery_store':
@@ -46,7 +55,7 @@ class IconMapping {
         case 'access_time':
         case 'baby_changing_station':
         case 'build':
-          grouped['Home & Utilities']!.add(icon);
+          grouped['Home & Utilities']!.add(item);
           break;
 
         // Food & Drink
@@ -56,14 +65,14 @@ class IconMapping {
         case 'wine_bar':
         case 'local_bar':
         case 'cake':
-          grouped['Food & Drink']!.add(icon);
+          grouped['Food & Drink']!.add(item);
           break;
 
         // Shopping
         case 'shopping_cart':
         case 'card_giftcard':
         case 'redeem':
-          grouped['Shopping']!.add(icon);
+          grouped['Shopping']!.add(item);
           break;
 
         // Entertainment & Travel
@@ -76,26 +85,26 @@ class IconMapping {
         case 'camera_alt':
         case 'event':
         case 'luggage':
-          grouped['Entertainment & Travel']!.add(icon);
+          grouped['Entertainment & Travel']!.add(item);
           break;
 
         // Education
         case 'school':
         case 'book':
         case 'school_income':
-          grouped['Education']!.add(icon);
+          grouped['Education']!.add(item);
           break;
 
         // Health & Fitness
         case 'fitness_center':
         case 'healing':
         case 'favorite':
-          grouped['Health & Fitness']!.add(icon);
+          grouped['Health & Fitness']!.add(item);
           break;
 
         // Transport
         case 'directions_car':
-          grouped['Transport']!.add(icon);
+          grouped['Transport']!.add(item);
           break;
 
         // Art & Nature
@@ -105,7 +114,7 @@ class IconMapping {
         case 'lightbulb':
         case 'wb_sunny':
         case 'nightlight_round':
-          grouped['Art & Nature']!.add(icon);
+          grouped['Art & Nature']!.add(item);
           break;
 
         // Finance & Business
@@ -119,16 +128,41 @@ class IconMapping {
         case 'work':
         case 'work_outline':
         case 'refresh':
-          grouped['Finance & Business']!.add(icon);
+          grouped['Finance & Business']!.add(item);
           break;
 
         // Other
         default:
-          grouped['Other']!.add(icon);
+          grouped['Other']!.add(item);
           break;
       }
-    });
+    }
 
+    // Remove empty groups
+    grouped.removeWhere((key, value) => value.isEmpty);
+    
     return grouped;
+  }
+
+  /// Group icons by category (original method, now uses generic method)
+  static Map<String, List<IconData>> groupIconsByCategory() {
+    final groupedEntries = _groupByIconCategory<MapEntry<String, IconData>>(
+      iconMap.entries.toList(),
+      (entry) => entry.key,
+    );
+    
+    // Convert MapEntry to IconData
+    return groupedEntries.map((key, value) => MapEntry(
+      key,
+      value.map((entry) => entry.value).toList(),
+    ));
+  }
+
+  /// Group categories by their type and icon category
+  static Map<String, List<Category>> groupCategoriesByType(List<Category> categories) {
+    return _groupByIconCategory<Category>(
+      categories,
+      (category) => category.icon,
+    );
   }
 }
