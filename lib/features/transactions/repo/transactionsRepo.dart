@@ -2,7 +2,7 @@
 
 // import 'package:financy_ui/features/Account/models/money_source.dart';
 // import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 import 'package:hive/hive.dart';
 
 class TransactionsRepo {

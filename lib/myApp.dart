@@ -1,9 +1,9 @@
 // ignore_for_file: file_names
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
-import 'package:financy_ui/features/transactions/view/add.dart';
+import 'package:financy_ui/features/Transactions/view/add.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
-import 'package:financy_ui/features/transactions/view/home.dart';
+import 'package:financy_ui/features/Transactions/view/home.dart';
 import 'package:financy_ui/settings.dart';
 import 'package:financy_ui/statiscal.dart';
 import 'package:financy_ui/features/Transactions/view/wallet.dart';

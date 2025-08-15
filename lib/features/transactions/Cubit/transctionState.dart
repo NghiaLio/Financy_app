@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 
 enum TransactionStateStatus { initial, loading, loaded, success, error }
 
@@ -41,8 +41,12 @@ class TransactionState {
     status: TransactionStateStatus.error,
   );
 
-  factory TransactionState.success() => TransactionState(
-    transactionsList: {},
+
+  // Success state that preserves current transactions
+  factory TransactionState.successWith(
+    Map<DateTime, List<Transactionsmodels>> transactions,
+  ) => TransactionState(
+    transactionsList: transactions,
     errorMessage: null,
     status: TransactionStateStatus.success,
   );

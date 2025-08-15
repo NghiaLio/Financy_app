@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:developer';
 
@@ -7,8 +7,8 @@ import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
-import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/localText.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -157,12 +157,20 @@ class _WalletState extends State<Wallet> {
   }) {
     final theme = Theme.of(context);
     return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(
+      onTap: () async {
+        await Navigator.pushNamed(
           context,
           '/add',
           arguments: {'transaction': transaction, 'fromScreen': 'wallet'},
         );
+        // Refresh transactions for the current account after returning
+        final String? accountIdToRefresh = currentAccountId ??
+            context.read<ManageMoneyCubit>().listAccounts?.first.id;
+        if (accountIdToRefresh != null && accountIdToRefresh.isNotEmpty) {
+          context
+              .read<TransactionCubit>()
+              .fetchTransactionsByAccount(accountIdToRefresh);
+        }
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 16),

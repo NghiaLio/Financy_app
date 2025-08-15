@@ -5,6 +5,7 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 class Authrepo {
 
@@ -35,7 +36,7 @@ class Authrepo {
     final user = await ApiService().get('/google/user');
     //save user to local storage
     await Hive.box<UserModel>('userBox').put('currentUser', UserModel.fromJson(user.data));
-    Hive.box('settings').put('app_state', true);
+    await SettingsService.setAppState(true);
   }
 
   Future<Map<String,dynamic>> authenticated() async{
@@ -55,7 +56,7 @@ class Authrepo {
   //login with no account
   Future<void> loginWithNoAccount(UserModel guestUser) async {
     await Hive.box<UserModel>('userBox').put('currentUser', guestUser);
-    Hive.box('settings').put('app_state', true);
+    await SettingsService.setAppState(true);
   }
 
 }

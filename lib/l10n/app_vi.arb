@@ -62,6 +62,10 @@
   "linkBankDialogContent": "Chức năng này sẽ được phát triển sau.",
   "close": "Đóng",
   "compareExpenseTypes": "So sánh các loại chi tiêu",
+  "compareIncomeTypes": "So sánh các loại thu nhập",
+  "selectPeriod": "Chọn kỳ",
+  "monthly": "Hàng tháng",
+  "weekly": "Hàng tuần",
   "language": "Ngôn ngữ",
   "manageCategory": "Quản lý thể loại",
   "systemTheme": "Giao diện hệ thống",
@@ -153,7 +157,11 @@
   "medical": "Y tế",
   "transport": "Di chuyển",
   "waterBill": "Tiền nước",
-  "noTransactions":"Không có giao dịch nào."
+  "noTransactions":"Không có giao dịch nào.",
+  "done":"Hoàn tất",
+  "restore": "Khôi phục",
+  "restoreDefault": "Khôi phục mặc định",
+  "restoreDefaultConfirm": "Bạn có muốn khôi phục tất cả danh mục về mặc định không? Điều này sẽ xóa tất cả danh mục tùy chỉnh."
 }
 
 

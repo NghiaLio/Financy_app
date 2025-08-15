@@ -1,8 +1,8 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
-import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
+import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/repo/transactionsRepo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TransactionCubit extends Cubit<TransactionState> {
@@ -49,8 +49,12 @@ class TransactionCubit extends Cubit<TransactionState> {
         }
       }
       emit(TransactionState.loaded(updatedMap));
-
-      emit(TransactionState.success());
+      // Keep current data in success so listeners can react without losing list
+      emit(TransactionState(
+        transactionsList: updatedMap,
+        errorMessage: null,
+        status: TransactionStateStatus.success,
+      ));
 
       // Optionally, fetch the latest transactions from the repository instead of updating the map manually:
     } catch (e) {
@@ -74,7 +78,11 @@ class TransactionCubit extends Cubit<TransactionState> {
         updatedMap[txDate] = updatedList;
       }
       emit(TransactionState.loaded(updatedMap));
-      emit(TransactionState.success());
+      emit(TransactionState(
+        transactionsList: updatedMap,
+        errorMessage: null,
+        status: TransactionStateStatus.success,
+      ));
     } catch (e) {
       emit(TransactionState.error(e.toString()));
     }
@@ -92,7 +100,11 @@ class TransactionCubit extends Cubit<TransactionState> {
       // Remove any empty lists from the map
       updatedMap.removeWhere((date, txList) => txList.isEmpty);
       emit(TransactionState.loaded(updatedMap));
-      emit(TransactionState.success());
+      emit(TransactionState(
+        transactionsList: updatedMap,
+        errorMessage: null,
+        status: TransactionStateStatus.success,
+      ));
     } catch (e) {
       emit(TransactionState.error(e.toString()));
     }
