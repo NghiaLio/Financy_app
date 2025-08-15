@@ -222,7 +222,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     final groupedCategories = IconMapping.groupCategoriesByType(categories);
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 16.0),
       child: ListView.builder(
         itemCount: groupedCategories.length,
         itemBuilder: (context, index) {
@@ -236,7 +236,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
               Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 12,
-                  horizontal: 4,
+                  horizontal: 12,
                 ),
                 child: Text(
                   groupName,
@@ -275,8 +275,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           ],
         ),
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            _buildDeleteButton(category),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -313,6 +313,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                 ],
               ),
             ),
+            _buildDeleteButton(category),
           ],
         ),
       ),
@@ -377,7 +378,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                 ListTile(
                   leading: Icon(Icons.restore, color: theme.iconTheme.color),
                   title: Text(
-                    'Restore Default',
+                    'Khôi phục mặc định',
                     style: theme.textTheme.bodyLarge,
                   ),
                   onTap: () {
@@ -408,48 +409,55 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
 
   void _showRestoreDefaultDialog() {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: theme.cardColor,
-            title: Text('Restore Default', style: theme.textTheme.titleLarge),
-            content: Text(
-              'Do you want to restore all categories to default?',
-              style: theme.textTheme.bodyMedium,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        title: Text(
+          l10n?.restoreDefault ?? 'Restore Default',
+          style: theme.textTheme.titleLarge,
+        ),
+        content: Text(
+          l10n?.restoreDefaultConfirm ?? 'Are you sure you want to restore all categories to default? This will delete all custom categories.',
+          style: theme.textTheme.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              l10n?.cancel ?? 'Cancel',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.hintColor,
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(
-                  AppLocalizations.of(context)?.cancel ?? 'Cancel',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.hintColor,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        AppLocalizations.of(context)?.success ?? 'Success',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      backgroundColor: theme.colorScheme.secondary,
-                    ),
-                  );
-                },
-                child: Text(
-                  'Restore',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-              ),
-            ],
           ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await context.read<Categoriescubit>().restoreDefaultCategories().then((value) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(l10n?.success ?? 'Success'),
+                    backgroundColor: theme.primaryColor,
+                  ),
+                );
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              l10n?.restore ?? 'Restore',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -502,10 +510,10 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   Widget _buildCategoryListItem(Category category) {
     final theme = Theme.of(context);
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12, top: 8, left: 8, right: 8),
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
-          _buildDeleteButton(category),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -551,6 +559,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
             ),
             onTap: () => isEdit ? null : _onCategorySelected(category),
           ),
+          _buildDeleteButton(category),
         ],
       ),
     );
@@ -559,11 +568,36 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   Widget _buildDeleteButton(Category category) {
     return isEdit
         ? Positioned(
-          child: GestureDetector(
-            onTap: () => _showDialogConfirmDelete(category),
-            child: Icon(Icons.cancel, color: AppColors.negativeRed),
-          ),
-        )
+            top: -5,
+            right: -5,
+            child: GestureDetector(
+              onTap: () => _showDialogConfirmDelete(category),
+              child: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: AppColors.negativeRed,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 3,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.white,
+                  size: 14,
+                ),
+              ),
+            ),
+          )
         : Container();
   }
 }

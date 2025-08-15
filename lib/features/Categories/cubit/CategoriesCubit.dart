@@ -95,4 +95,26 @@ class Categoriescubit extends Cubit<CategoriesState> {
   Future<int> getIndexOfCategory(Category category) async {
     return await _categorierepo.getIndexOfCategory(category);
   }
+
+  Future<void> restoreDefaultCategories() async {
+    emit(CategoriesState.loading());
+    try {
+      // Clear all existing categories
+      await _categorierepo.clearAllCategories();
+      
+      // Add default categories
+      await addDefaultCategory(defaultExpenseCategories);
+      await addDefaultCategory(defaultIncomeCategories);
+      
+      // Emit loaded state with default categories
+      emit(
+        CategoriesState.loaded(
+          defaultExpenseCategories,
+          defaultIncomeCategories,
+        ),
+      );
+    } catch (e) {
+      emit(CategoriesState.failure(e.toString()));
+    }
+  }
 }

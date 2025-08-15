@@ -10,15 +10,15 @@ import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';
 import 'package:financy_ui/features/Categories/view/edit_categories.dart';
 import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Users/Views/profile.dart';
-import 'package:financy_ui/features/transactions/view/add.dart';
+import 'package:financy_ui/features/Transactions/view/add.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
 // ignore: unused_import
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
-import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/repo/transactionsRepo.dart';
 import 'package:financy_ui/firebase_options.dart';
 import 'package:financy_ui/interfaceSettings.dart';
 import 'package:financy_ui/l10n/l10n.dart';

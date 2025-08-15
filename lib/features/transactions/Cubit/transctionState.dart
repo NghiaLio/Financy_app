@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 
 enum TransactionStateStatus { initial, loading, loaded, success, error }
 

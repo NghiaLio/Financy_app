@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'spending.dart';
 import 'income.dart';
 
@@ -32,11 +33,13 @@ class _StatiscalState extends State<Statiscal>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    
     return Column(
       children: [
         // Tab Bar
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TabBar(
             controller: _tabController,
             indicatorColor: theme.primaryColor,
@@ -46,7 +49,10 @@ class _StatiscalState extends State<Statiscal>
             labelStyle: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w600,
             ),
-            tabs: [Tab(text: 'Expenses'), Tab(text: 'Income')],
+            tabs: [
+              Tab(text: l10n?.expense ?? 'Expenses'),
+              Tab(text: l10n?.income ?? 'Income'),
+            ],
           ),
         ),
 
@@ -56,9 +62,9 @@ class _StatiscalState extends State<Statiscal>
             controller: _tabController,
             children: [
               // Expenses tab
-              Spending(),
+              const Spending(),
               // Income tab
-              Income(),
+              const Income(),
             ],
           ),
         ),

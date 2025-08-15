@@ -1,8 +1,8 @@
 // ignore_for_file: file_names
 
-import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
-import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
-import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
+import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
+import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/Transactions/repo/transactionsRepo.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class TransactionCubit extends Cubit<TransactionState> {

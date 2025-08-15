@@ -203,7 +203,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              (_selectedType == 'income'
+              _selectedType == null ? '' : (_selectedType == 'income'
                       ? (AppLocalizations.of(context)?.income ?? 'Income')
                       : (AppLocalizations.of(context)?.expense ?? 'Expense'))
                   .toUpperCase(),

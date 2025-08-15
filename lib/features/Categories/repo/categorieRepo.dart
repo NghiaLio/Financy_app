@@ -51,4 +51,8 @@ class Categorierepo {
   Future<void> updateCategory(int index, Category category) async {
     await _localBox.putAt(index, category);
   }
+
+  Future<void> clearAllCategories() async {
+    await _localBox.clear();
+  }
 }
