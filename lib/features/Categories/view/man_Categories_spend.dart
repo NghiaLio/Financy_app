@@ -1,5 +1,6 @@
-// ignore_for_file: file_names, deprecated_member_use
-import 'package:financy_ui/core/constants/icons.dart';
+// ignore_for_file: file_names, deprecated_member_use, use_build_context_synchronously
+
+import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
@@ -25,6 +26,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
 
   List<Category> expenseCategories = [];
   List<Category> incomeCategories = [];
+
+  bool isEdit = false;
 
   @override
   void initState() {
@@ -55,12 +58,30 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          IconButton(
-            icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
-            onPressed: () {
-              _showOptionsMenu(context, theme);
-            },
-          ),
+          !isEdit
+              ? IconButton(
+                icon: Icon(Icons.more_vert, color: theme.iconTheme.color),
+                onPressed: () {
+                  _showOptionsMenu(context, theme);
+                },
+              )
+              : GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isEdit = false;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    l10n?.done ?? 'Done',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
         ],
         bottom: TabBar(
           controller: _tabController,
@@ -92,7 +113,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                   l10n?.success ?? 'Success',
                   style: theme.textTheme.bodyMedium,
                 ),
-                backgroundColor: theme.colorScheme.secondary,
+                backgroundColor: theme.primaryColor,
               ),
             );
           } else if (state.status == CategoriesStatus.failure) {
@@ -146,39 +167,9 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-  Widget _buildCategoryGrid(List<Category> categories) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: GridView.builder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4, // Tăng từ 3 lên 4 items trên 1 hàng
-          crossAxisSpacing: 8, // Giảm từ 12 xuống 8 để vừa 4 items
-          mainAxisSpacing: 8,  // Giảm từ 12 xuống 8 để vừa 4 items
-          childAspectRatio: 1.0, // Giảm từ 1.2 xuống 1.0 để items vuông hơn
-        ),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return _buildCategoryItem(categories[index]);
-        },
-      ),
-    );
-  }
-
-  Widget _buildCategoryList(List<Category> categories) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ListView.builder(
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return _buildCategoryListItem(categories[index]);
-        },
-      ),
-    );
-  }
-
   Widget _buildCategoryGridGrouped(List<Category> categories) {
     final groupedCategories = IconMapping.groupCategoriesByType(categories);
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView.builder(
@@ -187,12 +178,15 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           final groupEntry = groupedCategories.entries.elementAt(index);
           final groupName = groupEntry.key;
           final groupCategories = groupEntry.value;
-          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 4,
+                ),
                 child: Text(
                   groupName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -207,8 +201,9 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 4, // Tăng từ 3 lên 4 items trên 1 hàng
                   crossAxisSpacing: 8, // Giảm từ 12 xuống 8 để vừa 4 items
-                  mainAxisSpacing: 8,  // Giảm từ 12 xuống 8 để vừa 4 items
-                  childAspectRatio: 1.0, // Giảm từ 1.2 xuống 1.0 để items vuông hơn
+                  mainAxisSpacing: 8, // Giảm từ 12 xuống 8 để vừa 4 items
+                  childAspectRatio:
+                      1.0, // Giảm từ 1.2 xuống 1.0 để items vuông hơn
                 ),
                 itemCount: groupCategories.length,
                 itemBuilder: (context, gridIndex) {
@@ -223,9 +218,9 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-    Widget _buildCategoryListGrouped(List<Category> categories) {
+  Widget _buildCategoryListGrouped(List<Category> categories) {
     final groupedCategories = IconMapping.groupCategoriesByType(categories);
-    
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView.builder(
@@ -234,21 +229,26 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
           final groupEntry = groupedCategories.entries.elementAt(index);
           final groupName = groupEntry.key;
           final groupCategories = groupEntry.value;
-          
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 4,
+                ),
                 child: Text(
                   groupName,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: Theme.of(context).primaryColor,
-                    ),
                   ),
                 ),
-              ...groupCategories.map((category) => _buildCategoryListItem(category)),
+              ),
+              ...groupCategories.map(
+                (category) => _buildCategoryListItem(category),
+              ),
               SizedBox(height: 8),
             ],
           );
@@ -260,7 +260,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   Widget _buildCategoryItem(Category category) {
     return GestureDetector(
       onTap: () {
-        _onCategorySelected(category);
+        isEdit ? null : _onCategorySelected(category);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -274,33 +274,44 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
           children: [
-            Container(
-              width: 40, // Giảm từ 50 xuống 40 (20% giảm)
-              height: 40, // Giảm từ 50 xuống 40 (20% giảm)
-              decoration: BoxDecoration(
-                color:
-                    ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                shape: BoxShape.circle,
+            _buildDeleteButton(category),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 40, // Giảm từ 50 xuống 40 (20% giảm)
+                    height: 40, // Giảm từ 50 xuống 40 (20% giảm)
+                    decoration: BoxDecoration(
+                      color:
+                          ColorUtils.parseColor(
+                            category.color,
+                          )?.withOpacity(0.1) ??
+                          Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      IconMapping.stringToIcon(category.icon),
+                      color: ColorUtils.parseColor(category.color),
+                      size: 22, // Giảm từ 28 xuống 22 (21% giảm)
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    category.name,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              child: Icon(
-                IconMapping.stringToIcon(category.icon),
-                color: ColorUtils.parseColor(category.color),
-                size: 22, // Giảm từ 28 xuống 22 (21% giảm)
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              category.name,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -308,11 +319,13 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-
-
   void _onCategorySelected(Category category) async {
-    final result = await Navigator.pushNamed(context, '/editCategory', arguments: category);
-    
+    final result = await Navigator.pushNamed(
+      context,
+      '/editCategory',
+      arguments: category,
+    );
+
     // Refresh categories if there was an edit/add/delete action
     if (result != null && result is Map<String, dynamic>) {
       context.read<Categoriescubit>().loadCategories();
@@ -353,13 +366,12 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                 ListTile(
                   leading: Icon(Icons.edit, color: theme.iconTheme.color),
                   title: Text(
-                    AppLocalizations.of(context)?.manageCategory ??
-                        'Manage categories',
+                    AppLocalizations.of(context)?.edit ?? 'Edit categories',
                     style: theme.textTheme.bodyLarge,
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    _showEditCategoriesDialog();
+                    _editCategoriesDialog();
                   },
                 ),
                 ListTile(
@@ -381,24 +393,17 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
 
   void _showAddCategoryDialog() async {
     final result = await Navigator.pushNamed(context, '/editCategory');
-    
+
     // Refresh categories if there was an add action
     if (result != null && result is Map<String, dynamic>) {
       context.read<Categoriescubit>().loadCategories();
     }
   }
 
-  void _showEditCategoriesDialog() {
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          AppLocalizations.of(context)?.manageCategory ?? 'Manage categories',
-          style: theme.textTheme.bodyMedium,
-        ),
-        backgroundColor: theme.colorScheme.primary,
-      ),
-    );
+  void _editCategoriesDialog() {
+    setState(() {
+      isEdit = true;
+    });
   }
 
   void _showRestoreDefaultDialog() {
@@ -448,50 +453,117 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
+  void _showDialogConfirmDelete(Category category) async {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              AppLocalizations.of(context)?.deleteSource ?? 'Delete Source',
+            ),
+            content: Text(
+              AppLocalizations.of(
+                    context,
+                  )?.deleteSourceConfirm(category.name) ??
+                  'Are you sure you want to delete ${category.name}?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+              ),
+              ElevatedButton(
+                onPressed:
+                    () => {_deleteCategory(category), Navigator.pop(context)},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.negativeRed,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)?.delete ?? 'Delete',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+    );
+    // Close the dialog after action
+  }
+
+  void _deleteCategory(Category category) async {
+    final index = await context.read<Categoriescubit>().getIndexOfCategory(
+      category,
+    );
+    await context.read<Categoriescubit>().deleteCategory(index, category);
+  }
+
   Widget _buildCategoryListItem(Category category) {
     final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        tileColor: theme.cardColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        leading: Container(
-          width: 43, // Giảm từ 48 xuống 43 (10% giảm)
-          height: 43, // Giảm từ 48 xuống 43 (10% giảm)
-          decoration: BoxDecoration(
-            color:
-                ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
-                theme.colorScheme.primary.withOpacity(0.1),
-            shape: BoxShape.circle,
+      child: Stack(
+        children: [
+          _buildDeleteButton(category),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            tileColor: theme.cardColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            leading: Container(
+              width: 43, // Giảm từ 48 xuống 43 (10% giảm)
+              height: 43, // Giảm từ 48 xuống 43 (10% giảm)
+              decoration: BoxDecoration(
+                color:
+                    ColorUtils.parseColor(category.color)?.withOpacity(0.1) ??
+                    theme.colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                IconMapping.stringToIcon(category.icon),
+                color: ColorUtils.parseColor(category.color),
+                size: 22, // Giảm từ 24 xuống 22 (8% giảm)
+              ),
+            ),
+            title: Text(
+              category.name,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            subtitle: Text(
+              category.type == 'income'
+                  ? (AppLocalizations.of(context)?.income ?? 'Income')
+                  : (AppLocalizations.of(context)?.expense ?? 'Expense'),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.hintColor,
+              ),
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              color: theme.hintColor,
+              size: 16,
+            ),
+            onTap: () => isEdit ? null : _onCategorySelected(category),
           ),
-          child: Icon(
-            IconMapping.stringToIcon(category.icon),
-            color: ColorUtils.parseColor(category.color),
-            size: 22, // Giảm từ 24 xuống 22 (8% giảm)
-          ),
-        ),
-        title: Text(
-          category.name,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: Text(
-          category.type == 'income'
-              ? (AppLocalizations.of(context)?.income ?? 'Income')
-              : (AppLocalizations.of(context)?.expense ?? 'Expense'),
-          style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          color: theme.hintColor,
-          size: 16,
-        ),
-        onTap: () => _onCategorySelected(category),
+        ],
       ),
     );
   }
 
-
+  Widget _buildDeleteButton(Category category) {
+    return isEdit
+        ? Positioned(
+          child: GestureDetector(
+            onTap: () => _showDialogConfirmDelete(category),
+            child: Icon(Icons.cancel, color: AppColors.negativeRed),
+          ),
+        )
+        : Container();
+  }
 }

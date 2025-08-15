@@ -153,7 +153,8 @@
   "medical": "Y tế",
   "transport": "Di chuyển",
   "waterBill": "Tiền nước",
-  "noTransactions":"Không có giao dịch nào."
+  "noTransactions":"Không có giao dịch nào.",
+  "done":"Hoàn tất"
 }
 
 

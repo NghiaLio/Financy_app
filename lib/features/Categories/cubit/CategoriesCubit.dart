@@ -18,11 +18,18 @@ class Categoriescubit extends Cubit<CategoriesState> {
         await addDefaultCategory(defaultExpenseCategories);
         await addDefaultCategory(defaultIncomeCategories);
 
-        emit(CategoriesState.loaded(defaultExpenseCategories, defaultIncomeCategories));
+        emit(
+          CategoriesState.loaded(
+            defaultExpenseCategories,
+            defaultIncomeCategories,
+          ),
+        );
         return;
       }
-      final categoriesExpense = categories.where((c) => c.type == 'expense').toList();
-      final categoriesIncome = categories.where((c) => c.type == 'income').toList();
+      final categoriesExpense =
+          categories.where((c) => c.type == 'expense').toList();
+      final categoriesIncome =
+          categories.where((c) => c.type == 'income').toList();
       emit(CategoriesState.loaded(categoriesExpense, categoriesIncome));
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
@@ -44,13 +51,16 @@ class Categoriescubit extends Cubit<CategoriesState> {
       await _categorierepo.addCategory(category);
       if (category.type == 'income') {
         final categoriesIncome = [...state.categoriesIncome, category];
-        emit(CategoriesState.success(state.categoriesExpense, categoriesIncome));
+        emit(
+          CategoriesState.success(state.categoriesExpense, categoriesIncome),
+        );
         return;
-      }else{
+      } else {
         final categoriesExpense = [...state.categoriesExpense, category];
-      emit(CategoriesState.success(categoriesExpense, state.categoriesIncome));
+        emit(
+          CategoriesState.success(categoriesExpense, state.categoriesIncome),
+        );
       }
-      
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
     }
@@ -59,10 +69,9 @@ class Categoriescubit extends Cubit<CategoriesState> {
   Future<void> updateCategory(int index, Category category) async {
     try {
       await _categorierepo.updateCategory(index, category);
-      
+
       // Reload categories to get the updated state
       await loadCategories();
-      
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
     }
@@ -71,19 +80,19 @@ class Categoriescubit extends Cubit<CategoriesState> {
   Future<void> deleteCategory(int index, Category category) async {
     try {
       await _categorierepo.deleteCategory(index);
-      if (category.type == 'income') {
-        final categoriesIncome = [...state.categoriesIncome]..removeAt(index);
-        emit(CategoriesState.success(state.categoriesExpense, categoriesIncome));
-        return;
-      }
-      final categoriesExpense = [...state.categoriesExpense]..removeAt(index);
-      emit(CategoriesState.success(categoriesExpense, state.categoriesIncome));
+      final allCategories = await _categorierepo.getCategories();
+      final categoriesExpense =
+          allCategories.where((c) => c.type == 'expense').toList();
+      final categoriesIncome =
+          allCategories.where((c) => c.type == 'income').toList();
+      emit(CategoriesState.success(categoriesExpense, categoriesIncome));
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
+      throw Exception('Failed to delete category: $e');
     }
   }
 
-  Future<int> getIndexOfCategory(Category category)async {
+  Future<int> getIndexOfCategory(Category category) async {
     return await _categorierepo.getIndexOfCategory(category);
   }
 }
