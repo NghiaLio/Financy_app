@@ -1,5 +1,4 @@
 // ignore_for_file: file_names, deprecated_member_use, use_build_context_synchronously
-
 import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
@@ -166,6 +165,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
       ),
     );
   }
+
 
   Widget _buildCategoryGridGrouped(List<Category> categories) {
     final groupedCategories = IconMapping.groupCategoriesByType(categories);
