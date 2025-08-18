@@ -1171,7 +1171,7 @@ class _SpendingState extends State<Spending> {
       builder: (context) => AlertDialog(
         title: const Text('Select View'),
         contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,

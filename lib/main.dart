@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 import 'package:financy_ui/app/cubit/themeCubit.dart';
+import 'package:financy_ui/app/services/Local/notifications.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Account/screen/account_detail_screen.dart';
 import 'package:financy_ui/features/Account/screen/add_money_source.dart';
@@ -40,6 +41,11 @@ import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // initialize notification
+
+  NotiService().initNotification();
+  //
   final appDocDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocDir.path);
 

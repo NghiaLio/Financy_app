@@ -1173,7 +1173,7 @@ class _IncomeState extends State<Income> {
       builder: (context) => AlertDialog(
         title: const Text('Select View'),
         contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1281,7 +1281,7 @@ class _IncomeState extends State<Income> {
       builder: (context) => AlertDialog(
         title: const Text('Select Year'),
         contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
