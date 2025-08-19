@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/browser.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:timezone/data/latest.dart' as tr;
 import 'package:timezone/timezone.dart' as tz;
 
 class NotiService {
@@ -9,17 +11,22 @@ class NotiService {
 
   bool get isInitialized => _initialized;
 
+  Future<void> setLocation() async{
+    try {
+      final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(currentTimeZone));
+    } catch (e) {
+      tz.setLocalLocation(tz.getLocation('Asia/Ho_Chi_Minh'));
+    }
+  }
+
   // Initialize the notification plugin
   Future<void> initNotification() async {
     if (_initialized) return;
 
     //timezone
-    initializeTimeZone();
-
-
-    setLocalLocation(
-      getLocation('Asia/Ho_Chi_Minh'),
-    );
+    tr.initializeTimeZones();
+    await setLocation();
 
     // prepare android settings
     const AndroidInitializationSettings initializationSettingsAndroid =
@@ -39,6 +46,13 @@ class NotiService {
     );
 
     await notificationPlugin.initialize(initSettings);
+     // 🔥 xin quyền runtime trên Android 13+
+    final status = await Permission.notification.status;
+    if (status.isDenied || status.isRestricted) {
+      await Permission.notification.request();
+    }
+
+    _initialized = true;
   }
 
   //Notification detail setup

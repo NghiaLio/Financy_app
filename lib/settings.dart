@@ -1,5 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:developer';
+
+import 'package:financy_ui/app/services/Local/notifications.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -56,7 +59,11 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.userManagement),
             iconColor: Colors.green,
             onTap: () {
-              Navigator.pushNamed(context, '/profile',arguments: context.read<UserCubit>().currentUser);
+              Navigator.pushNamed(
+                context,
+                '/profile',
+                arguments: context.read<UserCubit>().currentUser,
+              );
             },
           ),
           const SizedBox(height: 12),
@@ -74,7 +81,14 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.notification),
             iconColor: Colors.orange,
             hasNotification: true,
-            onTap: () {},
+            onTap: () {
+              log('message');
+              NotiService().showNotification(
+                id: 1,
+                title: 'Hallo',
+                body: 'This is Personal App',
+              );
+            },
           ),
           const Spacer(),
         ],
