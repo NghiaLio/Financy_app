@@ -109,17 +109,10 @@ class NotiService {
     if (!_initialized) {
       await initNotification();
     }
-    // get current time
-    final now = tz.TZDateTime.now(tz.local);
-
     // create scheduled time
-    final scheduledTime = tz.TZDateTime(
+    final scheduledTime = tz.TZDateTime.from(
+      _nextInstanceOfTime(hour, minute),
       tz.local,
-      now.year,
-      now.month,
-      now.day,
-      hour,
-      minute,
     );
 
     // schedule notification
@@ -134,11 +127,54 @@ class NotiService {
     );
   }
 
+  /// Tính giờ tiếp theo (nếu đã qua thì cộng thêm 1 ngày)
+  DateTime _nextInstanceOfTime(int hour, int minute) {
+    final now = DateTime.now();
+    var scheduled = DateTime(now.year, now.month, now.day, hour, minute);
+    if (scheduled.isBefore(now)) {
+      scheduled = scheduled.add(const Duration(days: 1));
+    }
+    return scheduled;
+  }
+
   //Cancel notification 
   Future<void> cancelNotification(int id) async {
     if (!_initialized) {
       await initNotification();
     }
     await notificationPlugin.cancel(id);
+  }
+
+  //cancel all notification
+  Future<void> cancelAllNotifications() async {
+    if (!_initialized) {
+      await initNotification();
+    }
+    await notificationPlugin.cancelAll();
+  }
+
+  //call scheduleNotification
+  Future<void> scheduleDailyNotifications({
+    required String title,
+    required String body,
+  }) async {
+    if (!_initialized) {
+      await initNotification();
+    }
+    // Schedule notifications for 11am and 8pm
+    await scheduleNotification(
+      id: 1,
+      title: title,
+      body: body,
+      hour: 11,
+      minute: 0,
+    );
+    await scheduleNotification(
+      id: 2,
+      title: title,
+      body: body, 
+      hour: 22,
+      minute: 10,
+    );
   }
 }

@@ -85,8 +85,8 @@ class Settings extends StatelessWidget {
               log('message');
               NotiService().showNotification(
                 id: 1,
-                title: 'Hallo',
-                body: 'This is Personal App',
+                title: _localText(context, (l) => l.titleNotification),
+                body: _localText(context, (l) => l.bodyNotification),
               );
             },
           ),

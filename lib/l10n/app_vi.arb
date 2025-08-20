@@ -161,7 +161,9 @@
   "done":"Hoàn tất",
   "restore": "Khôi phục",
   "restoreDefault": "Khôi phục mặc định",
-  "restoreDefaultConfirm": "Bạn có muốn khôi phục tất cả danh mục về mặc định không? Điều này sẽ xóa tất cả danh mục tùy chỉnh."
+  "restoreDefaultConfirm": "Bạn có muốn khôi phục tất cả danh mục về mặc định không? Điều này sẽ xóa tất cả danh mục tùy chỉnh.",
+  "titleNotification":"Kiếm soát chi tiêu",
+  "bodyNotification": "Hôm nay bạn đã chi tiêu bao nhiêu?"
 }
 
 

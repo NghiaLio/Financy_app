@@ -72,8 +72,26 @@ void main() async {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await NotiService().scheduleDailyNotifications(
+        title: AppLocalizations.of(context)?.titleNotification ?? 'Thông báo',
+        body:
+            AppLocalizations.of(context)?.bodyNotification ??
+            'Hôm nay bạn đã chi tiêu bao nhiêu?',
+      );
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +102,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ManageMoneyCubit()),
         BlocProvider(create: (_) => UserCubit()),
         BlocProvider(create: (_) => TransactionCubit()),
-        BlocProvider(create: (_)=>Categoriescubit())
+        BlocProvider(create: (_) => Categoriescubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
