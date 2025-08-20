@@ -11,13 +11,14 @@
 - Firebase Auth (Google Sign-in)
 - Bloc/Cubit (State management)
 - Hive (dữ liệu offline, dữ liệu key value)
-
+- Local Notification
 ---
 
 ### 📁 Cấu trúc thư mục
 ```
 lib/
 ├── main.dart
+├── app/ (theme,notification,cubitApp)
 ├── core/ (config, token, constants)
 ├── data/ (models, services, api)
 ├── features/
@@ -87,6 +88,7 @@ void setToken(String? token) {
 - [x] Categories CRUD
 - [ ] Dashboard báo cáo
 - [x] Offline mode (guest)
+- [x] Local Notification
 - [ ] Tự động sync khi login lại
 
 ---
@@ -108,7 +110,6 @@ flutter run
 ---
 
 ### ⏳ TODO tiếp theo
-- [ ] Báo cáo tổng thu/chi
 - [ ] Tự động refresh token
 - [ ] Tích hợp ngân hàng sau
 
@@ -117,5 +118,6 @@ flutter run
 📌 Ghi chú:
 - App hiện tại đang ở giai đoạn 1: CRUD + Auth
 - Giai đoạn 2: thêm sync, ngân hàng, báo cáo nâng cao
+
 
 
