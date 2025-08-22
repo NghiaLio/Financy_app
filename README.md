@@ -214,27 +214,16 @@ flutter run
 ---
 
 ### ⏳ TODO tiếp theo
-- [ ] Tự động refresh token
+- [ ] Đồng bộ dữ liệu
 - [ ] Tích hợp ngân hàng sau
-- [ ] Dashboard báo cáo nâng cao
-- [ ] Export dữ liệu (PDF/Excel)
-- [ ] Multi-language support
-- [ ] Dark/Light theme toggle
-- [ ] Push notifications
-- [ ] Biometric authentication
 
----
-
-### 📞 Liên hệ
-- **Developer**: [Your Name]
-- **Email**: [your.email@example.com]
-- **GitHub**: [github.com/yourusername]
 
 ---
 
 📌 Ghi chú:
 - App hiện tại đang ở giai đoạn 1: CRUD + Auth
 - Giai đoạn 2: thêm sync, ngân hàng, báo cáo nâng cao
+
 
 
 
