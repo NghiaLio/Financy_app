@@ -258,6 +258,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   }
 
   Widget _buildCategoryItem(Category category) {
+    final l10n = AppLocalizations.of(context);
     return GestureDetector(
       onTap: () {
         isEdit ? null : _onCategorySelected(category);
@@ -302,7 +303,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    category.name,
+                    IconMapping.getLocalizedCategoryNameFromCategory(category, l10n),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -509,6 +510,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
 
   Widget _buildCategoryListItem(Category category) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12, top: 8, left: 8, right: 8),
       child: Stack(
@@ -539,7 +541,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
               ),
             ),
             title: Text(
-              category.name,
+              IconMapping.getLocalizedCategoryNameFromCategory(category, l10n),
               style: theme.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w500,
               ),

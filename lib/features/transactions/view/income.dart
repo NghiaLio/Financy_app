@@ -9,7 +9,9 @@ import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/shared/utils/statistics_utils.dart';
+import 'package:financy_ui/shared/utils/mappingIcon.dart';
 
 enum StatisticsView { daily, weekly, monthly, yearly }
 
@@ -44,6 +46,11 @@ class _IncomeState extends State<Income> {
     _initializeAvailableOptions();
     context.read<TransactionCubit>().fetchTransactionsByDate();
     context.read<Categoriescubit>().loadCategories();
+  }
+
+  void _initializeCategories() {
+    final l10n = AppLocalizations.of(context);
+    categories = [l10n?.allCategories ?? 'All Categories'];
   }
 
   void _initializeAvailableOptions() {
@@ -152,9 +159,16 @@ class _IncomeState extends State<Income> {
         
         // Filter by category if not "All Categories"
         List<Transactionsmodels> categoryFiltered = txList;
-        if (selectedCategory != 'All Categories') {
+        final l10n = AppLocalizations.of(context);
+        if (selectedCategory != (l10n?.allCategories ?? 'All Categories')) {
+          // Convert localized category name back to original name for filtering
+          final originalCategoryName = IconMapping.getOriginalCategoryNameFromLocalized(
+            selectedCategory, 
+            context.read<Categoriescubit>().state.categoriesIncome, 
+            l10n
+          );
           categoryFiltered = txList.where((tx) => 
-            tx.type == TransactionType.income && tx.categoriesId == selectedCategory
+            tx.type == TransactionType.income && tx.categoriesId == originalCategoryName
           ).toList();
         } else {
           categoryFiltered = txList.where((tx) => 
@@ -183,10 +197,20 @@ class _IncomeState extends State<Income> {
 
   Map<String, double> _calculateCategoryTotals(Map<DateTime, List<Transactionsmodels>> transactions) {
     final categoryTotals = <String, double>{};
+    final l10n = AppLocalizations.of(context);
     
     transactions.forEach((date, txList) {
       for (var tx in txList) {
-        categoryTotals[tx.categoriesId] = (categoryTotals[tx.categoriesId] ?? 0.0) + tx.amount;
+        // Find the category and get its localized name
+        final category = context.read<Categoriescubit>().state.categoriesIncome
+            .firstWhere((c) => c.name == tx.categoriesId, 
+                orElse: () => Category(
+                  id: '', name: tx.categoriesId, type: 'income', 
+                  icon: 'more_horiz', color: '#000000', createdAt: DateTime.now()
+                ));
+        
+        final localizedName = IconMapping.getLocalizedCategoryNameFromCategory(category, l10n);
+        categoryTotals[localizedName] = (categoryTotals[localizedName] ?? 0.0) + tx.amount;
       }
     });
     
@@ -325,15 +349,16 @@ class _IncomeState extends State<Income> {
   }
 
   String _getChartTitle() {
+    final l10n = AppLocalizations.of(context);
     switch (selectedView) {
       case StatisticsView.daily:
-        return 'Daily Income';
+        return l10n?.dailyIncome ?? 'Daily Income';
       case StatisticsView.weekly:
-        return 'Weekly Income';
+        return l10n?.weeklyIncome ?? 'Weekly Income';
       case StatisticsView.monthly:
-        return 'Monthly Income';
+        return l10n?.monthlyIncome ?? 'Monthly Income';
       case StatisticsView.yearly:
-        return 'Yearly Income';
+        return l10n?.yearlyIncome ?? 'Yearly Income';
     }
   }
 
@@ -344,10 +369,11 @@ class _IncomeState extends State<Income> {
         final today = DateTime(now.year, now.month, now.day);
         final dateOnly = DateTime(date.year, date.month, date.day);
         
+        final l10n = AppLocalizations.of(context);
         if (dateOnly == today) {
-          return 'Today';
+          return l10n?.today ?? 'Today';
         } else if (dateOnly == today.subtract(const Duration(days: 1))) {
-          return 'Yesterday';
+          return l10n?.yesterday ?? 'Yesterday';
         } else {
           return '${date.day}/${date.month}';
         }
@@ -770,7 +796,7 @@ class _IncomeState extends State<Income> {
         PieChartSectionData(
           color: Colors.grey,
           value: 100,
-          title: 'No Data',
+          title: AppLocalizations.of(context)?.noData ?? 'No Data',
           titleStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -803,7 +829,7 @@ class _IncomeState extends State<Income> {
   List<Widget> _buildLegendItems() {
     if (pieChartData.isEmpty) {
       return [
-        _buildLegendItem(Colors.grey, 'Không có dữ liệu'),
+        _buildLegendItem(Colors.grey, AppLocalizations.of(context)?.noDataAvailable ?? 'Không có dữ liệu'),
       ];
     }
 
@@ -854,7 +880,11 @@ class _IncomeState extends State<Income> {
           listener: (context, state) {
             if (state.status == CategoriesStatus.loaded) {
               setState(() {
-                categories = ['All Categories', ...state.categoriesIncome.map((c) => c.name)];
+                final l10n = AppLocalizations.of(context);
+                categories = [
+                  l10n?.allCategories ?? 'All Categories', 
+                  ...state.categoriesIncome.map((c) => IconMapping.getLocalizedCategoryNameFromCategory(c, l10n))
+                ];
               });
             }
           },
@@ -965,15 +995,16 @@ class _IncomeState extends State<Income> {
   }
 
   String _getViewText() {
+    final l10n = AppLocalizations.of(context);
     switch (selectedView) {
       case StatisticsView.daily:
-        return 'Daily View';
+        return l10n?.dailyView ?? 'Daily View';
       case StatisticsView.weekly:
-        return 'Weekly View';
+        return l10n?.weeklyView ?? 'Weekly View';
       case StatisticsView.monthly:
-        return 'Monthly View';
+        return l10n?.monthlyView ?? 'Monthly View';
       case StatisticsView.yearly:
-        return 'Yearly View';
+        return l10n?.yearlyView ?? 'Yearly View';
     }
   }
 
@@ -1033,7 +1064,7 @@ class _IncomeState extends State<Income> {
                       ),
                       const SizedBox(width: 3),
                       Text(
-                        'Scroll để xem thêm',
+                        AppLocalizations.of(context)?.scrollToSeeMore ?? 'Scroll để xem thêm',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                           fontStyle: FontStyle.italic,
@@ -1171,9 +1202,9 @@ class _IncomeState extends State<Income> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select View'),
+        title: Text(AppLocalizations.of(context)?.selectView ?? 'Select View'),
         contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1203,7 +1234,7 @@ class _IncomeState extends State<Income> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1214,7 +1245,7 @@ class _IncomeState extends State<Income> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Category'),
+        title: Text(AppLocalizations.of(context)?.selectCategory ?? 'Select Category'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: Container(
           width: double.maxFinite,
@@ -1251,7 +1282,7 @@ class _IncomeState extends State<Income> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1279,9 +1310,9 @@ class _IncomeState extends State<Income> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Year'),
+        title: Text(AppLocalizations.of(context)?.selectYear ?? 'Select Year'),
         contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
+        content: SizedBox(
           width: double.maxFinite,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1302,7 +1333,7 @@ class _IncomeState extends State<Income> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1313,7 +1344,7 @@ class _IncomeState extends State<Income> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Month'),
+        title: Text(AppLocalizations.of(context)?.selectMonth ?? 'Select Month'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: Container(
           width: double.maxFinite,
@@ -1352,7 +1383,7 @@ class _IncomeState extends State<Income> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1365,7 +1396,7 @@ class _IncomeState extends State<Income> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Week'),
+        title: Text(AppLocalizations.of(context)?.selectWeek ?? 'Select Week'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: Container(
           width: double.maxFinite,
@@ -1399,7 +1430,7 @@ class _IncomeState extends State<Income> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1407,15 +1438,16 @@ class _IncomeState extends State<Income> {
   }
 
   String _getViewName(StatisticsView view) {
+    final l10n = AppLocalizations.of(context);
     switch (view) {
       case StatisticsView.daily:
-        return 'Daily View';
+        return l10n?.dailyView ?? 'Daily View';
       case StatisticsView.weekly:
-        return 'Weekly View';
+        return l10n?.weeklyView ?? 'Weekly View';
       case StatisticsView.monthly:
-        return 'Monthly View';
+        return l10n?.monthlyView ?? 'Monthly View';
       case StatisticsView.yearly:
-        return 'Yearly View';
+        return l10n?.yearlyView ?? 'Yearly View';
     }
   }
 }

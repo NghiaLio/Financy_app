@@ -1,5 +1,6 @@
 // ignore_for_file: must_be_immutable
 import 'package:financy_ui/app/cubit/themeCubit.dart';
+import 'package:financy_ui/app/services/Local/notifications.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Account/screen/account_detail_screen.dart';
 import 'package:financy_ui/features/Account/screen/add_money_source.dart';
@@ -19,12 +20,15 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 // ignore: unused_import
 import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Transactions/repo/transactionsRepo.dart';
+import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
+import 'package:financy_ui/features/notification/models/notificationModel.dart';
 import 'package:financy_ui/firebase_options.dart';
-import 'package:financy_ui/interfaceSettings.dart';
+import 'package:financy_ui/features/Setting/interfaceSettings.dart';
 import 'package:financy_ui/l10n/l10n.dart';
-import 'package:financy_ui/languageSettings.dart';
+import 'package:financy_ui/features/Setting/languageSettings.dart';
 import 'package:financy_ui/features/Categories/view/man_Categories_spend.dart';
 import 'package:financy_ui/myApp.dart';
+import 'package:financy_ui/features/notification/view/notificationSetting.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +44,12 @@ import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // initialize notification
+
+  NotiService().initNotification();
+  await NotiService().requestNotificationPermission();
+  //
   final appDocDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocDir.path);
 
@@ -51,6 +61,7 @@ void main() async {
   Hive.registerAdapter(TransactionTypeAdapter());
   Hive.registerAdapter(TransactionsmodelsAdapter());
   Hive.registerAdapter(CategoryAdapter());
+  Hive.registerAdapter(NotificationModelAdapter());
 
   await dotenv.load(fileName: ".env");
   await Hive.openBox('settings');
@@ -61,13 +72,33 @@ void main() async {
   await Hive.openBox<UserModel>('userBox');
   await TransactionsRepo.initializeLocalStorage();
   await Categorierepo.initializeLocalStorage();
+  await Hive.openBox<NotificationModel>('notificationSettings');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await NotiService().scheduleDailyNotifications(
+        title: AppLocalizations.of(context)?.titleNotification ?? 'Thông báo',
+        body:
+            AppLocalizations.of(context)?.bodyNotification ??
+            'Hôm nay bạn đã chi tiêu bao nhiêu?',
+      );
+      await NotiService().saveNotificationSettings();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +109,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => ManageMoneyCubit()),
         BlocProvider(create: (_) => UserCubit()),
         BlocProvider(create: (_) => TransactionCubit()),
-        BlocProvider(create: (_)=>Categoriescubit())
+        BlocProvider(create: (_) => Categoriescubit()),
+        BlocProvider(create: (_) => NotificationCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
@@ -129,6 +161,7 @@ class MyApp extends StatelessWidget {
               '/manageCategory': (context) => ExpenseCategoriesScreen(),
               '/languageSelection': (context) => LanguageSelectionScreen(),
               '/editCategory': (context) => AddEditCategoryScreen(),
+              '/notificationSettings': (context) => NotificationSettingsScreen(),
 
               // Add other routes here
             },

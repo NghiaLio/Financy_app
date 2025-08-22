@@ -56,7 +56,11 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.userManagement),
             iconColor: Colors.green,
             onTap: () {
-              Navigator.pushNamed(context, '/profile',arguments: context.read<UserCubit>().currentUser);
+              Navigator.pushNamed(
+                context,
+                '/profile',
+                arguments: context.read<UserCubit>().currentUser,
+              );
             },
           ),
           const SizedBox(height: 12),
@@ -74,7 +78,9 @@ class Settings extends StatelessWidget {
             title: _localText(context, (l) => l.notification),
             iconColor: Colors.orange,
             hasNotification: true,
-            onTap: () {},
+            onTap: () {
+              Navigator.pushNamed(context, '/notificationSettings');
+            },
           ),
           const Spacer(),
         ],
@@ -118,25 +124,7 @@ class Settings extends StatelessWidget {
                 ),
               ),
             ),
-            if (hasNotification)
-              Container(
-                width: 20,
-                height: 20,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Text(
-                    '1',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+            
           ],
         ),
       ),

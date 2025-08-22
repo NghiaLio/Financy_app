@@ -161,7 +161,178 @@
   "done":"Hoàn tất",
   "restore": "Khôi phục",
   "restoreDefault": "Khôi phục mặc định",
-  "restoreDefaultConfirm": "Bạn có muốn khôi phục tất cả danh mục về mặc định không? Điều này sẽ xóa tất cả danh mục tùy chỉnh."
+  "restoreDefaultConfirm": "Bạn có muốn khôi phục tất cả danh mục về mặc định không? Điều này sẽ xóa tất cả danh mục tùy chỉnh.",
+  "titleNotification":"Kiếm soát chi tiêu",
+  "bodyNotification": "Hôm nay bạn đã chi tiêu bao nhiêu?",
+  
+  "notificationSettings": "Cài đặt Thông báo",
+  "generalNotifications": "Thông báo tổng quát",
+  "enableNotifications": "Bật thông báo",
+  "enableNotificationsDesc": "Nhận tất cả thông báo từ ứng dụng",
+  "notificationSound": "Âm thanh thông báo",
+  "reminders": "Nhắc nhở",
+  "dailyReminder": "Nhắc nhở hàng ngày",
+  "dailyReminderDesc": "Nhận thông báo nhắc nhở mỗi ngày",
+  "reminderTime": "Thời gian nhắc nhở",
+  "weeklyReport": "Báo cáo tuần",
+  "weeklyReportDesc": "Nhận báo cáo tổng kết hàng tuần",
+  "testNotification": "Gửi thông báo thử nghiệm",
+  "testNotificationSent": "Đã gửi thông báo thử nghiệm!",
+  "reminderTimeFormat": "Thời gian nhắc nhở: {time}",
+  
+  "allCategories": "Tất cả danh mục",
+  "@allCategories": {
+    "description": "Text for all categories filter option"
+  },
+  
+  "dailyExpenses": "Chi tiêu hàng ngày",
+  "@dailyExpenses": {
+    "description": "Title for daily expenses chart"
+  },
+  "weeklyExpenses": "Chi tiêu hàng tuần",
+  "@weeklyExpenses": {
+    "description": "Title for weekly expenses chart"
+  },
+  "monthlyExpenses": "Chi tiêu hàng tháng",
+  "@monthlyExpenses": {
+    "description": "Title for monthly expenses chart"
+  },
+  "yearlyExpenses": "Chi tiêu hàng năm",
+  "@yearlyExpenses": {
+    "description": "Title for yearly expenses chart"
+  },
+  
+  "dailyIncome": "Thu nhập hàng ngày",
+  "@dailyIncome": {
+    "description": "Title for daily income chart"
+  },
+  "weeklyIncome": "Thu nhập hàng tuần",
+  "@weeklyIncome": {
+    "description": "Title for weekly income chart"
+  },
+  "monthlyIncome": "Thu nhập hàng tháng",
+  "@monthlyIncome": {
+    "description": "Title for monthly income chart"
+  },
+  "yearlyIncome": "Thu nhập hàng năm",
+  "@yearlyIncome": {
+    "description": "Title for yearly income chart"
+  },
+  
+  "today": "Hôm nay",
+  "@today": {
+    "description": "Text for today"
+  },
+  "yesterday": "Hôm qua",
+  "@yesterday": {
+    "description": "Text for yesterday"
+  },
+  
+  "dailyView": "Xem hàng ngày",
+  "@dailyView": {
+    "description": "Daily view option"
+  },
+  "weeklyView": "Xem hàng tuần",
+  "@weeklyView": {
+    "description": "Weekly view option"
+  },
+  "monthlyView": "Xem hàng tháng",
+  "@monthlyView": {
+    "description": "Monthly view option"
+  },
+  "yearlyView": "Xem hàng năm",
+  "@yearlyView": {
+    "description": "Yearly view option"
+  },
+  
+  "noData": "Không có dữ liệu",
+  "@noData": {
+    "description": "Text when no data is available"
+  },
+  "noDataAvailable": "Không có dữ liệu",
+  "@noDataAvailable": {
+    "description": "Text when no data is available for legend"
+  },
+  
+  "selectView": "Chọn chế độ xem",
+  "@selectView": {
+    "description": "Title for view selector dialog"
+  },
+  "selectCategory": "Chọn danh mục",
+  "@selectCategory": {
+    "description": "Title for category selector dialog"
+  },
+  "selectYear": "Chọn năm",
+  "@selectYear": {
+    "description": "Title for year selector dialog"
+  },
+  "selectMonth": "Chọn tháng",
+  "@selectMonth": {
+    "description": "Title for month selector dialog"
+  },
+  "selectWeek": "Chọn tuần",
+  "@selectWeek": {
+    "description": "Title for week selector dialog"
+  },
+  
+  "scrollToSeeMore": "Cuộn để xem thêm",
+  "@scrollToSeeMore": {
+    "description": "Text indicating user can scroll to see more data"
+  },
+
+  "iconHome": "Nhà",
+  "iconShoppingCart": "Mua sắm",
+  "iconFastfood": "Ăn uống",
+  "iconPets": "Thú cưng",
+  "iconWork": "Công việc",
+  "iconMusicNote": "Âm nhạc",
+  "iconMovie": "Giải trí",
+  "iconSportsSoccer": "Thể thao",
+  "iconFlight": "Du lịch",
+  "iconSchool": "Giáo dục",
+  "iconLocalCafe": "Cà phê",
+  "iconFitnessCenter": "Thể dục",
+  "iconDirectionsCar": "Giao thông",
+  "iconBeachAccess": "Giải trí",
+  "iconCameraAlt": "Chụp ảnh",
+  "iconBrush": "Nghệ thuật",
+  "iconNature": "Thiên nhiên",
+  "iconHealing": "Sức khỏe",
+  "iconCake": "Lễ kỷ niệm",
+  "iconFavorite": "Yêu thích",
+  "iconWbSunny": "Thời tiết",
+  "iconNightlightRound": "Đêm",
+  "iconLocalFlorist": "Hoa",
+  "iconLightbulb": "Tiện ích",
+  "iconBook": "Sách",
+  "iconLuggage": "Du lịch",
+  "iconEvent": "Sự kiện",
+  "iconPayment": "Thanh toán",
+  "iconCreditCard": "Thẻ tín dụng",
+  "iconAccessTime": "Thời gian",
+  "iconPeople": "Xã hội",
+  "iconPublic": "Công cộng",
+  "iconSecurity": "Bảo mật",
+  "iconWineBar": "Đồ uống",
+  "iconLocalBar": "Quán bar",
+  "iconRestaurant": "Nhà hàng",
+  "iconLocalGroceryStore": "Tạp hóa",
+  "iconBabyChangingStation": "Em bé",
+  "iconBugReport": "Bảo trì",
+  "iconBuild": "Công cụ",
+  "iconAttachMoney": "Tiền",
+  "iconCardGiftcard": "Quà tặng",
+  "iconTrendingUp": "Đầu tư",
+  "iconStorefront": "Kinh doanh",
+  "iconHouse": "Bất động sản",
+  "iconSavings": "Tiết kiệm",
+  "iconRedeem": "Thưởng",
+  "iconRefresh": "Làm mới",
+  "iconSchoolIncome": "Thu nhập giáo dục",
+  "iconMonetizationOn": "Kiếm tiền",
+  "iconCurrencyBitcoin": "Tiền điện tử",
+  "iconWorkOutline": "Thu nhập công việc",
+  "iconMoreHoriz": "Thêm"
 }
 
 

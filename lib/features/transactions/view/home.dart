@@ -79,24 +79,24 @@ class _HomeState extends State<Home> {
   // Get max amount to determine unit
   double _getMaxAmount(Map<int, Map<String, double>> monthlyData) {
     double maxValue = 0;
-    monthlyData.values.forEach((data) {
+    for (var data in monthlyData.values) {
       final income = data['income']!;
       final expense = data['expense']!;
       if (income > maxValue) maxValue = income;
       if (expense > maxValue) maxValue = expense;
-    });
+    }
     return maxValue;
   }
 
   // Calculate max Y value for chart with smart scaling (in tens of thousands)
   double _getMaxY(Map<int, Map<String, double>> monthlyData, double divisor) {
     double maxValue = 0;
-    monthlyData.values.forEach((data) {
+    for (var data in monthlyData.values) {
       final income = _convertAmount(data['income']!, divisor);
       final expense = _convertAmount(data['expense']!, divisor);
       if (income > maxValue) maxValue = income;
       if (expense > maxValue) maxValue = expense;
-    });
+    }
     
     // If no data, set minimum scale
     if (maxValue == 0) {
@@ -690,7 +690,7 @@ class _HomeState extends State<Home> {
                       transactionsList?.isEmpty ?? true
                           ? Center(
                             child: Text(
-                              'No transactions found',
+                              AppLocalizations.of(context)?.noTransactions ?? 'No transactions found',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.black),
                             ),
