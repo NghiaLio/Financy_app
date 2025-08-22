@@ -9,8 +9,9 @@ import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesState.dart';
-
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/shared/utils/statistics_utils.dart';
+import 'package:financy_ui/shared/utils/mappingIcon.dart';
 
 enum StatisticsView { daily, weekly, monthly, yearly }
 
@@ -45,6 +46,11 @@ class _SpendingState extends State<Spending> {
     _initializeAvailableOptions();
     context.read<TransactionCubit>().fetchTransactionsByDate();
     context.read<Categoriescubit>().loadCategories();
+  }
+
+  void _initializeCategories() {
+    final l10n = AppLocalizations.of(context);
+    categories = [l10n?.allCategories ?? 'All Categories'];
   }
 
   void _initializeAvailableOptions() {
@@ -153,9 +159,16 @@ class _SpendingState extends State<Spending> {
         
         // Filter by category if not "All Categories"
         List<Transactionsmodels> categoryFiltered = txList;
-        if (selectedCategory != 'All Categories') {
+        final l10n = AppLocalizations.of(context);
+        if (selectedCategory != (l10n?.allCategories ?? 'All Categories')) {
+          // Convert localized category name back to original name for filtering
+          final originalCategoryName = IconMapping.getOriginalCategoryNameFromLocalized(
+            selectedCategory, 
+            context.read<Categoriescubit>().state.categoriesExpense, 
+            l10n
+          );
           categoryFiltered = txList.where((tx) => 
-            tx.type == TransactionType.expense && tx.categoriesId == selectedCategory
+            tx.type == TransactionType.expense && tx.categoriesId == originalCategoryName
           ).toList();
         } else {
           categoryFiltered = txList.where((tx) => 
@@ -184,10 +197,20 @@ class _SpendingState extends State<Spending> {
 
   Map<String, double> _calculateCategoryTotals(Map<DateTime, List<Transactionsmodels>> transactions) {
     final categoryTotals = <String, double>{};
+    final l10n = AppLocalizations.of(context);
     
     transactions.forEach((date, txList) {
       for (var tx in txList) {
-        categoryTotals[tx.categoriesId] = (categoryTotals[tx.categoriesId] ?? 0.0) + tx.amount;
+        // Find the category and get its localized name
+        final category = context.read<Categoriescubit>().state.categoriesExpense
+            .firstWhere((c) => c.name == tx.categoriesId, 
+                orElse: () => Category(
+                  id: '', name: tx.categoriesId, type: 'expense', 
+                  icon: 'more_horiz', color: '#000000', createdAt: DateTime.now()
+                ));
+        
+        final localizedName = IconMapping.getLocalizedCategoryNameFromCategory(category, l10n);
+        categoryTotals[localizedName] = (categoryTotals[localizedName] ?? 0.0) + tx.amount;
       }
     });
     
@@ -326,15 +349,16 @@ class _SpendingState extends State<Spending> {
   }
 
   String _getChartTitle() {
+    final l10n = AppLocalizations.of(context);
     switch (selectedView) {
       case StatisticsView.daily:
-        return 'Daily Expenses';
+        return l10n?.dailyExpenses ?? 'Daily Expenses';
       case StatisticsView.weekly:
-        return 'Weekly Expenses';
+        return l10n?.weeklyExpenses ?? 'Weekly Expenses';
       case StatisticsView.monthly:
-        return 'Monthly Expenses';
+        return l10n?.monthlyExpenses ?? 'Monthly Expenses';
       case StatisticsView.yearly:
-        return 'Yearly Expenses';
+        return l10n?.yearlyExpenses ?? 'Yearly Expenses';
     }
   }
 
@@ -345,10 +369,11 @@ class _SpendingState extends State<Spending> {
         final today = DateTime(now.year, now.month, now.day);
         final dateOnly = DateTime(date.year, date.month, date.day);
         
+        final l10n = AppLocalizations.of(context);
         if (dateOnly == today) {
-          return 'Today';
+          return l10n?.today ?? 'Today';
         } else if (dateOnly == today.subtract(const Duration(days: 1))) {
-          return 'Yesterday';
+          return l10n?.yesterday ?? 'Yesterday';
         } else {
           return '${date.day}/${date.month}';
         }
@@ -773,7 +798,7 @@ class _SpendingState extends State<Spending> {
         PieChartSectionData(
           color: Colors.grey,
           value: 100,
-          title: 'No Data',
+          title: AppLocalizations.of(context)?.noData ?? 'No Data',
           titleStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -806,7 +831,7 @@ class _SpendingState extends State<Spending> {
   List<Widget> _buildLegendItems() {
     if (pieChartData.isEmpty) {
       return [
-        _buildLegendItem(Colors.grey, 'No data available'),
+        _buildLegendItem(Colors.grey, AppLocalizations.of(context)?.noDataAvailable ?? 'No data available'),
       ];
     }
 
@@ -840,7 +865,11 @@ class _SpendingState extends State<Spending> {
           listener: (context, state) {
             if (state.status == CategoriesStatus.loaded) {
               setState(() {
-                categories = ['All Categories', ...state.categoriesExpense.map((c) => c.name)];
+                final l10n = AppLocalizations.of(context);
+                categories = [
+                  l10n?.allCategories ?? 'All Categories', 
+                  ...state.categoriesExpense.map((c) => IconMapping.getLocalizedCategoryNameFromCategory(c, l10n))
+                ];
               });
             }
           },
@@ -968,15 +997,16 @@ class _SpendingState extends State<Spending> {
 
 
   String _getViewText() {
+    final l10n = AppLocalizations.of(context);
     switch (selectedView) {
       case StatisticsView.daily:
-        return 'Daily View';
+        return l10n?.dailyView ?? 'Daily View';
       case StatisticsView.weekly:
-        return 'Weekly View';
+        return l10n?.weeklyView ?? 'Weekly View';
       case StatisticsView.monthly:
-        return 'Monthly View';
+        return l10n?.monthlyView ?? 'Monthly View';
       case StatisticsView.yearly:
-        return 'Yearly View';
+        return l10n?.yearlyView ?? 'Yearly View';
     }
   }
 
@@ -1036,7 +1066,7 @@ class _SpendingState extends State<Spending> {
                       ),
                       const SizedBox(width: 3),
                       Text(
-                        'Scroll để xem thêm',
+                        AppLocalizations.of(context)?.scrollToSeeMore ?? 'Scroll để xem thêm',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
                           fontStyle: FontStyle.italic,
@@ -1169,7 +1199,7 @@ class _SpendingState extends State<Spending> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select View'),
+        title: Text(AppLocalizations.of(context)?.selectView ?? 'Select View'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: SizedBox(
           width: double.maxFinite,
@@ -1201,7 +1231,7 @@ class _SpendingState extends State<Spending> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1212,7 +1242,7 @@ class _SpendingState extends State<Spending> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Category'),
+        title: Text(AppLocalizations.of(context)?.selectCategory ?? 'Select Category'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: Container(
           width: double.maxFinite,
@@ -1249,7 +1279,7 @@ class _SpendingState extends State<Spending> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
             ],
           ),
@@ -1277,7 +1307,7 @@ class _SpendingState extends State<Spending> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Year'),
+        title: Text(AppLocalizations.of(context)?.selectYear ?? 'Select Year'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: availableYears.map((year) {
@@ -1301,7 +1331,7 @@ class _SpendingState extends State<Spending> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Month'),
+        title: Text(AppLocalizations.of(context)?.selectMonth ?? 'Select Month'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: Container(
           width: double.maxFinite,
@@ -1340,7 +1370,7 @@ class _SpendingState extends State<Spending> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
             ],
           ),
@@ -1351,7 +1381,7 @@ class _SpendingState extends State<Spending> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Week'),
+        title: Text(AppLocalizations.of(context)?.selectWeek ?? 'Select Week'),
         contentPadding: const EdgeInsets.only(top: 20),
         content: Container(
           width: double.maxFinite,
@@ -1386,7 +1416,7 @@ class _SpendingState extends State<Spending> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
         ],
       ),
@@ -1396,15 +1426,16 @@ class _SpendingState extends State<Spending> {
 
 
   String _getViewName(StatisticsView view) {
+    final l10n = AppLocalizations.of(context);
     switch (view) {
       case StatisticsView.daily:
-        return 'Daily View';
+        return l10n?.dailyView ?? 'Daily View';
       case StatisticsView.weekly:
-        return 'Weekly View';
+        return l10n?.weeklyView ?? 'Weekly View';
       case StatisticsView.monthly:
-        return 'Monthly View';
+        return l10n?.monthlyView ?? 'Monthly View';
       case StatisticsView.yearly:
-        return 'Yearly View';
+        return l10n?.yearlyView ?? 'Yearly View';
     }
   }
 }

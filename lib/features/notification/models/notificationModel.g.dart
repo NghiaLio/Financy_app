@@ -2,51 +2,42 @@
 
 // ignore_for_file: file_names
 
-part of 'userModels.dart';
+part of 'notificationModel.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class UserModelAdapter extends TypeAdapter<UserModel> {
+class NotificationModelAdapter extends TypeAdapter<NotificationModel> {
   @override
-  final int typeId = 0;
+  final int typeId = 9;
 
   @override
-  UserModel read(BinaryReader reader) {
+  NotificationModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return UserModel(
-      id: fields[0] as String,
-      uid: fields[1] as String,
-      name: fields[2] as String,
-      email: fields[3] as String,
-      picture: fields[4] as String,
-      dateOfBirth: fields[5] as DateTime,
-      createdAt: fields[6] as DateTime,
+    return NotificationModel(
+      isNotificationEnabled: fields[0] as bool,
+      isDaily: fields[1] as bool,
+      isWeekly: fields[2] as bool,
+      reminderTime: fields[3] as String,
     );
   }
 
   @override
-  void write(BinaryWriter writer, UserModel obj) {
+  void write(BinaryWriter writer, NotificationModel obj) {
     writer
-      ..writeByte(7)
-      ..writeByte(0)
-      ..write(obj.id)
-      ..writeByte(1)
-      ..write(obj.uid)
-      ..writeByte(2)
-      ..write(obj.name)
-      ..writeByte(3)
-      ..write(obj.email)
       ..writeByte(4)
-      ..write(obj.picture)
-      ..writeByte(5)
-      ..write(obj.dateOfBirth)
-      ..writeByte(6)
-      ..write(obj.createdAt);
+      ..writeByte(0)
+      ..write(obj.isNotificationEnabled)
+      ..writeByte(1)
+      ..write(obj.isDaily)
+      ..writeByte(2)
+      ..write(obj.isWeekly)
+      ..writeByte(3)
+      ..write(obj.reminderTime);
   }
 
   @override
@@ -55,7 +46,7 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is UserModelAdapter &&
+      other is NotificationModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

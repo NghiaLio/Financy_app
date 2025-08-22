@@ -24,8 +24,8 @@ class CategoryAdapter extends TypeAdapter<Category> {
       name: fields[2] as String,
       type: fields[3] as String,
       icon: fields[4] as String,
-      color: fields[5] as String,
       createdAt: fields[6] as DateTime,
+      color: fields[5] as String,
     );
   }
 

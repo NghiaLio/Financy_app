@@ -23,8 +23,6 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
   late double _fontSize;
   late ThemeMode _preThemeMode;
   bool _isSaveChange = false;
-  bool _enableAnimations = true;
-  bool _enableVibration = true;
 
   // Color themes
   final Map<String, Color> _colorThemes = {
@@ -33,7 +31,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     '0xFF9C27B0': AppColors.accentPink,
     '0xFFFF9800': AppColors.orange,
     '0xFFF44336': AppColors.red,
-    'Cyan': AppColors.cyan,
+    '0xFF00BCD4': AppColors.cyan,
   };
   late String _selectedColorTheme;
   @override
@@ -177,12 +175,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
 
             // Animation Section
             _buildSectionTitle(_localText((l) => l.effect)),
-            _buildAnimationSettings(),
-            SizedBox(height: 24),
-
-            // Preview Section
-            _buildSectionTitle('Preview'),
-            _buildPreviewCard(),
+            
             SizedBox(height: 24),
 
             // Action Buttons
@@ -391,128 +384,7 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     );
   }
 
-  Widget _buildAnimationSettings() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          SwitchListTile(
-            title: Row(
-              children: [
-                Icon(
-                  Icons.animation,
-                  color: Theme.of(context).highlightColor,
-                  size: 20,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Motion Effects',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
-            value: _enableAnimations,
-            onChanged: (bool value) {
-              setState(() {
-                _enableAnimations = value;
-              });
-            },
-            activeColor: _colorThemes[_selectedColorTheme],
-          ),
-          Divider(color: Colors.grey[600], height: 1),
-          SwitchListTile(
-            title: Row(
-              children: [
-                Icon(
-                  Icons.vibration,
-                  color: Theme.of(context).highlightColor,
-                  size: 20,
-                ),
-                SizedBox(width: 12),
-                Text(
-                  'Haptic Feedback',
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-              ],
-            ),
-            value: _enableVibration,
-            onChanged: (bool value) {
-              setState(() {
-                _enableVibration = value;
-              });
-            },
-            activeColor: _colorThemes[_selectedColorTheme],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPreviewCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: _colorThemes[_selectedColorTheme],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(Icons.account_balance_wallet, color: Colors.white),
-              ),
-              SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _localText((l) => l.wallet),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    '10,000,000 VND',
-                    style: TextStyle(
-                      color: _colorThemes[_selectedColorTheme],
-                      fontSize: _fontSize - 2,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          Container(
-            height: 4,
-            decoration: BoxDecoration(
-              color: _colorThemes[_selectedColorTheme],
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            _localText((l) => l.previewNote),
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(fontSize: 10),
-          ),
-        ],
-      ),
-    );
-  }
-
+  
   Widget _buildActionButtons() {
     return Row(
       children: [

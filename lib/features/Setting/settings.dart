@@ -1,8 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:developer';
-
-import 'package:financy_ui/app/services/Local/notifications.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -82,12 +79,7 @@ class Settings extends StatelessWidget {
             iconColor: Colors.orange,
             hasNotification: true,
             onTap: () {
-              log('message');
-              NotiService().showNotification(
-                id: 1,
-                title: _localText(context, (l) => l.titleNotification),
-                body: _localText(context, (l) => l.bodyNotification),
-              );
+              Navigator.pushNamed(context, '/notificationSettings');
             },
           ),
           const Spacer(),
@@ -132,25 +124,7 @@ class Settings extends StatelessWidget {
                 ),
               ),
             ),
-            if (hasNotification)
-              Container(
-                width: 20,
-                height: 20,
-                decoration: const BoxDecoration(
-                  color: Colors.red,
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Text(
-                    '1',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+            
           ],
         ),
       ),

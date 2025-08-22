@@ -1,6 +1,7 @@
-
+import 'package:financy_ui/features/notification/models/notificationModel.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:hive/hive.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/data/latest.dart' as tr;
 import 'package:timezone/timezone.dart' as tz;
@@ -12,7 +13,7 @@ class NotiService {
 
   bool get isInitialized => _initialized;
 
-  Future<void> setLocation() async{
+  Future<void> setLocation() async {
     try {
       final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
       tz.setLocalLocation(tz.getLocation(currentTimeZone));
@@ -47,11 +48,6 @@ class NotiService {
     );
 
     await notificationPlugin.initialize(initSettings);
-     // 🔥 xin quyền runtime trên Android 13+
-    final status = await Permission.notification.status;
-    if (status.isDenied || status.isRestricted) {
-      await Permission.notification.request();
-    }
 
     _initialized = true;
   }
@@ -106,6 +102,7 @@ class NotiService {
     required String body,
     required int hour,
     required int minute,
+    required bool isDaily,
   }) async {
     if (!_initialized) {
       await initNotification();
@@ -124,7 +121,10 @@ class NotiService {
       scheduledTime,
       _notificationDetails(),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
+      matchDateTimeComponents:
+          isDaily
+              ? DateTimeComponents.time
+              : DateTimeComponents.dayOfWeekAndTime,
     );
   }
 
@@ -138,7 +138,7 @@ class NotiService {
     return scheduled;
   }
 
-  //Cancel notification 
+  //Cancel notification
   Future<void> cancelNotification(int id) async {
     if (!_initialized) {
       await initNotification();
@@ -154,7 +154,37 @@ class NotiService {
     await notificationPlugin.cancelAll();
   }
 
-  //call scheduleNotification
+  Future<void> requestNotificationPermission() async {
+    // 🔥 xin quyền runtime trên Android 13+
+    final status = await Permission.notification.status;
+    if (status.isDenied || status.isRestricted) {
+      await Permission.notification.request();
+    }
+    _initialized = true;
+  }
+
+  Future<bool> checkNotificationPermission() async {
+    try {
+      // Khởi tạo notification service nếu chưa được khởi tạo
+      if (!_initialized) {
+        await initNotification();
+      }
+
+      // Kiểm tra trạng thái quyền thông báo
+      final status = await Permission.notification.status;
+      return status.isGranted;
+    } catch (e) {
+      // Nếu có lỗi, mặc định là false
+      return false;
+    }
+  }
+
+  /// Kiểm tra xem thông báo có được bật hay không
+  bool get isNotificationEnabled {
+    // Trả về true nếu đã được khởi tạo (có nghĩa là đã có quyền)
+    return _initialized;
+  }
+
   Future<void> scheduleDailyNotifications({
     required String title,
     required String body,
@@ -162,20 +192,60 @@ class NotiService {
     if (!_initialized) {
       await initNotification();
     }
+    final notificationSettings = Hive.box<NotificationModel>('notificationSettings').get('notificationSettings');
+    final hour = int.parse(notificationSettings?.reminderTime.split(':')[0] ?? '11');
+    final minute = int.parse(notificationSettings?.reminderTime.split(':')[1] ?? '0');
     // Schedule notifications for 11am and 8pm
     await scheduleNotification(
       id: 1,
       title: title,
       body: body,
-      hour: 11,
-      minute: 0,
+      hour: hour,
+      minute: minute,
+      isDaily: true,
     );
+    // await scheduleNotification(
+    //   id: 2,
+    //   title: title,
+    //   body: body,
+    //   hour: 20,
+    //   minute: 10,
+    //   isDaily: false,
+    // );
+  }
+
+  Future<void> scheduleWeeklyNotifications(
+    String title,
+    String body,
+    int hour,
+    int minute,
+  ) async {
+    final notificationSettings = Hive.box<NotificationModel>('notificationSettings').get('notificationSettings');
+    final hour = int.parse(notificationSettings?.reminderTime.split(':')[0] ?? '11');
+    final minute = int.parse(notificationSettings?.reminderTime.split(':')[1] ?? '0');
     await scheduleNotification(
-      id: 2,
+      id: 3,
       title: title,
-      body: body, 
-      hour: 22,
-      minute: 10,
+      body: body,
+      hour: hour,
+      minute: minute,
+      isDaily: false,
     );
+  }
+
+  Future<void> saveNotificationSettings() async {
+    final box = Hive.box<NotificationModel>('notificationSettings');
+    final isNotificationEnabled = await checkNotificationPermission();
+    if (isNotificationEnabled) {
+      await box.put(
+        'notificationSettings',
+        NotificationModel(
+          isNotificationEnabled: _initialized,
+          isDaily: true,
+          isWeekly: true,
+          reminderTime: '8:00',
+        ),
+      );
+    }
   }
 }

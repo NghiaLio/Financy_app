@@ -4,8 +4,9 @@ import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Transactions/view/add.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Transactions/view/home.dart';
-import 'package:financy_ui/settings.dart';
-import 'package:financy_ui/statiscal.dart';
+import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
+import 'package:financy_ui/features/Setting/settings.dart';
+import 'package:financy_ui/features/transactions/view/statiscal.dart';
 import 'package:financy_ui/features/Transactions/view/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +41,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
   void initState() {
     context.read<UserCubit>().getUser();
     context.read<ManageMoneyCubit>().getAllAccount();
+    context.read<NotificationCubit>().loadNotificationSettings();
     super.initState();
   }
 

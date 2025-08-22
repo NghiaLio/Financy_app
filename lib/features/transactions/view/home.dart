@@ -690,7 +690,7 @@ class _HomeState extends State<Home> {
                       transactionsList?.isEmpty ?? true
                           ? Center(
                             child: Text(
-                              'No transactions found',
+                              AppLocalizations.of(context)?.noTransactions ?? 'No transactions found',
                               style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(color: AppColors.black),
                             ),
