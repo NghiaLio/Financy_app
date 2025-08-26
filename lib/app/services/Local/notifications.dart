@@ -192,9 +192,15 @@ class NotiService {
     if (!_initialized) {
       await initNotification();
     }
-    final notificationSettings = Hive.box<NotificationModel>('notificationSettings').get('notificationSettings');
-    final hour = int.parse(notificationSettings?.reminderTime.split(':')[0] ?? '11');
-    final minute = int.parse(notificationSettings?.reminderTime.split(':')[1] ?? '0');
+    final notificationSettings = Hive.box<NotificationModel>(
+      'notificationSettings',
+    ).get('notificationSettings');
+    final hour = int.parse(
+      notificationSettings?.reminderTime.split(':')[0] ?? '11',
+    );
+    final minute = int.parse(
+      notificationSettings?.reminderTime.split(':')[1] ?? '0',
+    );
     // Schedule notifications for 11am and 8pm
     await scheduleNotification(
       id: 1,
@@ -220,9 +226,6 @@ class NotiService {
     int hour,
     int minute,
   ) async {
-    final notificationSettings = Hive.box<NotificationModel>('notificationSettings').get('notificationSettings');
-    final hour = int.parse(notificationSettings?.reminderTime.split(':')[0] ?? '11');
-    final minute = int.parse(notificationSettings?.reminderTime.split(':')[1] ?? '0');
     await scheduleNotification(
       id: 3,
       title: title,
@@ -243,7 +246,7 @@ class NotiService {
           isNotificationEnabled: _initialized,
           isDaily: true,
           isWeekly: true,
-          reminderTime: '8:00',
+          reminderTime: '11:00',
         ),
       );
     }

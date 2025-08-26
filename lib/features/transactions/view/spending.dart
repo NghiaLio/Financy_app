@@ -25,123 +25,159 @@ class Spending extends StatefulWidget {
 class _SpendingState extends State<Spending> {
   // Filter selections
   StatisticsView selectedView = StatisticsView.daily;
-  String selectedCategory = 'All Categories';
+  String selectedCategory = '';
   DateTime selectedDate = DateTime.now();
-  
+
   // Statistics data
   double totalExpense = 0.0;
   Map<String, double> categoryTotals = {};
   List<MapEntry<DateTime, double>> chartData = [];
   List<MapEntry<String, double>> pieChartData = [];
-  
+
   // UI data
-  List<String> categories = ['All Categories'];
+  List<String> categories = [];
   List<String> availableYears = [];
   List<String> availableMonths = [];
   List<String> availableWeeks = [];
-  
+
   @override
   void initState() {
     super.initState();
     _initializeAvailableOptions();
-    context.read<TransactionCubit>().fetchTransactionsByDate();
+    // Load categories first, then fetch transactions
     context.read<Categoriescubit>().loadCategories();
+    // Transactions will be fetched after categories are loaded
   }
 
-  void _initializeCategories() {
-    final l10n = AppLocalizations.of(context);
-    categories = [l10n?.allCategories ?? 'All Categories'];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // This method is called when the dependencies change (including locale)
+    // We can use this to refresh data when language changes
+    if (categories.isNotEmpty) {
+      _updateLocalizedValues();
+    }
   }
 
   void _initializeAvailableOptions() {
     final now = DateTime.now();
-    
+
     // Initialize years (current year and 3 years back)
     availableYears = List.generate(4, (index) => (now.year - index).toString());
-    
+
     // Initialize months for current year
     availableMonths = List.generate(12, (index) {
       final month = index + 1;
       return '$month/${now.year}';
     });
-    
+
     // Initialize weeks for current month
     _updateAvailableWeeks();
+  }
+
+  void _updateLocalizedValues() {
+    // This method ensures all localized values are properly updated
+    // when language changes
+    if (categories.isNotEmpty) {
+      final l10n = AppLocalizations.of(context);
+      final allCategoriesText = l10n?.allCategories ?? 'All Categories';
+
+      // Update selectedCategory if it's the old "All Categories" text
+      if (selectedCategory == 'All Categories' &&
+          selectedCategory != allCategoriesText) {
+        selectedCategory = allCategoriesText;
+      }
+    }
   }
 
   void _updateAvailableWeeks() {
     availableWeeks.clear();
     final year = selectedDate.year;
     final month = selectedDate.month;
-    
+
     // Get first day of month and calculate weeks
     final firstDay = DateTime(year, month, 1);
     final lastDay = DateTime(year, month + 1, 0);
-    
+
     DateTime current = firstDay;
     int weekNumber = 1;
-    
+
     while (current.isBefore(lastDay) || current.isAtSameMomentAs(lastDay)) {
       final weekStart = current.subtract(Duration(days: current.weekday - 1));
       final weekEnd = weekStart.add(const Duration(days: 6));
-      
-      availableWeeks.add('Week $weekNumber (${weekStart.day}/${weekStart.month} - ${weekEnd.day}/${weekEnd.month})');
+
+      availableWeeks.add(
+        'Week $weekNumber (${weekStart.day}/${weekStart.month} - ${weekEnd.day}/${weekEnd.month})',
+      );
       current = current.add(const Duration(days: 7));
       weekNumber++;
     }
   }
 
-  void _calculateStatistics(Map<DateTime, List<Transactionsmodels>> transactions) {
+  void _calculateStatistics(
+    Map<DateTime, List<Transactionsmodels>> transactions,
+  ) {
+    // Ensure selectedCategory is initialized before calculating statistics
+    if (selectedCategory.isEmpty && categories.isNotEmpty) {
+      selectedCategory = categories.first;
+    }
+
     final (startDate, endDate) = _getDateRange();
-    
+
     // Filter transactions by date range and category
-    final filteredTransactions = _filterTransactions(transactions, startDate, endDate);
-    
+    final filteredTransactions = _filterTransactions(
+      transactions,
+      startDate,
+      endDate,
+    );
+
     // Calculate total expense
     totalExpense = _calculateTotalExpense(filteredTransactions);
-    
+
     // Calculate category totals for pie chart
     categoryTotals = _calculateCategoryTotals(filteredTransactions);
-    
+
     // Calculate chart data based on selected view
     chartData = _calculateChartData(filteredTransactions, startDate, endDate);
-    
+
     // Calculate pie chart data
     pieChartData = StatisticsUtils.getPieChartData(categoryTotals, 5);
-    
+
     setState(() {});
   }
 
   (DateTime, DateTime) _getDateRange() {
     DateTime startDate, endDate;
-    
+
     switch (selectedView) {
       case StatisticsView.daily:
         // Show current month for daily view
         startDate = DateTime(selectedDate.year, selectedDate.month, 1);
         endDate = DateTime(selectedDate.year, selectedDate.month + 1, 0);
         break;
-        
+
       case StatisticsView.weekly:
         // Get start and end of selected week
-        final weekStart = selectedDate.subtract(Duration(days: selectedDate.weekday - 1));
+        final weekStart = selectedDate.subtract(
+          Duration(days: selectedDate.weekday - 1),
+        );
         startDate = DateTime(weekStart.year, weekStart.month, weekStart.day);
         endDate = startDate.add(const Duration(days: 6));
         break;
-        
+
       case StatisticsView.monthly:
         // Show current year for monthly view
         startDate = DateTime(selectedDate.year, 1, 1);
         endDate = DateTime(selectedDate.year, 12, 31);
         break;
-        
+
       case StatisticsView.yearly:
         // Show multiple years for yearly view
         startDate = DateTime(selectedDate.year - 3, 1, 1);
         endDate = DateTime(selectedDate.year, 12, 31);
         break;
     }
-    
+
     return (startDate, endDate);
   }
 
@@ -151,41 +187,49 @@ class _SpendingState extends State<Spending> {
     DateTime endDate,
   ) {
     final filtered = <DateTime, List<Transactionsmodels>>{};
-    
+
     transactions.forEach((date, txList) {
       // Filter by date range
       if (date.isAfter(startDate.subtract(const Duration(days: 1))) &&
           date.isBefore(endDate.add(const Duration(days: 1)))) {
-        
         // Filter by category if not "All Categories"
         List<Transactionsmodels> categoryFiltered = txList;
         final l10n = AppLocalizations.of(context);
-        if (selectedCategory != (l10n?.allCategories ?? 'All Categories')) {
+        final allCategoriesText = l10n?.allCategories ?? 'All Categories';
+
+        if (selectedCategory != allCategoriesText) {
           // Convert localized category name back to original name for filtering
-          final originalCategoryName = IconMapping.getOriginalCategoryNameFromLocalized(
-            selectedCategory, 
-            context.read<Categoriescubit>().state.categoriesExpense, 
-            l10n
-          );
-          categoryFiltered = txList.where((tx) => 
-            tx.type == TransactionType.expense && tx.categoriesId == originalCategoryName
-          ).toList();
+          final originalCategoryName =
+              IconMapping.getOriginalCategoryNameFromLocalized(
+                selectedCategory,
+                context.read<Categoriescubit>().state.categoriesExpense,
+                l10n,
+              );
+          categoryFiltered =
+              txList
+                  .where(
+                    (tx) =>
+                        tx.type == TransactionType.expense &&
+                        tx.categoriesId == originalCategoryName,
+                  )
+                  .toList();
         } else {
-          categoryFiltered = txList.where((tx) => 
-            tx.type == TransactionType.expense
-          ).toList();
+          categoryFiltered =
+              txList.where((tx) => tx.type == TransactionType.expense).toList();
         }
-        
+
         if (categoryFiltered.isNotEmpty) {
           filtered[date] = categoryFiltered;
         }
       }
     });
-    
+
     return filtered;
   }
 
-  double _calculateTotalExpense(Map<DateTime, List<Transactionsmodels>> transactions) {
+  double _calculateTotalExpense(
+    Map<DateTime, List<Transactionsmodels>> transactions,
+  ) {
     double total = 0.0;
     transactions.forEach((date, txList) {
       for (var tx in txList) {
@@ -195,25 +239,41 @@ class _SpendingState extends State<Spending> {
     return total;
   }
 
-  Map<String, double> _calculateCategoryTotals(Map<DateTime, List<Transactionsmodels>> transactions) {
+  Map<String, double> _calculateCategoryTotals(
+    Map<DateTime, List<Transactionsmodels>> transactions,
+  ) {
     final categoryTotals = <String, double>{};
     final l10n = AppLocalizations.of(context);
-    
+
     transactions.forEach((date, txList) {
       for (var tx in txList) {
         // Find the category and get its localized name
-        final category = context.read<Categoriescubit>().state.categoriesExpense
-            .firstWhere((c) => c.name == tx.categoriesId, 
-                orElse: () => Category(
-                  id: '', name: tx.categoriesId, type: 'expense', 
-                  icon: 'more_horiz', color: '#000000', createdAt: DateTime.now()
-                ));
-        
-        final localizedName = IconMapping.getLocalizedCategoryNameFromCategory(category, l10n);
-        categoryTotals[localizedName] = (categoryTotals[localizedName] ?? 0.0) + tx.amount;
+        final category = context
+            .read<Categoriescubit>()
+            .state
+            .categoriesExpense
+            .firstWhere(
+              (c) => c.name == tx.categoriesId,
+              orElse:
+                  () => Category(
+                    id: '',
+                    name: tx.categoriesId,
+                    type: 'expense',
+                    icon: 'more_horiz',
+                    color: '#000000',
+                    createdAt: DateTime.now(),
+                  ),
+            );
+
+        final localizedName = IconMapping.getLocalizedCategoryNameFromCategory(
+          category,
+          l10n,
+        );
+        categoryTotals[localizedName] =
+            (categoryTotals[localizedName] ?? 0.0) + tx.amount;
       }
     });
-    
+
     return categoryTotals;
   }
 
@@ -241,19 +301,19 @@ class _SpendingState extends State<Spending> {
   ) {
     final dailyData = <MapEntry<DateTime, double>>[];
     DateTime current = startDate;
-    
+
     while (current.isBefore(endDate.add(const Duration(days: 1)))) {
       double dailyTotal = 0.0;
       final txList = transactions[current] ?? [];
-      
+
       for (var tx in txList) {
         dailyTotal += tx.amount;
       }
-      
+
       dailyData.add(MapEntry(current, dailyTotal));
       current = current.add(const Duration(days: 1));
     }
-    
+
     return dailyData;
   }
 
@@ -264,14 +324,14 @@ class _SpendingState extends State<Spending> {
   ) {
     final weeklyData = <MapEntry<DateTime, double>>[];
     DateTime current = startDate;
-    
+
     while (current.isBefore(endDate)) {
       final weekStart = current.subtract(Duration(days: current.weekday - 1));
       final weekEnd = weekStart.add(const Duration(days: 6));
-      
+
       double weeklyTotal = 0.0;
       DateTime weekCurrent = weekStart;
-      
+
       while (weekCurrent.isBefore(weekEnd.add(const Duration(days: 1)))) {
         final txList = transactions[weekCurrent] ?? [];
         for (var tx in txList) {
@@ -279,11 +339,11 @@ class _SpendingState extends State<Spending> {
         }
         weekCurrent = weekCurrent.add(const Duration(days: 1));
       }
-      
+
       weeklyData.add(MapEntry(weekStart, weeklyTotal));
       current = weekEnd.add(const Duration(days: 1));
     }
-    
+
     return weeklyData;
   }
 
@@ -294,14 +354,14 @@ class _SpendingState extends State<Spending> {
   ) {
     final monthlyData = <MapEntry<DateTime, double>>[];
     DateTime current = DateTime(startDate.year, startDate.month, 1);
-    
+
     while (current.isBefore(endDate)) {
       final monthStart = DateTime(current.year, current.month, 1);
       final monthEnd = DateTime(current.year, current.month + 1, 0);
-      
+
       double monthlyTotal = 0.0;
       DateTime monthCurrent = monthStart;
-      
+
       while (monthCurrent.isBefore(monthEnd.add(const Duration(days: 1)))) {
         final txList = transactions[monthCurrent] ?? [];
         for (var tx in txList) {
@@ -309,11 +369,11 @@ class _SpendingState extends State<Spending> {
         }
         monthCurrent = monthCurrent.add(const Duration(days: 1));
       }
-      
+
       monthlyData.add(MapEntry(monthStart, monthlyTotal));
       current = DateTime(current.year, current.month + 1, 1);
     }
-    
+
     return monthlyData;
   }
 
@@ -324,14 +384,14 @@ class _SpendingState extends State<Spending> {
   ) {
     final yearlyData = <MapEntry<DateTime, double>>[];
     DateTime current = DateTime(startDate.year, 1, 1);
-    
+
     while (current.year <= endDate.year) {
       final yearStart = DateTime(current.year, 1, 1);
       final yearEnd = DateTime(current.year, 12, 31);
-      
+
       double yearlyTotal = 0.0;
       DateTime yearCurrent = yearStart;
-      
+
       while (yearCurrent.year == current.year) {
         final txList = transactions[yearCurrent] ?? [];
         for (var tx in txList) {
@@ -340,11 +400,11 @@ class _SpendingState extends State<Spending> {
         yearCurrent = yearCurrent.add(const Duration(days: 1));
         if (yearCurrent.isAfter(yearEnd)) break;
       }
-      
+
       yearlyData.add(MapEntry(yearStart, yearlyTotal));
       current = DateTime(current.year + 1, 1, 1);
     }
-    
+
     return yearlyData;
   }
 
@@ -365,10 +425,10 @@ class _SpendingState extends State<Spending> {
   String _getDateLabel(DateTime date) {
     switch (selectedView) {
       case StatisticsView.daily:
-    final now = DateTime.now();
+        final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
         final dateOnly = DateTime(date.year, date.month, date.day);
-        
+
         final l10n = AppLocalizations.of(context);
         if (dateOnly == today) {
           return l10n?.today ?? 'Today';
@@ -377,15 +437,15 @@ class _SpendingState extends State<Spending> {
         } else {
           return '${date.day}/${date.month}';
         }
-        
+
       case StatisticsView.weekly:
         final weekEnd = date.add(const Duration(days: 6));
         return 'W${_getWeekNumber(date)}\n${date.day}/${date.month}-${weekEnd.day}/${weekEnd.month}';
-        
+
       case StatisticsView.monthly:
         // Chỉ hiển thị tháng viết tắt để tránh dính chữ
         return _getMonthName(date.month);
-        
+
       case StatisticsView.yearly:
         return date.year.toString();
     }
@@ -398,30 +458,60 @@ class _SpendingState extends State<Spending> {
   }
 
   String _getMonthName(int month) {
-    const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return monthNames[month - 1];
+    final l10n = AppLocalizations.of(context);
+    switch (month) {
+      case 1:
+        return l10n?.jan ?? 'Jan';
+      case 2:
+        return l10n?.feb ?? 'Feb';
+      case 3:
+        return l10n?.mar ?? 'Mar';
+      case 4:
+        return l10n?.apr ?? 'Apr';
+      case 5:
+        return l10n?.may ?? 'May';
+      case 6:
+        return l10n?.jun ?? 'Jun';
+      case 7:
+        return l10n?.jul ?? 'Jul';
+      case 8:
+        return l10n?.aug ?? 'Aug';
+      case 9:
+        return l10n?.sep ?? 'Sep';
+      case 10:
+        return l10n?.oct ?? 'Oct';
+      case 11:
+        return l10n?.nov ?? 'Nov';
+      case 12:
+        return l10n?.dec ?? 'Dec';
+      default:
+        return 'Unknown';
+    }
   }
 
   double _getMaxY() {
     if (chartData.isEmpty) return 100;
-    final maxValue = chartData.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+    final maxValue = chartData
+        .map((e) => e.value)
+        .reduce((a, b) => a > b ? a : b);
     return maxValue > 0 ? maxValue * 1.2 : 100;
   }
 
   double _calculateChartWidth() {
     // Tính toán độ rộng cần thiết dựa trên số lượng data points
     if (chartData.isEmpty) return 300.0; // Minimum width khi không có data
-    
+
     final double barWidth = _getBarWidth();
     final double spacing = 24; // Khoảng cách giữa các bars
     final double leftPadding = 75; // Cho left titles (giảm từ 80 xuống 75)
     final double rightPadding = 20;
-    
-    final double calculatedWidth = leftPadding + rightPadding + (chartData.length * (barWidth + spacing));
-    return calculatedWidth.clamp(300.0, double.infinity); // Đảm bảo width tối thiểu
+
+    final double calculatedWidth =
+        leftPadding + rightPadding + (chartData.length * (barWidth + spacing));
+    return calculatedWidth.clamp(
+      300.0,
+      double.infinity,
+    ); // Đảm bảo width tối thiểu
   }
 
   double _getBarWidth() {
@@ -440,52 +530,69 @@ class _SpendingState extends State<Spending> {
 
   Widget _buildScrollableChart(ThemeData theme, double chartWidth) {
     final ScrollController scrollController = ScrollController();
-    
+
     // Auto scroll to today để hiển thị ngày hôm nay
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients && chartData.isNotEmpty) {
         final screenWidth = MediaQuery.of(context).size.width - 64;
         final shouldScroll = chartWidth > screenWidth;
-        
+
         if (shouldScroll) {
           // Tìm vị trí của ngày hôm nay trong chartData
           final today = DateTime.now();
           final todayNormalized = DateTime(today.year, today.month, today.day);
-          
+
           int todayIndex = -1;
           for (int i = 0; i < chartData.length; i++) {
             final chartDate = chartData[i].key;
-            final chartDateNormalized = DateTime(chartDate.year, chartDate.month, chartDate.day);
+            final chartDateNormalized = DateTime(
+              chartDate.year,
+              chartDate.month,
+              chartDate.day,
+            );
             if (chartDateNormalized.isAtSameMomentAs(todayNormalized)) {
               todayIndex = i;
               break;
             }
           }
-          
+
           // Nếu không tìm thấy ngày hôm nay, tìm ngày gần nhất
           if (todayIndex == -1) {
             todayIndex = chartData.length - 1; // Fallback to latest
             for (int i = chartData.length - 1; i >= 0; i--) {
               final chartDate = chartData[i].key;
-              if (chartDate.isBefore(today) || chartDate.isAtSameMomentAs(today)) {
+              if (chartDate.isBefore(today) ||
+                  chartDate.isAtSameMomentAs(today)) {
                 todayIndex = i;
                 break;
               }
             }
           }
-          
+
           // Tính toán scroll offset để center ngày hôm nay
           final barWidth = _getBarWidth() + 24; // bar width + spacing
           final visibleBars = (screenWidth / barWidth).floor();
           final centerOffset = (visibleBars / 2).floor();
-          
+
           // Scroll để hiển thị today ở giữa màn hình (hoặc về phía phải nếu có thể)
           final maxVisibleBars = (visibleBars > 0) ? visibleBars : 1;
-          final maxTargetIndex = (chartData.length - maxVisibleBars).clamp(0, chartData.length - 1);
-          final targetIndex = (todayIndex - centerOffset + 3).clamp(0, maxTargetIndex);
-          final maxScrollOffset = (chartWidth - screenWidth).clamp(0.0, double.infinity);
-          final scrollOffset = (targetIndex * barWidth).clamp(0.0, maxScrollOffset);
-          
+          final maxTargetIndex = (chartData.length - maxVisibleBars).clamp(
+            0,
+            chartData.length - 1,
+          );
+          final targetIndex = (todayIndex - centerOffset + 3).clamp(
+            0,
+            maxTargetIndex,
+          );
+          final maxScrollOffset = (chartWidth - screenWidth).clamp(
+            0.0,
+            double.infinity,
+          );
+          final scrollOffset = (targetIndex * barWidth).clamp(
+            0.0,
+            maxScrollOffset,
+          );
+
           if (scrollOffset > 0 && scrollOffset.isFinite) {
             scrollController.animateTo(
               scrollOffset,
@@ -496,7 +603,7 @@ class _SpendingState extends State<Spending> {
         }
       }
     });
-    
+
     return Stack(
       children: [
         SingleChildScrollView(
@@ -517,10 +624,7 @@ class _SpendingState extends State<Spending> {
             width: 12, // Giảm width để ít che hơn
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  theme.cardColor,
-                  theme.cardColor.withOpacity(0),
-                ],
+                colors: [theme.cardColor, theme.cardColor.withOpacity(0)],
                 stops: const [0.0, 1.0],
               ),
             ),
@@ -534,10 +638,7 @@ class _SpendingState extends State<Spending> {
             width: 12, // Giảm width để đồng bộ với bên trái
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  theme.cardColor.withOpacity(0),
-                  theme.cardColor,
-                ],
+                colors: [theme.cardColor.withOpacity(0), theme.cardColor],
                 stops: const [0.0, 1.0],
               ),
             ),
@@ -570,11 +671,7 @@ class _SpendingState extends State<Spending> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.today,
-                      size: 12,
-                      color: theme.primaryColor,
-                    ),
+                    Icon(Icons.today, size: 12, color: theme.primaryColor),
                     const SizedBox(width: 4),
                     Text(
                       'Hôm nay',
@@ -608,47 +705,68 @@ class _SpendingState extends State<Spending> {
 
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
-    
+
     return chartData.any((entry) {
       final chartDate = entry.key;
-      final chartDateNormalized = DateTime(chartDate.year, chartDate.month, chartDate.day);
+      final chartDateNormalized = DateTime(
+        chartDate.year,
+        chartDate.month,
+        chartDate.day,
+      );
       return chartDateNormalized.isAtSameMomentAs(todayNormalized);
     });
   }
 
   void _scrollToToday(ScrollController scrollController) {
     if (!scrollController.hasClients || chartData.isEmpty) return;
-    
+
     final today = DateTime.now();
     final todayNormalized = DateTime(today.year, today.month, today.day);
-    
+
     int todayIndex = -1;
     for (int i = 0; i < chartData.length; i++) {
       final chartDate = chartData[i].key;
-      final chartDateNormalized = DateTime(chartDate.year, chartDate.month, chartDate.day);
+      final chartDateNormalized = DateTime(
+        chartDate.year,
+        chartDate.month,
+        chartDate.day,
+      );
       if (chartDateNormalized.isAtSameMomentAs(todayNormalized)) {
         todayIndex = i;
         break;
       }
     }
-    
+
     if (todayIndex == -1) return;
-    
+
     final screenWidth = MediaQuery.of(context).size.width - 64;
     final barWidth = _getBarWidth() + 24; // bar width + spacing
-    final visibleBars = (screenWidth / barWidth).floor().clamp(1, chartData.length);
+    final visibleBars = (screenWidth / barWidth).floor().clamp(
+      1,
+      chartData.length,
+    );
     final centerOffset = (visibleBars / 2).floor();
-    
+
     // Tính toán an toàn cho scroll offset
     final chartWidth = _calculateChartWidth();
-    final maxScrollOffset = (chartWidth - screenWidth).clamp(0.0, double.infinity);
-    
-    if (maxScrollOffset <= 0) return; // Không cần scroll nếu chart nhỏ hơn screen
-    
-    final maxTargetIndex = (chartData.length - visibleBars).clamp(0, chartData.length - 1);
-    final targetIndex = (todayIndex - centerOffset + 1).clamp(0, maxTargetIndex);
+    final maxScrollOffset = (chartWidth - screenWidth).clamp(
+      0.0,
+      double.infinity,
+    );
+
+    if (maxScrollOffset <= 0)
+      return; // Không cần scroll nếu chart nhỏ hơn screen
+
+    final maxTargetIndex = (chartData.length - visibleBars).clamp(
+      0,
+      chartData.length - 1,
+    );
+    final targetIndex = (todayIndex - centerOffset + 1).clamp(
+      0,
+      maxTargetIndex,
+    );
     final scrollOffset = (targetIndex * barWidth).clamp(0.0, maxScrollOffset);
-    
+
     if (scrollOffset.isFinite && scrollOffset >= 0) {
       scrollController.animateTo(
         scrollOffset,
@@ -670,9 +788,13 @@ class _SpendingState extends State<Spending> {
               color: theme.primaryColor.withOpacity(0.8),
               width: 1,
             ),
-            tooltipPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            tooltipPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
             tooltipMargin: 8,
-            getTooltipColor: (group) => theme.colorScheme.surface.withOpacity(0.95),
+            getTooltipColor:
+                (group) => theme.colorScheme.surface.withOpacity(0.95),
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
               if (group.x >= chartData.length) return null;
               final data = chartData[group.x];
@@ -730,12 +852,8 @@ class _SpendingState extends State<Spending> {
               interval: _getMaxY() / 4,
             ),
           ),
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         gridData: FlGridData(
           show: true,
@@ -762,7 +880,7 @@ class _SpendingState extends State<Spending> {
 
   List<BarChartGroupData> _buildScrollableBarGroups() {
     final double barWidth = _getBarWidth();
-    
+
     return chartData.asMap().entries.map((entry) {
       final index = entry.key;
       final data = entry.value;
@@ -771,21 +889,23 @@ class _SpendingState extends State<Spending> {
         barRods: [
           BarChartRodData(
             toY: data.value,
-            color: data.value > 0 
-                ? Theme.of(context).primaryColor 
-                : Theme.of(context).primaryColor.withOpacity(0.3),
+            color:
+                data.value > 0
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).primaryColor.withOpacity(0.3),
             width: barWidth,
             borderRadius: BorderRadius.circular(6),
-            gradient: data.value > 0 
-                ? LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.8),
-                      Theme.of(context).primaryColor,
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  )
-                : null,
+            gradient:
+                data.value > 0
+                    ? LinearGradient(
+                      colors: [
+                        Theme.of(context).primaryColor.withOpacity(0.8),
+                        Theme.of(context).primaryColor,
+                      ],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    )
+                    : null,
           ),
         ],
       );
@@ -809,8 +929,14 @@ class _SpendingState extends State<Spending> {
       ];
     }
 
-    final colors = [Colors.cyan, Colors.orange, Colors.purple, Colors.pink, Colors.blue];
-    
+    final colors = [
+      Colors.cyan,
+      Colors.orange,
+      Colors.purple,
+      Colors.pink,
+      Colors.blue,
+    ];
+
     return pieChartData.asMap().entries.map((entry) {
       final index = entry.key;
       final data = entry.value;
@@ -831,12 +957,21 @@ class _SpendingState extends State<Spending> {
   List<Widget> _buildLegendItems() {
     if (pieChartData.isEmpty) {
       return [
-        _buildLegendItem(Colors.grey, AppLocalizations.of(context)?.noDataAvailable ?? 'No data available'),
+        _buildLegendItem(
+          Colors.grey,
+          AppLocalizations.of(context)?.noDataAvailable ?? 'No data available',
+        ),
       ];
     }
 
-    final colors = [Colors.cyan, Colors.orange, Colors.purple, Colors.pink, Colors.blue];
-    
+    final colors = [
+      Colors.cyan,
+      Colors.orange,
+      Colors.purple,
+      Colors.pink,
+      Colors.blue,
+    ];
+
     return pieChartData.asMap().entries.map((entry) {
       final index = entry.key;
       final data = entry.value;
@@ -851,53 +986,88 @@ class _SpendingState extends State<Spending> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    
+
     return MultiBlocListener(
       listeners: [
         BlocListener<TransactionCubit, TransactionState>(
-      listener: (context, state) {
-        if (state.status == TransactionStateStatus.loaded) {
-          _calculateStatistics(state.transactionsList);
-        }
-      },
+          listener: (context, state) {
+            if (state.status == TransactionStateStatus.loaded) {
+              _calculateStatistics(state.transactionsList);
+            }
+          },
         ),
         BlocListener<Categoriescubit, CategoriesState>(
           listener: (context, state) {
             if (state.status == CategoriesStatus.loaded) {
               setState(() {
                 final l10n = AppLocalizations.of(context);
-                categories = [
-                  l10n?.allCategories ?? 'All Categories', 
-                  ...state.categoriesExpense.map((c) => IconMapping.getLocalizedCategoryNameFromCategory(c, l10n))
+                final newCategories = [
+                  l10n?.allCategories ?? 'All Categories',
+                  ...state.categoriesExpense.map(
+                    (c) => IconMapping.getLocalizedCategoryNameFromCategory(
+                      c,
+                      l10n,
+                    ),
+                  ),
                 ];
+
+                // Update categories
+                categories = newCategories;
+
+                // Handle selectedCategory update when language changes
+                if (selectedCategory.isEmpty && categories.isNotEmpty) {
+                  // First time initialization
+                  selectedCategory = categories.first;
+                } else if (categories.isNotEmpty) {
+                  // Language changed - try to find equivalent category
+                  final currentIndex = categories.indexWhere(
+                    (cat) =>
+                        cat == selectedCategory ||
+                        (selectedCategory == 'All Categories' &&
+                            cat == (l10n?.allCategories ?? 'All Categories')),
+                  );
+
+                  if (currentIndex != -1) {
+                    selectedCategory = categories[currentIndex];
+                  } else {
+                    // Fallback to first category if no match found
+                    selectedCategory = categories.first;
+                  }
+                }
+
+                // Update localized values
+                _updateLocalizedValues();
+
+                // Fetch transactions after categories are loaded
+                context.read<TransactionCubit>().fetchTransactionsByDate();
               });
             }
           },
         ),
       ],
       child: BlocBuilder<TransactionCubit, TransactionState>(
-      builder: (context, state) {
-        if (state.status == TransactionStateStatus.loading) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        builder: (context, state) {
+          if (state.status == TransactionStateStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 // Summary Header
                 _buildSummaryHeader(theme, l10n),
                 const SizedBox(height: 24),
-                
+
                 // Filter Controls
                 _buildFilterControls(theme, l10n),
                 const SizedBox(height: 24),
-                
+
                 // Bar Chart
                 _buildBarChart(theme, l10n),
                 const SizedBox(height: 32),
-                
+
                 // Pie Chart Section
                 _buildPieChartSection(theme, l10n),
               ],
@@ -912,45 +1082,46 @@ class _SpendingState extends State<Spending> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-              Row(
-                children: [
-                  Text(
-                    l10n?.expense ?? 'Expense',
+        Row(
+          children: [
+            Text(
+              l10n?.expense ?? 'Expense',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    '-${StatisticsUtils.formatAmount(totalExpense)} VND',
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              '-${StatisticsUtils.formatAmount(totalExpense)} VND',
               style: theme.textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
-                ],
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.error,
               ),
-              const SizedBox(height: 8),
-              Text(
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
           _getPeriodDescription(),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
-                ),
-              ),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+          ),
+        ),
       ],
     );
   }
 
   String _getPeriodDescription() {
     final (startDate, endDate) = _getDateRange();
-    
+    final l10n = AppLocalizations.of(context);
+
     switch (selectedView) {
       case StatisticsView.daily:
         return '${_getMonthName(startDate.month)} ${startDate.year}';
       case StatisticsView.weekly:
-        return 'Week of ${startDate.day}/${startDate.month}/${startDate.year}';
+        return '${l10n?.weekOf ?? 'Week of'} ${startDate.day}/${startDate.month}/${startDate.year}';
       case StatisticsView.monthly:
-        return 'Year ${startDate.year}';
+        return '${l10n?.year ?? 'Year'} ${startDate.year}';
       case StatisticsView.yearly:
         return '${startDate.year} - ${endDate.year}';
     }
@@ -960,15 +1131,12 @@ class _SpendingState extends State<Spending> {
     return Column(
       children: [
         // View and Category Selection
-              Row(
-                children: [
+        Row(
+          children: [
             Expanded(
-              child: _buildDropdown(
-                _getViewText(),
-                () => _showViewSelector(),
-              ),
+              child: _buildDropdown(_getViewText(), () => _showViewSelector()),
             ),
-                  const SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _buildDropdown(
                 selectedCategory,
@@ -978,23 +1146,18 @@ class _SpendingState extends State<Spending> {
           ],
         ),
         const SizedBox(height: 12),
-        
+
         // Date Selection (centered)
         Row(
           children: [
             Expanded(
-              child: _buildDropdown(
-                _getDateText(),
-                () => _showDateSelector(),
-              ),
+              child: _buildDropdown(_getDateText(), () => _showDateSelector()),
             ),
           ],
         ),
       ],
     );
   }
-
-
 
   String _getViewText() {
     final l10n = AppLocalizations.of(context);
@@ -1026,9 +1189,12 @@ class _SpendingState extends State<Spending> {
   Widget _buildBarChart(ThemeData theme, AppLocalizations? l10n) {
     // Tính toán độ rộng cần thiết cho chart
     final double chartWidth = _calculateChartWidth();
-    final double screenWidth = MediaQuery.of(context).size.width - 64; // 64 = padding
-    final bool needsScroll = chartData.length > 3 && chartWidth > screenWidth; // Chỉ scroll khi có nhiều data và cần thiết
-    
+    final double screenWidth =
+        MediaQuery.of(context).size.width - 64; // 64 = padding
+    final bool needsScroll =
+        chartData.length > 3 &&
+        chartWidth > screenWidth; // Chỉ scroll khi có nhiều data và cần thiết
+
     return Container(
       decoration: BoxDecoration(
         color: theme.cardColor,
@@ -1044,13 +1210,15 @@ class _SpendingState extends State<Spending> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 8), // Giảm padding dưới title
+            padding: const EdgeInsets.only(
+              bottom: 8,
+            ), // Giảm padding dưới title
             child: Row(
               children: [
                 Text(
                   _getChartTitle(),
                   style: theme.textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w600,
                     fontSize: 16, // Giảm font size một chút
                   ),
                 ),
@@ -1062,13 +1230,18 @@ class _SpendingState extends State<Spending> {
                       Icon(
                         Icons.swipe_left,
                         size: 14, // Giảm icon size
-                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(
+                          0.6,
+                        ),
                       ),
                       const SizedBox(width: 3),
                       Text(
-                        AppLocalizations.of(context)?.scrollToSeeMore ?? 'Scroll để xem thêm',
+                        AppLocalizations.of(context)?.scrollToSeeMore ??
+                            'Scroll để xem thêm',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.textTheme.bodySmall?.color?.withOpacity(0.6),
+                          color: theme.textTheme.bodySmall?.color?.withOpacity(
+                            0.6,
+                          ),
                           fontStyle: FontStyle.italic,
                           fontSize: 10, // Giảm font size
                         ),
@@ -1079,9 +1252,10 @@ class _SpendingState extends State<Spending> {
             ),
           ),
           Expanded(
-            child: needsScroll 
-                ? _buildScrollableChart(theme, chartWidth)
-                : _buildStaticChart(theme),
+            child:
+                needsScroll
+                    ? _buildScrollableChart(theme, chartWidth)
+                    : _buildStaticChart(theme),
           ),
         ],
       ),
@@ -1091,44 +1265,43 @@ class _SpendingState extends State<Spending> {
   Widget _buildPieChartSection(ThemeData theme, AppLocalizations? l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+      children: [
+        Text(
           l10n?.compareExpenseTypes ?? 'Expense by Categories',
           style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-            fontSize: 16
-                    ),
-              ),
-              const SizedBox(height: 16),
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+        ),
+        const SizedBox(height: 16),
         Container(
-          
           padding: const EdgeInsets.all(16),
           child: Row(
-                children: [
-                  // Pie Chart
+            children: [
+              // Pie Chart
               SizedBox(
                 width: 140,
                 height: 140,
-                      child: PieChart(
-                        PieChartData(
-                          sectionsSpace: 2,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
                     centerSpaceRadius: 45,
-                          sections: _buildPieSections(),
-                        ),
-                      ),
-                    ),
+                    sections: _buildPieSections(),
+                  ),
+                ),
+              ),
               const SizedBox(width: 24),
 
-                  // Legend
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _buildLegendItems(),
-                    ),
-                  ),
-                ],
+              // Legend
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _buildLegendItems(),
+                ),
               ),
+            ],
           ),
+        ),
       ],
     );
   }
@@ -1151,12 +1324,12 @@ class _SpendingState extends State<Spending> {
           children: [
             Expanded(
               child: Text(
-              text,
+                text,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+                  fontWeight: FontWeight.w500,
+                ),
                 overflow: TextOverflow.ellipsis,
-            ),
+              ),
             ),
             const SizedBox(width: 8),
             Icon(
@@ -1182,9 +1355,9 @@ class _SpendingState extends State<Spending> {
         const SizedBox(width: 12),
         Expanded(
           child: Text(
-          text,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
+            text,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w500,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -1194,96 +1367,111 @@ class _SpendingState extends State<Spending> {
   }
 
   // Selector Methods
-    
-    void _showViewSelector() {
+
+  void _showViewSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.selectView ?? 'Select View'),
-        contentPadding: const EdgeInsets.only(top: 20),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: StatisticsView.values.map((view) {
-              return ListTile(
-          title: Text(
-                  _getViewName(view),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                trailing: selectedView == view 
-                    ? Icon(
-                        Icons.check,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  setState(() {
-                    selectedView = view;
-                  });
-                  Navigator.pop(context);
-                  context.read<TransactionCubit>().fetchTransactionsByDate();
-                },
-              );
-            }).toList(),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              AppLocalizations.of(context)?.selectView ?? 'Select View',
+            ),
+            contentPadding: const EdgeInsets.only(top: 20),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children:
+                    StatisticsView.values.map((view) {
+                      return ListTile(
+                        title: Text(
+                          _getViewName(view),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        trailing:
+                            selectedView == view
+                                ? Icon(
+                                  Icons.check,
+                                  color: Theme.of(context).primaryColor,
+                                )
+                                : null,
+                        onTap: () {
+                          setState(() {
+                            selectedView = view;
+                          });
+                          Navigator.pop(context);
+                          context
+                              .read<TransactionCubit>()
+                              .fetchTransactionsByDate();
+                        },
+                      );
+                    }).toList(),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
-          ),
-        ],
-      ),
     );
   }
 
   void _showCategorySelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.selectCategory ?? 'Select Category'),
-        contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
-          width: double.maxFinite,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.6, // Giới hạn 60% chiều cao màn hình
-          ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final category = categories[index];
-              return ListTile(
-                title: Text(
-                  category,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                trailing: selectedCategory == category 
-                    ? Icon(
-                        Icons.check,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  setState(() {
-                    selectedCategory = category;
-                  });
-                  Navigator.pop(context);
-                  context.read<TransactionCubit>().fetchTransactionsByDate();
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              AppLocalizations.of(context)?.selectCategory ?? 'Select Category',
+            ),
+            contentPadding: const EdgeInsets.only(top: 20),
+            content: Container(
+              width: double.maxFinite,
+              constraints: BoxConstraints(
+                maxHeight:
+                    MediaQuery.of(context).size.height *
+                    0.6, // Giới hạn 60% chiều cao màn hình
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final category = categories[index];
+                  return ListTile(
+                    title: Text(
+                      category,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    trailing:
+                        selectedCategory == category
+                            ? Icon(
+                              Icons.check,
+                              color: Theme.of(context).primaryColor,
+                            )
+                            : null,
+                    onTap: () {
+                      setState(() {
+                        selectedCategory = category;
+                      });
+                      Navigator.pop(context);
+                      context
+                          .read<TransactionCubit>()
+                          .fetchTransactionsByDate();
+                    },
+                  );
                 },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
-          ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+              ),
             ],
           ),
-        );
+    );
   }
 
   void _showDateSelector() {
@@ -1306,124 +1494,149 @@ class _SpendingState extends State<Spending> {
   void _showYearSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.selectYear ?? 'Select Year'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: availableYears.map((year) {
-            return ListTile(
-              title: Text(year),
-              onTap: () {
-                setState(() {
-                  selectedDate = DateTime(int.parse(year), selectedDate.month, selectedDate.day);
-                  });
-                  Navigator.pop(context);
-                context.read<TransactionCubit>().fetchTransactionsByDate();
-              },
-            );
-          }).toList(),
-        ),
-      ),
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              AppLocalizations.of(context)?.selectYear ?? 'Select Year',
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children:
+                  availableYears.map((year) {
+                    return ListTile(
+                      title: Text(year),
+                      onTap: () {
+                        setState(() {
+                          selectedDate = DateTime(
+                            int.parse(year),
+                            selectedDate.month,
+                            selectedDate.day,
+                          );
+                        });
+                        Navigator.pop(context);
+                        context
+                            .read<TransactionCubit>()
+                            .fetchTransactionsByDate();
+                      },
+                    );
+                  }).toList(),
+            ),
+          ),
     );
   }
 
   void _showMonthSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.selectMonth ?? 'Select Month'),
-        contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
-          width: double.maxFinite,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
-          ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: 12,
-            itemBuilder: (context, index) {
-              final month = index + 1;
-              final isSelected = selectedDate.month == month;
-              return ListTile(
-                title: Text(
-                  '${_getMonthName(month)} ${selectedDate.year}',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                trailing: isSelected
-                    ? Icon(
-                        Icons.check,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  setState(() {
-                    selectedDate = DateTime(selectedDate.year, month, 1);
-                    _updateAvailableWeeks();
-                  });
-                  Navigator.pop(context);
-                  context.read<TransactionCubit>().fetchTransactionsByDate();
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              AppLocalizations.of(context)?.selectMonth ?? 'Select Month',
+            ),
+            contentPadding: const EdgeInsets.only(top: 20),
+            content: Container(
+              width: double.maxFinite,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: 12,
+                itemBuilder: (context, index) {
+                  final month = index + 1;
+                  final isSelected = selectedDate.month == month;
+                  return ListTile(
+                    title: Text(
+                      '${_getMonthName(month)} ${selectedDate.year}',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    trailing:
+                        isSelected
+                            ? Icon(
+                              Icons.check,
+                              color: Theme.of(context).primaryColor,
+                            )
+                            : null,
+                    onTap: () {
+                      setState(() {
+                        selectedDate = DateTime(selectedDate.year, month, 1);
+                        _updateAvailableWeeks();
+                      });
+                      Navigator.pop(context);
+                      context
+                          .read<TransactionCubit>()
+                          .fetchTransactionsByDate();
+                    },
+                  );
                 },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
-          ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+              ),
             ],
           ),
-        );
+    );
   }
 
   void _showWeekSelector() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context)?.selectWeek ?? 'Select Week'),
-        contentPadding: const EdgeInsets.only(top: 20),
-        content: Container(
-          width: double.maxFinite,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.4,
-          ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: availableWeeks.length,
-            itemBuilder: (context, index) {
-              final weekText = availableWeeks[index];
-              return ListTile(
-                title: Text(
-                  weekText,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                onTap: () {
-                  // Calculate the start date of the selected week
-                  final firstDayOfMonth = DateTime(selectedDate.year, selectedDate.month, 1);
-                  final weekStartDate = firstDayOfMonth.add(Duration(days: index * 7));
-                  
-                  setState(() {
-                    selectedDate = weekStartDate;
-                  });
-                  Navigator.pop(context);
-                  context.read<TransactionCubit>().fetchTransactionsByDate();
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              AppLocalizations.of(context)?.selectWeek ?? 'Select Week',
+            ),
+            contentPadding: const EdgeInsets.only(top: 20),
+            content: Container(
+              width: double.maxFinite,
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.4,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: availableWeeks.length,
+                itemBuilder: (context, index) {
+                  final weekText = availableWeeks[index];
+                  return ListTile(
+                    title: Text(
+                      weekText,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    onTap: () {
+                      // Calculate the start date of the selected week
+                      final firstDayOfMonth = DateTime(
+                        selectedDate.year,
+                        selectedDate.month,
+                        1,
+                      );
+                      final weekStartDate = firstDayOfMonth.add(
+                        Duration(days: index * 7),
+                      );
+
+                      setState(() {
+                        selectedDate = weekStartDate;
+                      });
+                      Navigator.pop(context);
+                      context
+                          .read<TransactionCubit>()
+                          .fetchTransactionsByDate();
+                    },
+                  );
                 },
-              );
-            },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
+              ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
-          ),
-        ],
-      ),
     );
   }
-
-
 
   String _getViewName(StatisticsView view) {
     final l10n = AppLocalizations.of(context);

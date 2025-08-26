@@ -11,7 +11,7 @@ class ResultDialogAnimation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -26,7 +26,9 @@ class ResultDialogAnimation extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            isSuccess ? AppLocalizations.of(context)?.success ?? 'Success!' : AppLocalizations.of(context)?.error ?? 'Error!',
+            isSuccess
+                ? AppLocalizations.of(context)?.success ?? 'Success!'
+                : AppLocalizations.of(context)?.error ?? 'Error!',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
               color: Colors.green,
               fontWeight: FontWeight.bold,

@@ -57,7 +57,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   // Get default categories based on transaction type
   late List<Category> availableCategories;
-  
+
   // Default colors for each category group
   final Map<String, Color> categoryColors = {
     'Expense': AppColors.red,
@@ -107,7 +107,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   void initState() {
     listAccounts = context.read<ManageMoneyCubit>().listAccounts ?? [];
-    // Initialize with expense categories by default
+    // Luôn khởi tạo với expense (chi tiêu) khi vào màn hình
+    selectedTransactionType = 1;
     availableCategories = defaultExpenseCategories;
 
     // Check if we're in editing mode
@@ -170,13 +171,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       body: BlocListener<TransactionCubit, TransactionState>(
         listener: (listenerContext, state) async {
           if (state.status == TransactionStateStatus.success) {
-            final accountID = context.read<ManageMoneyCubit>().getAccountByName(selectedAccount)?.id ?? '';
-            await context.read<TransactionCubit>().fetchTransactionsByAccount(accountID);
+            final accountID =
+                context
+                    .read<ManageMoneyCubit>()
+                    .getAccountByName(selectedAccount)
+                    ?.id ??
+                '';
+            await context.read<TransactionCubit>().fetchTransactionsByAccount(
+              accountID,
+            );
             context.read<ManageMoneyCubit>().setCurrentAccountName(accountID);
             _showResultEvent(listenerContext, true, context);
             amountController.clear();
             noteController.clear();
-            
           }
           if (state.status == TransactionStateStatus.error) {
             _showResultEvent(listenerContext, false, context);
@@ -318,7 +325,8 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           setState(() {
             selectedTransactionType = index;
             // Update available categories based on transaction type
-            availableCategories = index == 0 ? defaultIncomeCategories : defaultExpenseCategories;
+            availableCategories =
+                index == 0 ? defaultIncomeCategories : defaultExpenseCategories;
             // Reset selected category when switching types
             selectedCategory = 'Select Category';
           });
@@ -432,7 +440,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         return Container(
           padding: EdgeInsets.all(20),
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,
+            maxHeight: MediaQuery.of(context).size.height * 0.45,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -467,7 +475,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     final category = availableCategories[index];
                     final categoryColor = ColorUtils.parseColor(category.color);
                     final isSelected = selectedCategory == category.name;
-                    
+
                     return GestureDetector(
                       onTap: () {
                         setState(() {
@@ -477,14 +485,16 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: isSelected
-                              ? categoryColor?.withOpacity(0.2)
-                              : theme.cardColor,
+                          color:
+                              isSelected
+                                  ? categoryColor?.withOpacity(0.2)
+                                  : theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected
-                                ? categoryColor ?? theme.colorScheme.primary
-                                : theme.dividerColor,
+                            color:
+                                isSelected
+                                    ? categoryColor ?? theme.colorScheme.primary
+                                    : theme.dividerColor,
                             width: isSelected ? 2 : 1,
                           ),
                           boxShadow: [
@@ -513,13 +523,17 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                             ),
                             SizedBox(height: 4),
                             Text(
-                              category.name,
+                              IconMapping.getLocalizedCategoryNameFromCategory(
+                                category,
+                                AppLocalizations.of(context),
+                              ),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
-                                color: isSelected
-                                    ? categoryColor
-                                    : theme.textTheme.bodySmall?.color,
+                                color:
+                                    isSelected
+                                        ? categoryColor
+                                        : theme.textTheme.bodySmall?.color,
                               ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
@@ -643,9 +657,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
     // Calculate effective balance for validation
     double effectiveBalance = account.balance;
-    
+
     // If editing and same account, calculate balance after reverting old transaction
-    if (isEditing && editingTransaction != null && oldAccount?.id == account.id) {
+    if (isEditing &&
+        editingTransaction != null &&
+        oldAccount?.id == account.id) {
       if (editingTransaction!.type == TransactionType.income) {
         effectiveBalance -= editingTransaction!.amount; // Revert income
       } else {
@@ -678,7 +694,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     return true;
   }
 
-    void addTrans() async {
+  void addTrans() async {
     try {
       // Validate and parse input
       final validationResult = await _validateAndParseInput();
@@ -689,9 +705,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       final amount = validationResult.amount!;
       final date = validationResult.date!;
       final account = validationResult.account!;
-      final type = selectedTransactionType == 0 
-          ? TransactionType.income 
-          : TransactionType.expense;
+      final type =
+          selectedTransactionType == 0
+              ? TransactionType.income
+              : TransactionType.expense;
       final uid = context.read<UserCubit>().state.user?.uid ?? '';
 
       // Create or update transaction
@@ -703,12 +720,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
       // Update account balances
       await _updateAccountBalances(amount, account, type);
-
     } catch (e) {
       log('Error in addTrans: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
     }
   }
 
@@ -716,9 +732,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Future<ValidationResult> _validateAndParseInput() async {
     // Validate amount
     if (amountController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter an amount')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please enter an amount')));
       return ValidationResult(isValid: false);
     }
 
@@ -726,9 +742,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     try {
       amount = double.parse(amountController.text.trim());
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Invalid amount format')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Invalid amount format')));
       return ValidationResult(isValid: false);
     }
 
@@ -812,7 +828,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       isSync: false,
     );
 
-    await context.read<TransactionCubit>().updateTransaction(updatedTransaction);
+    await context.read<TransactionCubit>().updateTransaction(
+      updatedTransaction,
+    );
   }
 
   // Helper method to update account balances
@@ -920,7 +938,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   // Helper method to create updated MoneySource
-  MoneySource _createUpdatedMoneySource(MoneySource original, double newBalance) {
+  MoneySource _createUpdatedMoneySource(
+    MoneySource original,
+    double newBalance,
+  ) {
     return MoneySource(
       id: original.id,
       name: original.name,
@@ -958,7 +979,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (fromScreen == 'wallet') {
         Navigator.of(rootContext).pop();
       } else {
-        Navigator.of(rootContext).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
+        Navigator.of(
+          rootContext,
+        ).pushNamedAndRemoveUntil('/', ModalRoute.withName('/'));
       }
     }
   }

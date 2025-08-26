@@ -126,7 +126,7 @@ class _WalletState extends State<Wallet> {
                         icon: Icons.money,
                         iconColor: AppColors.blue,
                         title: transaction.categoriesId,
-                        subtitle: 'Description of transaction $index',
+                        subtitle: transaction.note ?? '',
                         amount:
                             transaction.type == TransactionType.income
                                 ? '+${transaction.amount} VND'
@@ -164,12 +164,13 @@ class _WalletState extends State<Wallet> {
           arguments: {'transaction': transaction, 'fromScreen': 'wallet'},
         );
         // Refresh transactions for the current account after returning
-        final String? accountIdToRefresh = currentAccountId ??
+        final String? accountIdToRefresh =
+            currentAccountId ??
             context.read<ManageMoneyCubit>().listAccounts?.first.id;
         if (accountIdToRefresh != null && accountIdToRefresh.isNotEmpty) {
-          context
-              .read<TransactionCubit>()
-              .fetchTransactionsByAccount(accountIdToRefresh);
+          context.read<TransactionCubit>().fetchTransactionsByAccount(
+            accountIdToRefresh,
+          );
         }
       },
       child: Container(

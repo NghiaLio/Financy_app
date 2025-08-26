@@ -332,7 +332,8 @@
   "iconMonetizationOn": "Kiếm tiền",
   "iconCurrencyBitcoin": "Tiền điện tử",
   "iconWorkOutline": "Thu nhập công việc",
-  "iconMoreHoriz": "Thêm"
+  "iconMoreHoriz": "Thêm",
+  "weekOf":"theo tuần"
 }
 
 

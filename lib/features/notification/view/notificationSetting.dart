@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, use_build_context_synchronously
+// ignore_for_file: file_names, use_build_context_synchronously, deprecated_member_use
 
 import 'dart:developer';
 
@@ -26,19 +26,41 @@ class _NotificationSettingsScreenState
   TimeOfDay? _reminderTime;
 
   @override
+  void initState(){
+    super.initState();
+    context.read<NotificationCubit>().loadNotificationSettings();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     
+
+    TimeOfDay parseTimeOfDay(String timeString) {
+      try {
+        // Try parsing as full DateTime
+        return TimeOfDay.fromDateTime(DateTime.parse(timeString));
+      } catch (_) {
+        // Try parsing as 'HH:mm'
+        final parts = timeString.split(':');
+        if (parts.length >= 2) {
+          final hour = int.tryParse(parts[0]) ?? 8;
+          final minute = int.tryParse(parts[1]) ?? 0;
+          return TimeOfDay(hour: hour, minute: minute);
+        }
+        // Fallback
+        return const TimeOfDay(hour: 8, minute: 0);
+      }
+    }
+
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           l10n?.notificationSettings ?? 'Cài đặt Thông báo',
-          style: textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-          ),
+          style: textTheme.titleLarge?.copyWith(color: Colors.white),
         ),
         backgroundColor: theme.primaryColor,
         foregroundColor: Colors.white,
@@ -50,13 +72,13 @@ class _NotificationSettingsScreenState
       ),
       body: BlocBuilder<NotificationCubit, NotificationState>(
         builder: (context, state) {
-          log(state.isNotificationEnabled.toString());
+          log(state.reminderTime.toString());
           _notificationEnabled = state.isNotificationEnabled;
           _dailyReminder = state.isDaily;
           _weeklyReport = state.isWeekly;
           _reminderTime =
               state.reminderTime != null
-                  ? TimeOfDay.fromDateTime(DateTime.parse(state.reminderTime!))
+                  ? parseTimeOfDay(state.reminderTime ?? '11:00')
                   : const TimeOfDay(hour: 8, minute: 0);
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -75,7 +97,7 @@ class _NotificationSettingsScreenState
                         l10n?.enableNotificationsDesc ??
                         'Nhận tất cả thông báo từ ứng dụng',
                     value: _notificationEnabled,
-                    onChanged: (value) {
+                    onChanged: (value) async {
                       context.read<NotificationCubit>().toggleNotification(
                         value,
                       );
@@ -105,10 +127,20 @@ class _NotificationSettingsScreenState
                     value: _dailyReminder,
                     onChanged:
                         _notificationEnabled
-                            ? (value) {
+                            ? (value) async {
                               context
                                   .read<NotificationCubit>()
                                   .toggleDailyReminder(value);
+                              if (value == true) {
+                                await NotiService().scheduleDailyNotifications(
+                                  title: l10n?.titleNotification ?? 'Thông báo',
+                                  body:
+                                      l10n?.dailyReminderDesc ??
+                                      'Hôm nay bạn đã chi tiêu bao nhiêu?',
+                                );
+                              } else {
+                                await NotiService().cancelNotification(1);
+                              }
                             }
                             : null,
                     icon: Icons.schedule,
@@ -124,10 +156,22 @@ class _NotificationSettingsScreenState
                     value: _weeklyReport,
                     onChanged:
                         _notificationEnabled
-                            ? (value) {
+                            ? (value) async {
                               context
                                   .read<NotificationCubit>()
                                   .toggleWeeklyReminder(value);
+
+                              if (value == true) {
+                                await NotiService().scheduleWeeklyNotifications(
+                                  l10n?.weeklyReport ?? 'Báo cáo tuần',
+                                  l10n?.weeklyReportDesc ??
+                                      'Đây là thông báo báo cáo tuần',
+                                  11,
+                                  0,
+                                );
+                              } else {
+                                await NotiService().cancelNotification(3);
+                              }
                             }
                             : null,
                     icon: Icons.bar_chart,
@@ -189,9 +233,10 @@ class _NotificationSettingsScreenState
   }) {
     final isEnabled = onChanged != null;
     final iconColor = isEnabled ? AppColors.primaryBlue : AppColors.textGrey;
-    final backgroundColor = isEnabled 
-        ? AppColors.primaryBlue.withOpacity(0.1) 
-        : AppColors.textGrey.withOpacity(0.1);
+    final backgroundColor =
+        isEnabled
+            ? AppColors.primaryBlue.withOpacity(0.1)
+            : AppColors.textGrey.withOpacity(0.1);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -203,11 +248,7 @@ class _NotificationSettingsScreenState
               color: backgroundColor,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 20,
-            ),
+            child: Icon(icon, color: iconColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -218,14 +259,20 @@ class _NotificationSettingsScreenState
                   title,
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.w500,
-                    color: isEnabled ? theme.textTheme.bodyLarge?.color : AppColors.textGrey,
+                    color:
+                        isEnabled
+                            ? theme.textTheme.bodyLarge?.color
+                            : AppColors.textGrey,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: isEnabled ? AppColors.textGrey : AppColors.textGrey.withOpacity(0.6),
+                    color:
+                        isEnabled
+                            ? AppColors.textGrey
+                            : AppColors.textGrey.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -267,6 +314,14 @@ class _NotificationSettingsScreenState
                     context.read<NotificationCubit>().setReminderTime(
                       picked.format(context),
                     );
+                    await NotiService().scheduleDailyNotifications(
+                      title:
+                          AppLocalizations.of(context)?.titleNotification ??
+                          'Thông báo',
+                      body:
+                          AppLocalizations.of(context)?.bodyNotification ??
+                          'Hôm nay bạn đã chi tiêu bao nhiêu?',
+                    );
                   }
                 }
                 : null,
@@ -282,16 +337,20 @@ class _NotificationSettingsScreenState
             children: [
               Icon(
                 Icons.access_time,
-                color: _notificationEnabled ? AppColors.primaryBlue : AppColors.textGrey,
+                color:
+                    _notificationEnabled
+                        ? AppColors.primaryBlue
+                        : AppColors.textGrey,
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 'Thời gian nhắc nhở: ${_reminderTime?.format(context) ?? '8:00'}',
                 style: textTheme.bodyMedium?.copyWith(
-                  color: _notificationEnabled 
-                      ? theme.textTheme.bodyMedium?.color 
-                      : AppColors.textGrey,
+                  color:
+                      _notificationEnabled
+                          ? theme.textTheme.bodyMedium?.color
+                          : AppColors.textGrey,
                 ),
               ),
             ],

@@ -55,7 +55,7 @@ class _LoginState extends State<Login> {
             ClipRRect(
               borderRadius: BorderRadius.circular(15),
               child: Image.asset(
-                'assets/image/image 1.png',
+                'assets/icon/rounded-in-photoretrica.png',
                 width: MediaQuery.of(context).size.width * 0.4,
                 height: MediaQuery.of(context).size.width * 0.4,
                 fit: BoxFit.cover,
