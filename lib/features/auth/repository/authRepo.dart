@@ -6,9 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:financy_ui/app/services/Local/settings_service.dart';
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Authrepo {
-
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication googleAuth =
@@ -34,12 +35,33 @@ class Authrepo {
     ApiService().setToken(accessToken);
     // fetch user data
     final user = await ApiService().get('/google/user');
-    //save user to local storage
-    await Hive.box<UserModel>('userBox').put('currentUser', UserModel.fromJson(user.data));
+    // Nếu user có picture là link, tải về app data và lưu path local
+    String? localPicturePath;
+    if (user.data['picture'] != null &&
+        user.data['picture'].toString().startsWith('http')) {
+      try {
+        final dir = await getApplicationDocumentsDirectory();
+        final fileName =
+            'google_profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savePath = '${dir.path}/$fileName';
+        await Dio().download(user.data['picture'], savePath);
+        localPicturePath = savePath;
+      } catch (e) {
+        localPicturePath = null;
+      }
+    }
+    // Lưu user vào Hive, thay picture = local path nếu có
+    final userJson = Map<String, dynamic>.from(user.data);
+    if (localPicturePath != null) {
+      userJson['picture'] = localPicturePath;
+    }
+    await Hive.box<UserModel>(
+      'userBox',
+    ).put('currentUser', UserModel.fromJson(userJson));
     await SettingsService.setAppState(true);
   }
 
-  Future<Map<String,dynamic>> authenticated() async{
+  Future<Map<String, dynamic>> authenticated() async {
     final accessToken = Hive.box('jwt').get('accessToken');
     ApiService().setToken(accessToken);
     final res = await ApiService().get('/google/user');
@@ -47,16 +69,15 @@ class Authrepo {
   }
 
   //get user data from local storage
-  Future<UserModel?> getCurrentUser() async{
+  Future<UserModel?> getCurrentUser() async {
     final boxUser = Hive.box<UserModel>('userBox').get('currentUser');
+    // Nếu picture là local path, trả về luôn, nếu là link thì không cần tải lại
     return boxUser;
   }
-
 
   //login with no account
   Future<void> loginWithNoAccount(UserModel guestUser) async {
     await Hive.box<UserModel>('userBox').put('currentUser', guestUser);
     await SettingsService.setAppState(true);
   }
-
 }

@@ -754,8 +754,9 @@ class _SpendingState extends State<Spending> {
       double.infinity,
     );
 
-    if (maxScrollOffset <= 0)
+    if (maxScrollOffset <= 0) {
       return; // Không cần scroll nếu chart nhỏ hơn screen
+    }
 
     final maxTargetIndex = (chartData.length - visibleBars).clamp(
       0,

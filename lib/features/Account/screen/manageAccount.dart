@@ -12,6 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../core/constants/colors.dart';
 import '../models/money_source.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
+import 'package:financy_ui/core/constants/money_source_icons.dart';
 
 class AccountMoneyScreen extends StatefulWidget {
   const AccountMoneyScreen({super.key});
@@ -301,7 +302,6 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           );
         }
       },
-
     );
   }
 
@@ -488,13 +488,25 @@ class _MoneySourceTile extends StatelessWidget {
                 .withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            MoneySourceIconColorMapper.iconFor(
-              source.type?.toString().split('.').last ?? '',
-            ),
-            color: ColorUtils.parseColor(source.color) ?? AppColors.primaryBlue,
-            size: 20,
-          ),
+          child:
+              MoneySourceImages.assetFor(source.name) != null
+                  ? ClipOval(
+                    child: Image.asset(
+                      MoneySourceImages.assetFor(source.name)!,
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                  : Icon(
+                    MoneySourceIconColorMapper.iconFor(
+                      source.type?.toString().split('.').last ?? '',
+                    ),
+                    color:
+                        ColorUtils.parseColor(source.color) ??
+                        AppColors.primaryBlue,
+                    size: 20,
+                  ),
         ),
         title: Text(
           source.name,

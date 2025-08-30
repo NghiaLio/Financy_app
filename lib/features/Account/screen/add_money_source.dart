@@ -68,57 +68,65 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
     return map[key] ?? key;
   }
 
-  Widget _buildBrandGrid(BuildContext context, Color backgroundColor, Color borderColor) {
+  Widget _buildBrandGrid(
+    BuildContext context,
+    Color backgroundColor,
+    Color borderColor,
+  ) {
     final keys = _brandKeysForType(selectedType);
     if (keys.isEmpty) return const SizedBox.shrink();
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: keys.map((key) {
-        final asset = MoneySourceImages.nameToAsset[key];
-        if (asset == null) return const SizedBox.shrink();
-        final isSelected = selectedBrandKey == key;
-        return GestureDetector(
-          onTap: () {
-            setState(() {
-              selectedBrandKey = key;
-              nameController.text = _brandDisplayName(key);
-              selectedColor = MoneySourceColors.colorForWithFallback(
-                key,
-                fallback: AppColors.primaryBlue,
-              );
-            });
-          },
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: backgroundColor,
-              border: Border.all(
-                color: isSelected ? Theme.of(context).colorScheme.primary : borderColor,
-                width: isSelected ? 2 : 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
+      children:
+          keys.map((key) {
+            final asset = MoneySourceImages.nameToAsset[key];
+            if (asset == null) return const SizedBox.shrink();
+            final isSelected = selectedBrandKey == key;
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  selectedBrandKey = key;
+                  nameController.text = _brandDisplayName(key);
+                  selectedColor = MoneySourceColors.colorForWithFallback(
+                    key,
+                    fallback: AppColors.primaryBlue,
+                  );
+                });
+              },
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: backgroundColor,
+                  border: Border.all(
+                    color:
+                        isSelected
+                            ? Theme.of(context).colorScheme.primary
+                            : borderColor,
+                    width: isSelected ? 2 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: ClipOval(
-              child: Image.asset(
-                asset,
-                width: 40,
-                height: 40,
-                fit: BoxFit.contain,
+                alignment: Alignment.center,
+                child: ClipOval(
+                  child: Image.asset(
+                    asset,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
-      }).toList(),
+            );
+          }).toList(),
     );
   }
 
@@ -128,14 +136,19 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
     final localizations = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Theme-aware colors
     final backgroundColor = isDark ? const Color(0xFF2A2A3E) : Colors.white;
     final textColor = isDark ? AppColors.textDark : AppColors.textLight;
-    final borderColor = isDark ? AppColors.textGrey.withOpacity(0.3) : AppColors.primaryBlue.withOpacity(0.2);
-    final focusedBorderColor = isDark ? AppColors.primaryBlue : AppColors.primaryBlue;
-    final hintColor = isDark ? AppColors.textGrey.withOpacity(0.7) : Colors.grey[600];
-    
+    final borderColor =
+        isDark
+            ? AppColors.textGrey.withOpacity(0.3)
+            : AppColors.primaryBlue.withOpacity(0.2);
+    final focusedBorderColor =
+        isDark ? AppColors.primaryBlue : AppColors.primaryBlue;
+    final hintColor =
+        isDark ? AppColors.textGrey.withOpacity(0.7) : Colors.grey[600];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -148,7 +161,9 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
           if (state.status == ManageMoneyStatus.success) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(AppLocalizations.of(context)?.success ?? 'Success'),
+                content: Text(
+                  AppLocalizations.of(context)?.success ?? 'Success',
+                ),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 2),
               ),
@@ -157,9 +172,9 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
               Navigator.pop(context);
             });
           } else if (state.status == ManageMoneyStatus.error) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message ?? 'An error occurred')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.message ?? 'An error occurred')),
+            );
           }
         },
         child: Padding(
@@ -185,10 +200,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                       color: backgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: borderColor,
-                          width: 1.5,
-                        ),
+                        side: BorderSide(color: borderColor, width: 1.5),
                       ),
                     ),
                   ),
@@ -236,10 +248,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                       fillColor: backgroundColor,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: borderColor,
-                          width: 1.5,
-                        ),
+                        borderSide: BorderSide(color: borderColor, width: 1.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -272,7 +281,10 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   controller: nameController,
                   style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.edit, color: textColor.withOpacity(0.7)),
+                    prefixIcon: Icon(
+                      Icons.edit,
+                      color: textColor.withOpacity(0.7),
+                    ),
                     hintText: localizations.sourceName,
                     hintStyle: TextStyle(color: hintColor),
                     filled: true,
@@ -316,10 +328,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                       color: backgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(
-                          color: borderColor,
-                          width: 1.5,
-                        ),
+                        side: BorderSide(color: borderColor, width: 1.5),
                       ),
                     ),
                   ),
@@ -351,10 +360,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                       fillColor: backgroundColor,
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: borderColor,
-                          width: 1.5,
-                        ),
+                        borderSide: BorderSide(color: borderColor, width: 1.5),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -384,7 +390,10 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   keyboardType: TextInputType.number,
                   style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.attach_money, color: textColor.withOpacity(0.7)),
+                    prefixIcon: Icon(
+                      Icons.attach_money,
+                      color: textColor.withOpacity(0.7),
+                    ),
                     hintText: localizations.initialBalance,
                     filled: true,
                     hintStyle: TextStyle(color: hintColor),
@@ -423,7 +432,10 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   controller: descriptionController,
                   style: TextStyle(color: textColor),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.notes, color: textColor.withOpacity(0.7)),
+                    prefixIcon: Icon(
+                      Icons.notes,
+                      color: textColor.withOpacity(0.7),
+                    ),
                     hintText: localizations.descriptionOptional,
                     hintStyle: TextStyle(color: hintColor),
                     filled: true,
@@ -450,29 +462,31 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Chọn màu sắc
-                Row(
-                  children: [
-                    Text(
-                      localizations.colorLabel,
-                      style: TextStyle(color: textColor),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () => _showColorPicker(),
-                      child: Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: selectedColor,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey),
+                // Chỉ cho chọn màu nếu không phải ewallet hoặc banking
+                if (selectedType != 'ewallet' && selectedType != 'banking') ...[
+                  Row(
+                    children: [
+                      Text(
+                        localizations.colorLabel,
+                        style: TextStyle(color: textColor),
+                      ),
+                      const SizedBox(width: 8),
+                      GestureDetector(
+                        onTap: () => _showColorPicker(),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: selectedColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                ],
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -554,7 +568,9 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: Text(AppLocalizations.of(context)?.colorLabel ?? 'Choose Color'),
+            title: Text(
+              AppLocalizations.of(context)?.colorLabel ?? 'Choose Color',
+            ),
             content: Wrap(
               children:
                   colors
@@ -588,13 +604,13 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
     if (nameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-              ).showSnackBar(SnackBar(content: Text('Please enter source name!')));
+      ).showSnackBar(SnackBar(content: Text('Please enter source name!')));
       return;
     }
     if (balanceController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-              ).showSnackBar(SnackBar(content: Text('Please enter balance!')));
+      ).showSnackBar(SnackBar(content: Text('Please enter balance!')));
       return;
     }
     final source = MoneySource(
