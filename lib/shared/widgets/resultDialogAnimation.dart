@@ -30,7 +30,7 @@ class ResultDialogAnimation extends StatelessWidget {
                 ? AppLocalizations.of(context)?.success ?? 'Success!'
                 : AppLocalizations.of(context)?.error ?? 'Error!',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.green,
+              color: isSuccess ? Colors.green : Colors.red,
               fontWeight: FontWeight.bold,
             ),
           ),

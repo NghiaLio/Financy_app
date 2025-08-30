@@ -138,12 +138,9 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
             Navigator.of(listenerContext).pop();
           }
           
-          // Navigate back to manage account
+          // Navigate back to previous screen
           if (mounted) {
-            Navigator.of(_rootContext).pushNamedAndRemoveUntil(
-              '/manageAccount',
-              ModalRoute.withName('/'),
-            );
+            Navigator.of(_rootContext).pop();
           }
         }
       },

@@ -19,4 +19,22 @@ class ColorUtils {
   static String colorToHex(Color color) {
     return '0x${color.value.toRadixString(16).toUpperCase()}';
   }
+
+  /// Choose a readable foreground color (typically white or black)
+  /// that maximizes contrast against the given [background].
+  /// Uses WCAG contrast ratio with black and white and returns the better one.
+  static Color bestOnColor(Color background,
+      {Color light = Colors.white, Color dark = Colors.black}) {
+    final double bgLum = background.computeLuminance();
+    final double contrastWhite = (1.05) / (bgLum + 0.05);
+    final double contrastBlack = (bgLum + 0.05) / 0.05;
+    return contrastWhite >= contrastBlack ? light : dark;
+  }
+
+  /// Convenience to get a foreground color with opacity for overlays/borders.
+  static Color bestOnColorWithOpacity(Color background, double opacity,
+      {Color light = Colors.white, Color dark = Colors.black}) {
+    return bestOnColor(background, light: light, dark: dark)
+        .withOpacity(opacity);
+  }
 }

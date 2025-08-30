@@ -598,23 +598,36 @@ class _HomeState extends State<Home> {
                     child: CircleAvatar(
                       radius: 25,
                       backgroundColor: Colors.transparent,
-                      child: user?.picture != null
-                          ? ClipOval(
-                              child: Image.file(
-                                File(user!.picture),
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Container(
-                              color: theme.colorScheme.surfaceVariant,
-                              child: Icon(
-                                Icons.person,
-                                size: 20,
-                                color: theme.colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                            ),
+                      child:
+                          (user?.picture ?? '').isNotEmpty
+                              ? ClipOval(
+                                  child: Image.file(
+                                    File(user!.picture),
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: theme.colorScheme.surfaceVariant,
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 40,
+                                          color: theme.colorScheme.onSurface
+                                              .withOpacity(0.5),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )
+                              : Container(
+                                  color: theme.colorScheme.surfaceVariant,
+                                  child: Icon(
+                                    Icons.person,
+                                    size: 20,
+                                    color: theme.colorScheme.onSurface
+                                        .withOpacity(0.5),
+                                  ),
+                                ),
                     ),
                   ),
                   SizedBox(width: 10),

@@ -106,7 +106,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   @override
   void initState() {
-    listAccounts = context.read<ManageMoneyCubit>().listAccounts ?? [];
+    listAccounts =
+        (context.read<ManageMoneyCubit>().listAccounts ?? [])
+            .where((e) => e.isActive == true)
+            .toList();
     // Luôn khởi tạo với expense (chi tiêu) khi vào màn hình
     selectedTransactionType = 1;
     availableCategories = defaultExpenseCategories;
@@ -144,6 +147,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final activeAccounts =
+        (context.read<ManageMoneyCubit>().state.listAccounts ?? [])
+            .where((e) => e.isActive == true)
+            .toList();
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
@@ -255,11 +262,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       _buildSelectField(
                         label: _localText((l) => l.account),
                         value:
-                            listAccounts.isEmpty
+                            activeAccounts.isEmpty
                                 ? 'No accounts available'
                                 : selectedAccount,
                         onTap:
-                            listAccounts.isEmpty
+                            activeAccounts.isEmpty
                                 ? null
                                 : () => _showAccountBottomSheet(),
                       ),
@@ -294,7 +301,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               width: double.infinity,
               margin: EdgeInsets.all(20),
               child: ElevatedButton(
-                onPressed: listAccounts.isEmpty ? null : addTrans,
+                onPressed: activeAccounts.isEmpty ? null : addTrans,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryBlue,
                   padding: EdgeInsets.symmetric(vertical: 16),
@@ -612,7 +619,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                   ),
                 )
               else
-                ...listAccounts.map(
+                ...listAccounts
+                    .where((e) => e.isActive == true)
+                    .map(
                   (account) => ListTile(
                     title: Text(
                       account.name,
@@ -648,6 +657,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   bool _validate(double amount, MoneySource account) {
+    if (account.isActive != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Selected account is inactive')),
+      );
+      return false;
+    }
     if (amount <= 0) {
       ScaffoldMessenger.of(
         context,
@@ -766,10 +781,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     }
 
     // Get selected account
-    final account = listAccounts.firstWhere(
-      (e) => e.name == selectedAccount,
-      orElse: () => listAccounts.first,
-    );
+    final account = listAccounts
+        .where((e) => e.isActive == true)
+        .firstWhere(
+          (e) => e.name == selectedAccount,
+          orElse: () => listAccounts.first,
+        );
 
     // Validate input
     if (!_validate(amount, account)) {
@@ -926,6 +943,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     MoneySource account,
     TransactionType type,
   ) async {
+    // Block if account is inactive (safety net)
+    if (account.isActive != true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Selected account is inactive')),
+      );
+      return;
+    }
     double newBalance = account.balance;
     if (type == TransactionType.income) {
       newBalance += amount;

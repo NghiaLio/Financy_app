@@ -3,6 +3,8 @@
 import 'dart:developer';
 
 import 'package:financy_ui/core/constants/colors.dart';
+import 'package:financy_ui/core/constants/money_source_icons.dart';
+import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
@@ -254,14 +256,18 @@ class BalanceCard extends StatelessWidget {
           listAccounts = [];
         }
 
-        if (currentAccountId != null &&
-            listAccounts != null &&
-            listAccounts.isNotEmpty) {
-          final found = listAccounts.firstWhere(
-            (acc) => acc.id == currentAccountId,
-            orElse: () => listAccounts!.first,
-          );
-          currentAccountName = found.name;
+        MoneySource? currentAccount;
+        if (listAccounts != null && listAccounts.isNotEmpty) {
+          if (currentAccountId != null) {
+            final found = listAccounts.firstWhere(
+              (acc) => acc.id == currentAccountId,
+              orElse: () => listAccounts!.first,
+            );
+            currentAccount = found;
+          } else {
+            currentAccount = listAccounts.first;
+          }
+          currentAccountName = currentAccount.name;
         }
 
         // Lấy tổng thu nhập và chi tiêu theo tài khoản hiện tại
@@ -285,14 +291,27 @@ class BalanceCard extends StatelessWidget {
           }
         }
 
+        // Determine brand color and logo for current account
+        final Color fallbackColor = AppColors.blue;
+        final Color brandColor = currentAccount != null
+            ? (ColorUtils.parseColor(currentAccount.color) ??
+                MoneySourceColors.colorForWithFallback(
+                  currentAccount.name,
+                  fallback: fallbackColor,
+                ))
+            : fallbackColor;
+        final Color onBrand = ColorUtils.bestOnColor(
+          brandColor,
+          light: AppColors.textDark,
+          dark: AppColors.textLight,
+        );
+        final String? brandAsset =
+            currentAccount != null ? MoneySourceImages.assetFor(currentAccount.name) : null;
+
         return Container(
           margin: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primaryBlue, AppColors.teal, AppColors.blue],
-            ),
+            color: brandColor,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -306,14 +325,6 @@ class BalanceCard extends StatelessWidget {
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.cardColor.withOpacity(0.1),
-                  theme.cardColor.withOpacity(0.05),
-                ],
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,84 +340,155 @@ class BalanceCard extends StatelessWidget {
                           Text(
                             LocalText.localText(context, (l) => l.myAccount),
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textDark.withOpacity(0.8),
+                              color: onBrand.withOpacity(0.8),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           SizedBox(height: 4),
-                          Text(
-                            currentAccountName.isNotEmpty
-                                ? currentAccountName
-                                : '---',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: AppColors.textDark,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              if (brandAsset != null) ...[
+                                ClipOval(
+                                  child: Image.asset(
+                                    brandAsset,
+                                    width: 24,
+                                    height: 24,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  currentAccountName.isNotEmpty
+                                      ? currentAccountName
+                                      : '---',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    color: onBrand,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
+                          SizedBox(height: 6),
+                          if (currentAccount != null)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: (currentAccount.isActive
+                                        ? AppColors.positiveGreen
+                                        : AppColors.negativeRed)
+                                    .withOpacity(0.12),
+                                border: Border.all(
+                                  color: (currentAccount.isActive
+                                          ? AppColors.positiveGreen
+                                          : AppColors.negativeRed)
+                                      .withOpacity(0.4),
+                                  width: 1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                currentAccount.isActive
+                                    ? LocalText.localText(
+                                        context,
+                                        (l) => l.active,
+                                      )
+                                    : LocalText.localText(
+                                        context,
+                                        (l) => l.inactive,
+                                      ),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: currentAccount.isActive
+                                      ? AppColors.positiveGreen
+                                      : AppColors.negativeRed,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
-                    // Account Dropdown Button
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.cardColor.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value:
-                              currentAccountId ??
-                              (listAccounts != null && listAccounts.isNotEmpty
-                                  ? listAccounts.first.id
-                                  : null),
-                          icon: Icon(
-                            Icons.keyboard_arrow_down,
-                            color: AppColors.textDark,
-                            size: 16,
+                    // Brand logo and Account Dropdown Button
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: onBrand.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: onBrand.withOpacity(0.3),
+                              width: 1,
+                            ),
                           ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textDark,
-                            fontWeight: FontWeight.w600,
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value:
+                                  currentAccountId ??
+                                  (listAccounts != null && listAccounts.isNotEmpty
+                                      ? listAccounts.first.id
+                                      : null),
+                              icon: Icon(
+                                Icons.keyboard_arrow_down,
+                                color: onBrand,
+                                size: 16,
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: onBrand,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              dropdownColor: theme.cardColor,
+                              borderRadius: BorderRadius.circular(16),
+                              items:
+                                  listAccounts != null
+                                      ? listAccounts
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e.id,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  if (MoneySourceImages.assetFor(e.name) != null)
+                                                    ClipOval(
+                                                      child: Image.asset(
+                                                        MoneySourceImages.assetFor(e.name)!,
+                                                        width: 18,
+                                                        height: 18,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    )
+                                                  else
+                                                    Icon(
+                                                      MoneySourceIconColorMapper.iconFor(
+                                                        e.type.toString(),
+                                                      ),
+                                                      color: theme.textTheme.bodyMedium?.color,
+                                                      size: 18,
+                                                    ),
+                                                  SizedBox(width: 6),
+                                                  Text(
+                                                    e.name,
+                                                    style: theme.textTheme.bodyMedium,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                          .toList()
+                                      : [],
+                              onChanged: changeAccount,
+                            ),
                           ),
-                          dropdownColor: theme.cardColor,
-                          borderRadius: BorderRadius.circular(16),
-                          items:
-                              listAccounts != null
-                                  ? listAccounts
-                                      .map(
-                                        (e) => DropdownMenuItem(
-                                          value: e.id,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                MoneySourceIconColorMapper.iconFor(
-                                                  e.type.toString(),
-                                                ),
-                                                color: AppColors.blue,
-                                                size: 18,
-                                              ),
-                                              SizedBox(width: 6),
-                                              Text(
-                                                e.name,
-                                                style:
-                                                    theme.textTheme.bodyMedium,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                      .toList()
-                                  : [],
-                          onChanged: changeAccount,
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),

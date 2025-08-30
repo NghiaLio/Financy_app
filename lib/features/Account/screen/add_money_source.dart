@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../core/constants/colors.dart';
-// import '../../../../core/constants/money_source_icons.dart';
+import '../../../core/constants/money_source_icons.dart';
 
 class AddMoneySourceScreen extends StatefulWidget {
   const AddMoneySourceScreen({super.key});
@@ -26,6 +26,101 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
   String selectedType = 'cash';
   String selectedCurrency = 'vnd';
   Color selectedColor = AppColors.primaryBlue;
+  String? selectedBrandKey;
+
+  List<String> _brandKeysForType(String type) {
+    if (type == 'ewallet') {
+      return const ['shopeepay', 'viettelpay', 'vnpay', 'zalopay', 'momo'];
+    }
+    if (type == 'banking') {
+      return const [
+        'tpbank',
+        'acb',
+        'mbbank',
+        'vpbank',
+        'vietcombank',
+        'vietinbank',
+        'bidv',
+        'techcombank',
+        'agribank',
+      ];
+    }
+    return const [];
+  }
+
+  String _brandDisplayName(String key) {
+    const map = {
+      'shopeepay': 'ShopeePay',
+      'viettelpay': 'ViettelPay',
+      'vnpay': 'VNPAY',
+      'zalopay': 'ZaloPay',
+      'momo': 'MoMo',
+      'tpbank': 'TPBank',
+      'acb': 'ACB',
+      'mbbank': 'MBBank',
+      'vpbank': 'VPBank',
+      'vietcombank': 'Vietcombank',
+      'vietinbank': 'VietinBank',
+      'bidv': 'BIDV',
+      'techcombank': 'Techcombank',
+      'agribank': 'Agribank',
+    };
+    return map[key] ?? key;
+  }
+
+  Widget _buildBrandGrid(BuildContext context, Color backgroundColor, Color borderColor) {
+    final keys = _brandKeysForType(selectedType);
+    if (keys.isEmpty) return const SizedBox.shrink();
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: keys.map((key) {
+        final asset = MoneySourceImages.nameToAsset[key];
+        if (asset == null) return const SizedBox.shrink();
+        final isSelected = selectedBrandKey == key;
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedBrandKey = key;
+              nameController.text = _brandDisplayName(key);
+              selectedColor = MoneySourceColors.colorForWithFallback(
+                key,
+                fallback: AppColors.primaryBlue,
+              );
+            });
+          },
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: backgroundColor,
+              border: Border.all(
+                color: isSelected ? Theme.of(context).colorScheme.primary : borderColor,
+                width: isSelected ? 2 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: ClipOval(
+              child: Image.asset(
+                asset,
+                width: 40,
+                height: 40,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,46 +168,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  localizations.sourceName,
-                  style: textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: nameController,
-                  style: TextStyle(color: textColor),
-                  decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.edit, color: textColor.withOpacity(0.7)),
-                    hintText: localizations.sourceName,
-                    hintStyle: TextStyle(color: hintColor),
-                    filled: true,
-                    fillColor: backgroundColor,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 16,
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: borderColor),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: borderColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                        color: focusedBorderColor,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Dropdown chọn loại nguồn tiền
+                // Dropdown chọn loại nguồn tiền (moved to top)
                 Text(
                   localizations.typeLabel,
                   style: textTheme.labelLarge?.copyWith(
@@ -171,6 +227,8 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                     onChanged: (value) {
                       setState(() {
                         selectedType = value!;
+                        selectedBrandKey = null;
+                        nameController.text = '';
                       });
                     },
                     decoration: InputDecoration(
@@ -195,6 +253,49 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                     dropdownColor: backgroundColor,
                     menuMaxHeight: 350,
                     borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                if (selectedType == 'ewallet' || selectedType == 'banking') ...[
+                  _buildBrandGrid(context, backgroundColor, borderColor),
+                  const SizedBox(height: 16),
+                ],
+                Text(
+                  localizations.sourceName,
+                  style: textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: nameController,
+                  style: TextStyle(color: textColor),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(Icons.edit, color: textColor.withOpacity(0.7)),
+                    hintText: localizations.sourceName,
+                    hintStyle: TextStyle(color: hintColor),
+                    filled: true,
+                    fillColor: backgroundColor,
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 16,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: borderColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: focusedBorderColor,
+                        width: 2,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
