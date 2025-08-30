@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, avoid_print, unrelated_type_equality_checks
 
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
@@ -38,30 +39,34 @@ class _HomeState extends State<Home> {
   }
 
   // Calculate monthly data for chart (full 12 months)
-  Map<int, Map<String, double>> _calculateMonthlyData(Map<DateTime, List<Transactionsmodels>> transactions) {
+  Map<int, Map<String, double>> _calculateMonthlyData(
+    Map<DateTime, List<Transactionsmodels>> transactions,
+  ) {
     final monthlyData = <int, Map<String, double>>{};
     final currentYear = DateTime.now().year;
-    
+
     // Initialize 12 months data
     for (int month = 1; month <= 12; month++) {
       monthlyData[month] = {'income': 0.0, 'expense': 0.0};
     }
-    
+
     transactions.forEach((date, txList) {
       if (date.year == currentYear) {
         for (var tx in txList) {
           final month = date.month;
           if (tx.type == TransactionType.income) {
-            monthlyData[month]!['income'] = (monthlyData[month]!['income']! + tx.amount.toDouble());
+            monthlyData[month]!['income'] =
+                (monthlyData[month]!['income']! + tx.amount.toDouble());
           } else if (tx.type == TransactionType.expense) {
-            monthlyData[month]!['expense'] = (monthlyData[month]!['expense']! + tx.amount.toDouble());
+            monthlyData[month]!['expense'] =
+                (monthlyData[month]!['expense']! + tx.amount.toDouble());
           }
         }
       }
     });
-    
+
     // Use real data only - no sample data
-    
+
     return monthlyData;
   }
 
@@ -97,27 +102,30 @@ class _HomeState extends State<Home> {
       if (income > maxValue) maxValue = income;
       if (expense > maxValue) maxValue = expense;
     }
-    
+
     // If no data, set minimum scale
     if (maxValue == 0) {
       return 10.0; // 10 x 10K = 100K minimum scale
     }
-    
+
     // Smart interval for tens of thousands unit
     double interval;
     if (maxValue <= 5) {
-      interval = 1.0;  // 1, 2, 3, 4, 5 (10K, 20K, 30K, 40K, 50K)
+      interval = 1.0; // 1, 2, 3, 4, 5 (10K, 20K, 30K, 40K, 50K)
     } else if (maxValue <= 20) {
-      interval = 5.0;  // 5, 10, 15, 20 (50K, 100K, 150K, 200K)
+      interval = 5.0; // 5, 10, 15, 20 (50K, 100K, 150K, 200K)
     } else if (maxValue <= 50) {
       interval = 10.0; // 10, 20, 30, 40, 50 (100K, 200K, 300K, 400K, 500K)
     } else {
       interval = 20.0; // 20, 40, 60, 80, 100 (200K, 400K, 600K, 800K, 1M)
     }
-    
+
     // Add padding and round up to nearest interval
     final paddedMax = maxValue * 1.2;
-    return ((paddedMax / interval).ceil() * interval).toDouble().clamp(interval, double.infinity);
+    return ((paddedMax / interval).ceil() * interval).toDouble().clamp(
+      interval,
+      double.infinity,
+    );
   }
 
   // Format amount for tooltip display in original VND
@@ -136,9 +144,10 @@ class _HomeState extends State<Home> {
   // Calculate chart width for 12 months
   double _calculateChartWidth() {
     const double monthWidth = 60.0; // Width per month
-    const double leftPadding = 60.0; // Increased for left titles (40 reservedSize + 20 padding)
+    const double leftPadding =
+        60.0; // Increased for left titles (40 reservedSize + 20 padding)
     const double rightPadding = 20.0;
-    
+
     return leftPadding + rightPadding + (12 * monthWidth);
   }
 
@@ -151,26 +160,33 @@ class _HomeState extends State<Home> {
   // Scroll to current month (similar to spending.dart logic)
   void _scrollToCurrentMonth(ScrollController scrollController) {
     if (!scrollController.hasClients) return;
-    
+
     final currentMonth = DateTime.now().month;
-    
+
     // Calculate scroll parameters similar to spending.dart
-    final screenWidth = MediaQuery.of(context).size.width - 64; // 64 = container margins
+    final screenWidth =
+        MediaQuery.of(context).size.width - 64; // 64 = container margins
     final monthWidth = 60.0; // Width per month
     final visibleMonths = (screenWidth / monthWidth).floor().clamp(1, 12);
     final centerOffset = (visibleMonths / 2).floor();
-    
+
     // Calculate chart dimensions
     final chartWidth = _calculateChartWidth();
-    final maxScrollOffset = (chartWidth - screenWidth).clamp(0.0, double.infinity);
-    
+    final maxScrollOffset = (chartWidth - screenWidth).clamp(
+      0.0,
+      double.infinity,
+    );
+
     if (maxScrollOffset <= 0) return; // No need to scroll if chart fits screen
-    
+
     // Calculate target scroll position to center current month
     final maxTargetIndex = (12 - visibleMonths).clamp(0, 11);
-    final targetIndex = (currentMonth - centerOffset - 1).clamp(0, maxTargetIndex);
+    final targetIndex = (currentMonth - centerOffset - 1).clamp(
+      0,
+      maxTargetIndex,
+    );
     final scrollOffset = (targetIndex * monthWidth).clamp(0.0, maxScrollOffset);
-    
+
     if (scrollOffset > 0 && scrollOffset.isFinite) {
       scrollController.animateTo(
         scrollOffset,
@@ -182,14 +198,14 @@ class _HomeState extends State<Home> {
 
   // Build scrollable chart for 12 months
   Widget _buildScrollableChart(
-    List<FlSpot> incomeSpots, 
-    List<FlSpot> expenseSpots, 
+    List<FlSpot> incomeSpots,
+    List<FlSpot> expenseSpots,
     Map<int, Map<String, double>> monthlyData,
     double divisor,
-    ThemeData theme
+    ThemeData theme,
   ) {
     final ScrollController scrollController = ScrollController();
-    
+
     // Auto scroll to current month (similar to spending.dart logic)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentMonth(scrollController);
@@ -203,7 +219,13 @@ class _HomeState extends State<Home> {
           physics: const BouncingScrollPhysics(),
           child: SizedBox(
             width: _calculateChartWidth(),
-            child: _buildLineChart(incomeSpots, expenseSpots, monthlyData, divisor, theme),
+            child: _buildLineChart(
+              incomeSpots,
+              expenseSpots,
+              monthlyData,
+              divisor,
+              theme,
+            ),
           ),
         ),
         // Scroll indicators - positioned after left titles to avoid covering units
@@ -215,10 +237,7 @@ class _HomeState extends State<Home> {
             width: 12,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  theme.cardColor,
-                  theme.cardColor.withOpacity(0),
-                ],
+                colors: [theme.cardColor, theme.cardColor.withOpacity(0)],
                 stops: const [0.0, 1.0],
               ),
             ),
@@ -232,10 +251,7 @@ class _HomeState extends State<Home> {
             width: 12, // Match left indicator width
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  theme.cardColor.withOpacity(0),
-                  theme.cardColor,
-                ],
+                colors: [theme.cardColor.withOpacity(0), theme.cardColor],
                 stops: const [0.0, 1.0],
               ),
             ),
@@ -243,12 +259,12 @@ class _HomeState extends State<Home> {
         ),
         // "Current Month" indicator button
         Positioned(
-          right: 25,
-          top: 10,
+          right: 0,
+          top: 0,
           child: GestureDetector(
             onTap: () => _scrollToCurrentMonth(scrollController),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
               decoration: BoxDecoration(
                 color: theme.primaryColor.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
@@ -267,11 +283,7 @@ class _HomeState extends State<Home> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.today,
-                    size: 12,
-                    color: theme.primaryColor,
-                  ),
+                  Icon(Icons.today, size: 12, color: theme.primaryColor),
                   const SizedBox(width: 4),
                   Text(
                     'Tháng này',
@@ -292,22 +304,28 @@ class _HomeState extends State<Home> {
 
   // Build static chart
   Widget _buildStaticChart(
-    List<FlSpot> incomeSpots, 
-    List<FlSpot> expenseSpots, 
+    List<FlSpot> incomeSpots,
+    List<FlSpot> expenseSpots,
     Map<int, Map<String, double>> monthlyData,
     double divisor,
-    ThemeData theme
+    ThemeData theme,
   ) {
-    return _buildLineChart(incomeSpots, expenseSpots, monthlyData, divisor, theme);
+    return _buildLineChart(
+      incomeSpots,
+      expenseSpots,
+      monthlyData,
+      divisor,
+      theme,
+    );
   }
 
   // Build the actual LineChart widget
   Widget _buildLineChart(
-    List<FlSpot> incomeSpots, 
-    List<FlSpot> expenseSpots, 
+    List<FlSpot> incomeSpots,
+    List<FlSpot> expenseSpots,
     Map<int, Map<String, double>> monthlyData,
     double divisor,
-    ThemeData theme
+    ThemeData theme,
   ) {
     return LineChart(
       LineChartData(
@@ -315,22 +333,37 @@ class _HomeState extends State<Home> {
           enabled: true,
           touchTooltipData: LineTouchTooltipData(
             getTooltipColor: (touchedSpot) => theme.colorScheme.surface,
-            tooltipBorder: BorderSide(
-              color: theme.dividerColor,
-              width: 1,
-            ),
+            tooltipBorder: BorderSide(color: theme.dividerColor, width: 1),
             tooltipPadding: EdgeInsets.all(8),
             getTooltipItems: (touchedSpots) {
               return touchedSpots.map((touchedSpot) {
                 final isIncome = touchedSpot.barIndex == 0;
                 final month = touchedSpot.x.toInt();
-                final monthNames = ['', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
-                final displayAmount = touchedSpot.y * divisor; // Convert back to original amount
-                
+                final monthNames = [
+                  '',
+                  'T1',
+                  'T2',
+                  'T3',
+                  'T4',
+                  'T5',
+                  'T6',
+                  'T7',
+                  'T8',
+                  'T9',
+                  'T10',
+                  'T11',
+                  'T12',
+                ];
+                final displayAmount =
+                    touchedSpot.y * divisor; // Convert back to original amount
+
                 return LineTooltipItem(
                   '${monthNames[month]}\n${isIncome ? 'Thu nhập' : 'Chi tiêu'}: ${_formatTooltipAmount(displayAmount)}',
                   TextStyle(
-                    color: isIncome ? AppColors.positiveGreen : AppColors.negativeRed,
+                    color:
+                        isIncome
+                            ? AppColors.positiveGreen
+                            : AppColors.negativeRed,
                     fontWeight: FontWeight.w600,
                     fontSize: 12,
                   ),
@@ -356,7 +389,7 @@ class _HomeState extends State<Home> {
               showTitles: true,
               getTitlesWidget: (value, meta) {
                 return Text(
-                  '${(value * 10).toInt()}K',  // Convert back to display format
+                  '${(value * 10).toInt()}K', // Convert back to display format
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppColors.textGrey,
                     fontSize: 10,
@@ -371,7 +404,21 @@ class _HomeState extends State<Home> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (value, meta) {
-                final months = ['', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'];
+                final months = [
+                  '',
+                  'T1',
+                  'T2',
+                  'T3',
+                  'T4',
+                  'T5',
+                  'T6',
+                  'T7',
+                  'T8',
+                  'T9',
+                  'T10',
+                  'T11',
+                  'T12',
+                ];
                 if (value >= 1 && value <= 12) {
                   return Text(
                     months[value.toInt()],
@@ -386,12 +433,8 @@ class _HomeState extends State<Home> {
               interval: 1,
             ),
           ),
-          rightTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
-          topTitles: AxisTitles(
-            sideTitles: SideTitles(showTitles: false),
-          ),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(show: false),
         lineBarsData: [
@@ -494,16 +537,17 @@ class _HomeState extends State<Home> {
     // First check in default expense categories
     final expenseCategory = defaultExpenseCategories.firstWhere(
       (category) => category.name == categoryName,
-      orElse: () => Category(
-        id: '',
-        name: '',
-        type: '',
-        icon: '',
-        color: '',
-        createdAt: DateTime.now(),
-      ),
+      orElse:
+          () => Category(
+            id: '',
+            name: '',
+            type: '',
+            icon: '',
+            color: '',
+            createdAt: DateTime.now(),
+          ),
     );
-    
+
     if (expenseCategory.name.isNotEmpty) {
       return expenseCategory;
     }
@@ -511,16 +555,17 @@ class _HomeState extends State<Home> {
     // Then check in default income categories
     final incomeCategory = defaultIncomeCategories.firstWhere(
       (category) => category.name == categoryName,
-      orElse: () => Category(
-        id: '',
-        name: '',
-        type: '',
-        icon: '',
-        color: '',
-        createdAt: DateTime.now(),
-      ),
+      orElse:
+          () => Category(
+            id: '',
+            name: '',
+            type: '',
+            icon: '',
+            color: '',
+            createdAt: DateTime.now(),
+          ),
     );
-    
+
     if (incomeCategory.name.isNotEmpty) {
       return incomeCategory;
     }
@@ -551,12 +596,38 @@ class _HomeState extends State<Home> {
                       Navigator.pushNamed(context, '/profile', arguments: user);
                     },
                     child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: theme.colorScheme.background,
-                      child: Icon(
-                        Icons.person,
-                        color: theme.colorScheme.onBackground,
-                      ),
+                      radius: 25,
+                      backgroundColor: Colors.transparent,
+                      child:
+                          (user?.picture ?? '').isNotEmpty
+                              ? ClipOval(
+                                child: Image.file(
+                                  File(user!.picture),
+                                  width: 60,
+                                  height: 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: theme.colorScheme.surfaceVariant,
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: theme.colorScheme.onSurface
+                                            .withOpacity(0.5),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              )
+                              : Container(
+                                color: theme.colorScheme.surfaceVariant,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 20,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.5),
+                                ),
+                              ),
                     ),
                   ),
                   SizedBox(width: 10),
@@ -577,9 +648,12 @@ class _HomeState extends State<Home> {
             // Chart Section
             BlocBuilder<TransactionCubit, TransactionState>(
               builder: (context, transactionState) {
-                final monthlyData = transactionState.status == TransactionStateStatus.loaded
-                    ? _calculateMonthlyData(transactionState.transactionsList)
-                    : <int, Map<String, double>>{};
+                final monthlyData =
+                    transactionState.status == TransactionStateStatus.loaded
+                        ? _calculateMonthlyData(
+                          transactionState.transactionsList,
+                        )
+                        : <int, Map<String, double>>{};
 
                 // Determine smart unit based on max amount
                 final maxAmount = _getMaxAmount(monthlyData);
@@ -591,11 +665,22 @@ class _HomeState extends State<Home> {
                 // Generate chart spots from real data with smart unit (12 months)
                 final incomeSpots = <FlSpot>[];
                 final expenseSpots = <FlSpot>[];
-                
+
                 for (int month = 1; month <= 12; month++) {
-                  final data = monthlyData[month] ?? {'income': 0.0, 'expense': 0.0};
-                  incomeSpots.add(FlSpot(month.toDouble(), _convertAmount(data['income']!, divisor)));
-                  expenseSpots.add(FlSpot(month.toDouble(), _convertAmount(data['expense']!, divisor)));
+                  final data =
+                      monthlyData[month] ?? {'income': 0.0, 'expense': 0.0};
+                  incomeSpots.add(
+                    FlSpot(
+                      month.toDouble(),
+                      _convertAmount(data['income']!, divisor),
+                    ),
+                  );
+                  expenseSpots.add(
+                    FlSpot(
+                      month.toDouble(),
+                      _convertAmount(data['expense']!, divisor),
+                    ),
+                  );
                 }
 
                 return Container(
@@ -647,11 +732,27 @@ class _HomeState extends State<Home> {
                       ),
                       SizedBox(height: 16),
                       Expanded(
-                        child: transactionState.status == TransactionStateStatus.loading
-                            ? Center(child: CircularProgressIndicator())
-                            : _needsScroll(MediaQuery.of(context).size.width)
-                                ? _buildScrollableChart(incomeSpots, expenseSpots, monthlyData, divisor, theme)
-                                : _buildStaticChart(incomeSpots, expenseSpots, monthlyData, divisor, theme),
+                        child:
+                            transactionState.status ==
+                                    TransactionStateStatus.loading
+                                ? Center(child: CircularProgressIndicator())
+                                : _needsScroll(
+                                  MediaQuery.of(context).size.width,
+                                )
+                                ? _buildScrollableChart(
+                                  incomeSpots,
+                                  expenseSpots,
+                                  monthlyData,
+                                  divisor,
+                                  theme,
+                                )
+                                : _buildStaticChart(
+                                  incomeSpots,
+                                  expenseSpots,
+                                  monthlyData,
+                                  divisor,
+                                  theme,
+                                ),
                       ),
                     ],
                   ),
@@ -690,9 +791,9 @@ class _HomeState extends State<Home> {
                       transactionsList?.isEmpty ?? true
                           ? Center(
                             child: Text(
-                              AppLocalizations.of(context)?.noTransactions ?? 'No transactions found',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: AppColors.black),
+                              AppLocalizations.of(context)?.noTransactions ??
+                                  'No transactions found',
+                              style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           )
                           : ListView.builder(
@@ -733,13 +834,22 @@ class _HomeState extends State<Home> {
                                         );
 
                                     // Get category info
-                                    final category = _getCategoryByName(transaction.categoriesId);
-                                    final categoryIcon = category != null 
-                                        ? IconMapping.stringToIcon(category.icon)
-                                        : Icons.category;
-                                    final categoryColor = category != null 
-                                        ? ColorUtils.parseColor(category.color) ?? AppColors.primaryBlue
-                                        : AppColors.primaryBlue;
+                                    final category = _getCategoryByName(
+                                      transaction.categoriesId,
+                                    );
+                                    final categoryIcon =
+                                        category != null
+                                            ? IconMapping.stringToIcon(
+                                              category.icon,
+                                            )
+                                            : Icons.category;
+                                    final categoryColor =
+                                        category != null
+                                            ? ColorUtils.parseColor(
+                                                  category.color,
+                                                ) ??
+                                                AppColors.primaryBlue
+                                            : AppColors.primaryBlue;
 
                                     return _buildTransactionItem(
                                       context: context,

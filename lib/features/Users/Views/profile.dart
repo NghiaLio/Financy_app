@@ -6,6 +6,8 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/colors.dart';
 import 'dart:io';
 
@@ -19,15 +21,15 @@ class UserProfileScreen extends StatefulWidget {
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _isEditing = false;
-  
+
   // Controllers cho các trường thông tin
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  
+
   // Thông tin người dùng mẫu
-  final String _avatarPath = '';
+  String _avatarPath = '';
   DateTime _selectedBirthDate = DateTime(1990, 1, 1);
-  
+
   @override
   void initState() {
     super.initState();
@@ -40,6 +42,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       _nameController.text = widget.user!.name;
       _emailController.text = widget.user!.email;
       _selectedBirthDate = widget.user!.dateOfBirth;
+      _avatarPath = widget.user!.picture;
     } else {
       // Default data
       _nameController.text = 'Nguyễn Văn A';
@@ -53,13 +56,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final localizations = AppLocalizations.of(context);
-    
+
     return BlocListener<UserCubit, UserState>(
       listener: (context, state) {
         if (state.status == UserStatus.success && state.user != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(localizations?.profileUpdateSuccess ?? 'Profile updated successfully!'),
+              content: Text(
+                localizations?.profileUpdateSuccess ??
+                    'Profile updated successfully!',
+              ),
               backgroundColor: Colors.green,
             ),
           );
@@ -82,9 +88,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            _isEditing 
-              ? localizations?.edit ?? 'Edit'
-              : localizations?.personalInformation ?? 'Personal Information',
+            _isEditing
+                ? localizations?.edit ?? 'Edit'
+                : localizations?.personalInformation ?? 'Personal Information',
             style: textTheme.titleLarge?.copyWith(
               color: colorScheme.onSurface,
               fontWeight: FontWeight.w600,
@@ -104,7 +110,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             if (state.status == UserStatus.loading) {
               return const Center(child: CircularProgressIndicator());
             }
-            
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -131,7 +137,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   Widget _buildAvatarSection() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Center(
       child: Stack(
         children: [
@@ -143,19 +149,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               border: Border.all(color: AppColors.primaryBlue, width: 3),
             ),
             child: ClipOval(
-              child: _avatarPath.isNotEmpty
-                  ? Image.file(
-                      File(_avatarPath),
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      color: colorScheme.surfaceVariant,
-                      child: Icon(
-                        Icons.person,
-                        size: 60,
-                        color: colorScheme.onSurface.withOpacity(0.5),
+              child:
+                  _avatarPath.isNotEmpty
+                      ? Image.file(File(_avatarPath), fit: BoxFit.cover)
+                      : Container(
+                        color: colorScheme.surfaceVariant,
+                        child: Icon(
+                          Icons.person,
+                          size: 60,
+                          color: colorScheme.onSurface.withOpacity(0.5),
+                        ),
                       ),
-                    ),
             ),
           ),
           if (_isEditing)
@@ -217,11 +221,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  Widget _buildSection({required String title, required List<Widget> children}) {
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+  }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -264,7 +271,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -278,10 +285,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             ),
             if (isRequired)
-              Text(
-                ' *',
-                style: TextStyle(color: AppColors.negativeRed),
-              ),
+              Text(' *', style: TextStyle(color: AppColors.negativeRed)),
           ],
         ),
         const SizedBox(height: 8),
@@ -291,12 +295,18 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           keyboardType: keyboardType,
           maxLines: maxLines,
           style: textTheme.bodyLarge?.copyWith(
-            color: _isEditing ? colorScheme.onSurface : colorScheme.onSurface.withOpacity(0.7),
+            color:
+                _isEditing
+                    ? colorScheme.onSurface
+                    : colorScheme.onSurface.withOpacity(0.7),
           ),
           decoration: InputDecoration(
             prefixIcon: Icon(
               icon,
-              color: _isEditing ? AppColors.primaryBlue : colorScheme.onSurface.withOpacity(0.5),
+              color:
+                  _isEditing
+                      ? AppColors.primaryBlue
+                      : colorScheme.onSurface.withOpacity(0.5),
               size: 20,
             ),
             border: OutlineInputBorder(
@@ -313,10 +323,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: AppColors.primaryBlue,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: AppColors.primaryBlue, width: 2),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
@@ -325,7 +332,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             ),
             filled: true,
-            fillColor: _isEditing ? colorScheme.surface : colorScheme.surfaceVariant,
+            fillColor:
+                _isEditing ? colorScheme.surface : colorScheme.surfaceVariant,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
@@ -341,7 +349,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final localizations = AppLocalizations.of(context);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -361,20 +369,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             decoration: BoxDecoration(
               border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
               borderRadius: BorderRadius.circular(8),
-              color: _isEditing ? colorScheme.surface : colorScheme.surfaceVariant,
+              color:
+                  _isEditing ? colorScheme.surface : colorScheme.surfaceVariant,
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.calendar_today,
-                  color: _isEditing ? AppColors.primaryBlue : colorScheme.onSurface.withOpacity(0.5),
+                  color:
+                      _isEditing
+                          ? AppColors.primaryBlue
+                          : colorScheme.onSurface.withOpacity(0.5),
                   size: 20,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   '${_selectedBirthDate.day}/${_selectedBirthDate.month}/${_selectedBirthDate.year}',
                   style: textTheme.bodyLarge?.copyWith(
-                    color: _isEditing ? colorScheme.onSurface : colorScheme.onSurface.withOpacity(0.7),
+                    color:
+                        _isEditing
+                            ? colorScheme.onSurface
+                            : colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ),
               ],
@@ -390,7 +405,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     final colorScheme = theme.colorScheme;
     final textTheme = theme.textTheme;
     final localizations = AppLocalizations.of(context);
-    
+
     return Row(
       children: [
         Expanded(
@@ -451,12 +466,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   void _saveProfile() async {
     final localizations = AppLocalizations.of(context);
-    
+
     // Validate email format
-    if (_emailController.text.trim().isNotEmpty && !_isValidEmail(_emailController.text.trim())) {
+    if (_emailController.text.trim().isNotEmpty &&
+        !_isValidEmail(_emailController.text.trim())) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(localizations?.invalidEmailFormat ?? 'Invalid email format'),
+          content: Text(
+            localizations?.invalidEmailFormat ?? 'Invalid email format',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -464,30 +482,42 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
 
     // Update user via Cubit
-    await context.read<UserCubit>().updateUser(UserModel(
-      id: widget.user?.id ?? '',
-      uid: widget.user?.uid ?? '',
-      picture: _avatarPath.isNotEmpty ? _avatarPath : widget.user?.picture ?? '',
-      createdAt: widget.user?.createdAt ?? DateTime.now(),
-      name: _nameController.text,
-      email: _emailController.text,
-      dateOfBirth: _selectedBirthDate,
-    ));
-    
+    await context.read<UserCubit>().updateUser(
+      UserModel(
+        id: widget.user?.id ?? '',
+        uid: widget.user?.uid ?? '',
+        picture:
+            _avatarPath.isNotEmpty ? _avatarPath : widget.user?.picture ?? '',
+        createdAt: widget.user?.createdAt ?? DateTime.now(),
+        name: _nameController.text,
+        email: _emailController.text,
+        dateOfBirth: _selectedBirthDate,
+      ),
+    );
+
     setState(() {
       _isEditing = false;
     });
   }
 
-  void _pickImage() async {
-    final localizations = AppLocalizations.of(context);
-    // Simulate image picker
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(localizations?.imagePickerFeatureComingSoon ?? 'Image picker feature will be added later'),
-        backgroundColor: Colors.blue,
-      ),
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
     );
+    if (pickedFile != null) {
+      // Lấy thư mục appData
+      final appDir = await getApplicationDocumentsDirectory();
+      final fileName = "avatar_${DateTime.now().millisecondsSinceEpoch}.png";
+
+      // Copy ảnh vào appData
+      final savedImage = await File(
+        pickedFile.path,
+      ).copy("${appDir.path}/$fileName");
+
+      setState(() {
+        _avatarPath = savedImage.path;
+      });
+    }
   }
 
   void _selectBirthDate() async {

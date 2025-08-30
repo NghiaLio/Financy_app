@@ -23,89 +23,103 @@ class IconMapping {
   /// Get localized category name from icon name
   static String getLocalizedCategoryName(String iconName, dynamic l10n) {
     if (l10n == null) return iconName;
-    
-    // Map icon names to localized names based on current locale
-    final Map<String, String> localizedNames = {
-      // Expense Icons
-      'home': 'Home',
-      'shopping_cart': 'Shopping',
-      'fastfood': 'Food',
-      'pets': 'Pets',
-      'work': 'Work',
-      'music_note': 'Music',
-      'movie': 'Entertainment',
-      'sports_soccer': 'Sports',
-      'flight': 'Travel',
-      'school': 'Education',
-      'local_cafe': 'Coffee',
-      'fitness_center': 'Fitness',
-      'directions_car': 'Transport',
-      'beach_access': 'Leisure',
-      'camera_alt': 'Photography',
-      'brush': 'Art',
-      'nature': 'Nature',
-      'healing': 'Health',
-      'cake': 'Celebration',
-      'favorite': 'Favorites',
-      'wb_sunny': 'Weather',
-      'nightlight_round': 'Night',
-      'local_florist': 'Flowers',
-      'lightbulb': 'Utilities',
-      'book': 'Books',
-      'luggage': 'Travel',
-      'event': 'Events',
-      'payment': 'Payment',
-      'credit_card': 'Credit Card',
-      'access_time': 'Time',
-      'people': 'Social',
-      'public': 'Public',
-      'security': 'Security',
-      'wine_bar': 'Drinks',
-      'local_bar': 'Bar',
-      'restaurant': 'Restaurant',
-      'local_grocery_store': 'Grocery',
-      'baby_changing_station': 'Baby',
-      'bug_report': 'Maintenance',
-      'build': 'Tools',
-      
-      // Income Icons
-      'attach_money': 'Money',
-      'card_giftcard': 'Gift',
-      'trending_up': 'Investment',
-      'storefront': 'Business',
-      'house': 'Real Estate',
-      'savings': 'Savings',
-      'redeem': 'Rewards',
-      'refresh': 'Refresh',
-      'school_income': 'Education Income',
-      'monetization_on': 'Monetization',
-      'currency_bitcoin': 'Cryptocurrency',
-      'work_outline': 'Work Income',
-      'more_horiz': 'More',
-    };
-    
+
+    // Map icon names to localized names using l10n keys
+    final Map<String, String> localizedNames = <String, String>{};
+
+    // Expense Icons
+    localizedNames['home'] = l10n.iconHome ?? 'Home';
+    localizedNames['shopping_cart'] = l10n.iconShoppingCart ?? 'Shopping';
+    localizedNames['fastfood'] = l10n.iconFastfood ?? 'Food';
+    localizedNames['pets'] = l10n.iconPets ?? 'Pets';
+    localizedNames['work'] = l10n.iconWork ?? 'Work';
+    localizedNames['music_note'] = l10n.iconMusicNote ?? 'Music';
+    localizedNames['movie'] = l10n.iconMovie ?? 'Entertainment';
+    localizedNames['sports_soccer'] = l10n.iconSportsSoccer ?? 'Sports';
+    localizedNames['flight'] = l10n.iconFlight ?? 'Travel';
+    localizedNames['school'] = l10n.iconSchool ?? 'Education';
+    localizedNames['local_cafe'] = l10n.iconLocalCafe ?? 'Coffee';
+    localizedNames['fitness_center'] = l10n.iconFitnessCenter ?? 'Fitness';
+    localizedNames['directions_car'] = l10n.iconDirectionsCar ?? 'Transport';
+    localizedNames['beach_access'] = l10n.iconBeachAccess ?? 'Leisure';
+    localizedNames['camera_alt'] = l10n.iconCameraAlt ?? 'Photography';
+    localizedNames['brush'] = l10n.iconBrush ?? 'Art';
+    localizedNames['nature'] = l10n.iconNature ?? 'Nature';
+    localizedNames['healing'] = l10n.iconHealing ?? 'Health';
+    localizedNames['cake'] = l10n.iconCake ?? 'Celebration';
+    localizedNames['favorite'] = l10n.iconFavorite ?? 'Favorites';
+    localizedNames['wb_sunny'] = l10n.iconWbSunny ?? 'Weather';
+    localizedNames['nightlight_round'] = l10n.iconNightlightRound ?? 'Night';
+    localizedNames['local_florist'] = l10n.iconLocalFlorist ?? 'Flowers';
+    localizedNames['lightbulb'] = l10n.iconLightbulb ?? 'Utilities';
+    localizedNames['book'] = l10n.iconBook ?? 'Books';
+    localizedNames['luggage'] = l10n.iconLuggage ?? 'Travel';
+    localizedNames['event'] = l10n.iconEvent ?? 'Events';
+    localizedNames['payment'] = l10n.iconPayment ?? 'Payment';
+    localizedNames['credit_card'] = l10n.iconCreditCard ?? 'Credit Card';
+    localizedNames['access_time'] = l10n.iconAccessTime ?? 'Time';
+    localizedNames['people'] = l10n.iconPeople ?? 'Social';
+    localizedNames['public'] = l10n.iconPublic ?? 'Public';
+    localizedNames['security'] = l10n.iconSecurity ?? 'Security';
+    localizedNames['wine_bar'] = l10n.iconWineBar ?? 'Drinks';
+    localizedNames['local_bar'] = l10n.iconLocalBar ?? 'Bar';
+    localizedNames['restaurant'] = l10n.iconRestaurant ?? 'Restaurant';
+    localizedNames['local_grocery_store'] =
+        l10n.iconLocalGroceryStore ?? 'Grocery';
+    localizedNames['baby_changing_station'] =
+        l10n.iconBabyChangingStation ?? 'Baby';
+    localizedNames['bug_report'] = l10n.iconBugReport ?? 'Maintenance';
+    localizedNames['build'] = l10n.iconBuild ?? 'Tools';
+
+    // Income Icons
+    localizedNames['attach_money'] = l10n.iconAttachMoney ?? 'Money';
+    localizedNames['card_giftcard'] = l10n.iconCardGiftcard ?? 'Gift';
+    localizedNames['trending_up'] = l10n.iconTrendingUp ?? 'Investment';
+    localizedNames['storefront'] = l10n.iconStorefront ?? 'Business';
+    localizedNames['house'] = l10n.iconHouse ?? 'Real Estate';
+    localizedNames['savings'] = l10n.iconSavings ?? 'Savings';
+    localizedNames['redeem'] = l10n.iconRedeem ?? 'Rewards';
+    localizedNames['refresh'] = l10n.iconRefresh ?? 'Refresh';
+    localizedNames['school_income'] =
+        l10n.iconSchoolIncome ?? 'Education Income';
+    localizedNames['monetization_on'] =
+        l10n.iconMonetizationOn ?? 'Monetization';
+    localizedNames['currency_bitcoin'] =
+        l10n.iconCurrencyBitcoin ?? 'Cryptocurrency';
+    localizedNames['work_outline'] = l10n.iconWorkOutline ?? 'Work Income';
+    localizedNames['more_horiz'] = l10n.iconMoreHoriz ?? 'More';
+
     return localizedNames[iconName] ?? iconName;
   }
 
   /// Get localized category name from Category object
-  static String getLocalizedCategoryNameFromCategory(Category category, dynamic l10n) {
+  static String getLocalizedCategoryNameFromCategory(
+    Category category,
+    dynamic l10n,
+  ) {
+    if (l10n == null) return category.name;
     return getLocalizedCategoryName(category.icon, l10n);
   }
 
   /// Get original category name from localized name
-  static String getOriginalCategoryNameFromLocalized(String localizedName, List<Category> categories, dynamic l10n) {
+  static String getOriginalCategoryNameFromLocalized(
+    String localizedName,
+    List<Category> categories,
+    dynamic l10n,
+  ) {
     // First check if it's "All Categories"
     if (localizedName == (l10n?.allCategories ?? 'All Categories')) {
       return localizedName;
     }
-    
+
     // Find the category that matches the localized name
     for (var category in categories) {
-      if (getLocalizedCategoryNameFromCategory(category, l10n) == localizedName) {
+      if (getLocalizedCategoryNameFromCategory(category, l10n) ==
+          localizedName) {
         return category.name;
       }
     }
-    
+
     // If not found, return the localized name as fallback
     return localizedName;
   }
@@ -130,7 +144,7 @@ class IconMapping {
 
     for (var item in items) {
       String iconName = getIconName(item);
-      
+
       switch (iconName) {
         // Home & Utilities
         case 'home':
@@ -228,7 +242,7 @@ class IconMapping {
 
     // Remove empty groups
     grouped.removeWhere((key, value) => value.isEmpty);
-    
+
     return grouped;
   }
 
@@ -238,16 +252,17 @@ class IconMapping {
       iconMap.entries.toList(),
       (entry) => entry.key,
     );
-    
+
     // Convert MapEntry to IconData
-    return groupedEntries.map((key, value) => MapEntry(
-      key,
-      value.map((entry) => entry.value).toList(),
-    ));
+    return groupedEntries.map(
+      (key, value) => MapEntry(key, value.map((entry) => entry.value).toList()),
+    );
   }
 
   /// Group categories by their type and icon category
-  static Map<String, List<Category>> groupCategoriesByType(List<Category> categories) {
+  static Map<String, List<Category>> groupCategoriesByType(
+    List<Category> categories,
+  ) {
     return _groupByIconCategory<Category>(
       categories,
       (category) => category.icon,

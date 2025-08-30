@@ -56,6 +56,7 @@ dependencies:
   timezone: ^0.10.1
   flutter_timezone: ^4.1.1
   permission_handler: ^12.0.1
+  image_picker: ^1.2.0
 
 
 dev_dependencies:
@@ -74,21 +75,21 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/image/ios_app_store_1024.png"
+  image_path: "assets/icon/1024.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
 
 
-# flutter_native_splash:
-#   color: "#FFFFFF"
-#   color_dark: "#000000"
-#   image: assets/image/android_xxxhdpi_192.png
-#   image_dark: assets/image/android_xxxhdpi_192.png
-#   android_12:
-#     image: assets/image/android_xxxhdpi_192.png
-#     icon_background_color: "#FFFFFF"
-#     image_dark: assets/image/android_xxxhdpi_192.png
-#     icon_background_color_dark: "#000000"
-#   fullscreen: true
+flutter_native_splash:
+  color: "#FFFFFF"
+  color_dark: "#000000"
+  image: assets\icon\rounded-in-photoretrica.png
+  image_dark: assets\icon\rounded-in-photoretrica.png
+  android_12:
+    image: assets\icon\rounded-in-photoretrica.png
+    icon_background_color: "#FFFFFF"
+    image_dark: assets\icon\rounded-in-photoretrica.png
+    icon_background_color_dark: "#000000"
+  fullscreen: true
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -107,6 +108,7 @@ flutter:
     - assets/image/
     - .env
     - assets/animation/
+    - assets/icon/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

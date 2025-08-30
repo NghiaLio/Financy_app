@@ -96,6 +96,7 @@ class _MyAppState extends State<MyApp> {
             'Hôm nay bạn đã chi tiêu bao nhiêu?',
       );
       await NotiService().saveNotificationSettings();
+      
     });
     super.initState();
   }

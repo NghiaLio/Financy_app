@@ -49,6 +49,7 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
           [];
       _listAccounts = updatedList;
       emit(ManageMoneyState.loaded(updatedList));
+      emit(ManageMoneyState.success('Account updated successfully'));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }

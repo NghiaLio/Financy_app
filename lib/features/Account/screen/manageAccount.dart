@@ -12,6 +12,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../core/constants/colors.dart';
 import '../models/money_source.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
+import 'package:financy_ui/core/constants/money_source_icons.dart';
 
 class AccountMoneyScreen extends StatefulWidget {
   const AccountMoneyScreen({super.key});
@@ -21,8 +22,8 @@ class AccountMoneyScreen extends StatefulWidget {
 }
 
 class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
-  bool isBalanceVisible = true;
-  bool isTotalInUSD = true; // Switch between USD and VND for total balance
+  bool isBalanceVisible = false;
+  bool isTotalInUSD = false; // Switch between USD and VND for total balance
 
   List<MoneySource> get moneySources {
     final state = context.read<ManageMoneyCubit>().state;
@@ -167,14 +168,10 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primaryBlue, AppColors.accentPink],
-                    ),
+                    color: colorScheme.primary,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.15),
+                      color: colorScheme.onPrimary.withOpacity(0.15),
                       width: 1.5,
                     ),
                   ),
@@ -187,7 +184,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                           Text(
                             localizations?.totalMoney ?? 'Total Money',
                             style: textTheme.bodyMedium?.copyWith(
-                              color: Colors.white70,
+                              color: colorScheme.onPrimary.withOpacity(0.8),
                               fontSize: 16,
                             ),
                           ),
@@ -214,7 +211,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                                   isBalanceVisible
                                       ? Icons.visibility_outlined
                                       : Icons.visibility_off_outlined,
-                                  color: Colors.white70,
+                                  color: colorScheme.onPrimary.withOpacity(0.7),
                                 ),
                               ),
                             ],
@@ -227,7 +224,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                             ? '${isTotalInUSD ? '\$' : '₫'}${_formatCurrency(isTotalInUSD ? totalBalanceInUSD : totalBalanceInVND, isUSD: isTotalInUSD)}'
                             : '••••••',
                         style: textTheme.displaySmall?.copyWith(
-                          color: Colors.white,
+                          color: colorScheme.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -236,7 +233,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                         localizations?.sourcesAvailable(moneySources.length) ??
                             '${moneySources.length} sources available',
                         style: textTheme.bodySmall?.copyWith(
-                          color: Colors.white70,
+                          color: colorScheme.onPrimary.withOpacity(0.75),
                           fontSize: 14,
                         ),
                       ),
@@ -305,7 +302,6 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           );
         }
       },
-
     );
   }
 
@@ -492,13 +488,25 @@ class _MoneySourceTile extends StatelessWidget {
                 .withOpacity(0.1),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(
-            MoneySourceIconColorMapper.iconFor(
-              source.type?.toString().split('.').last ?? '',
-            ),
-            color: ColorUtils.parseColor(source.color) ?? AppColors.primaryBlue,
-            size: 20,
-          ),
+          child:
+              MoneySourceImages.assetFor(source.name) != null
+                  ? ClipOval(
+                    child: Image.asset(
+                      MoneySourceImages.assetFor(source.name)!,
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                  : Icon(
+                    MoneySourceIconColorMapper.iconFor(
+                      source.type?.toString().split('.').last ?? '',
+                    ),
+                    color:
+                        ColorUtils.parseColor(source.color) ??
+                        AppColors.primaryBlue,
+                    size: 20,
+                  ),
         ),
         title: Text(
           source.name,

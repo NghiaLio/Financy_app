@@ -3,6 +3,8 @@
 import 'dart:developer';
 
 import 'package:financy_ui/core/constants/colors.dart';
+import 'package:financy_ui/core/constants/money_source_icons.dart';
+
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
@@ -10,7 +12,9 @@ import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/localText.dart';
+import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
+import 'package:financy_ui/shared/utils/statistics_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +26,21 @@ class Wallet extends StatefulWidget {
 }
 
 class _WalletState extends State<Wallet> {
+  String _formatAmount(num amount) {
+    if (amount % 1 == 0) {
+      // Là số nguyên
+      return amount.toInt().toString().replaceAllMapped(
+        RegExp(r'\B(?=(\d{3})+(?!\d))'),
+        (match) => ',',
+      );
+    } else {
+      // Có phần thập phân
+      return amount
+          .toStringAsFixed(2)
+          .replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => ',');
+    }
+  }
+
   List<Transactionsmodels> transactionsList(
     Map<DateTime, List<Transactionsmodels>> transactionsByDate,
   ) {
@@ -121,17 +140,33 @@ class _WalletState extends State<Wallet> {
                     itemBuilder: (context, index) {
                       final Transactionsmodels transaction =
                           transactionsList[index];
+                      final isIncome =
+                          transaction.type == TransactionType.income;
+                      final amountStr = _formatAmount(transaction.amount);
+                      // Lấy category object từ id
+                      final categories =
+                          isIncome
+                              ? StatisticsUtils.getCategoriesForType(
+                                TransactionType.income,
+                              )
+                              : StatisticsUtils.getCategoriesForType(
+                                TransactionType.expense,
+                              );
+                      final category = categories.firstWhere(
+                        (cat) => cat.id == transaction.categoriesId,
+                        orElse: () => categories.first,
+                      );
+                      final iconData = IconMapping.stringToIcon(category.icon);
+                      final iconColor = Color(int.parse(category.color));
+                      final title = category.name;
                       return _buildTransactionItem(
                         context,
-                        icon: Icons.money,
-                        iconColor: AppColors.blue,
-                        title: transaction.categoriesId,
-                        subtitle: 'Description of transaction $index',
-                        amount:
-                            transaction.type == TransactionType.income
-                                ? '+${transaction.amount} VND'
-                                : '-${transaction.amount} VND',
-                        isPositive: transaction.type == TransactionType.income,
+                        icon: iconData,
+                        iconColor: iconColor,
+                        title: title,
+                        subtitle: transaction.note ?? '',
+                        amount: (isIncome ? '+ ' : '- ') + amountStr + ' VND',
+                        isPositive: isIncome,
                         transaction: transaction,
                       );
                     },
@@ -164,12 +199,13 @@ class _WalletState extends State<Wallet> {
           arguments: {'transaction': transaction, 'fromScreen': 'wallet'},
         );
         // Refresh transactions for the current account after returning
-        final String? accountIdToRefresh = currentAccountId ??
+        final String? accountIdToRefresh =
+            currentAccountId ??
             context.read<ManageMoneyCubit>().listAccounts?.first.id;
         if (accountIdToRefresh != null && accountIdToRefresh.isNotEmpty) {
-          context
-              .read<TransactionCubit>()
-              .fetchTransactionsByAccount(accountIdToRefresh);
+          context.read<TransactionCubit>().fetchTransactionsByAccount(
+            accountIdToRefresh,
+          );
         }
       },
       child: Container(
@@ -209,7 +245,7 @@ class _WalletState extends State<Wallet> {
                     color:
                         isPositive
                             ? AppColors.positiveGreen
-                            : theme.textTheme.bodyLarge?.color,
+                            : AppColors.negativeRed,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -253,14 +289,18 @@ class BalanceCard extends StatelessWidget {
           listAccounts = [];
         }
 
-        if (currentAccountId != null &&
-            listAccounts != null &&
-            listAccounts.isNotEmpty) {
-          final found = listAccounts.firstWhere(
-            (acc) => acc.id == currentAccountId,
-            orElse: () => listAccounts!.first,
-          );
-          currentAccountName = found.name;
+        MoneySource? currentAccount;
+        if (listAccounts != null && listAccounts.isNotEmpty) {
+          if (currentAccountId != null) {
+            final found = listAccounts.firstWhere(
+              (acc) => acc.id == currentAccountId,
+              orElse: () => listAccounts!.first,
+            );
+            currentAccount = found;
+          } else {
+            currentAccount = listAccounts.first;
+          }
+          currentAccountName = currentAccount.name;
         }
 
         // Lấy tổng thu nhập và chi tiêu theo tài khoản hiện tại
@@ -284,14 +324,25 @@ class BalanceCard extends StatelessWidget {
           }
         }
 
+        // Determine brand color and logo for current account
+        final Color fallbackColor = AppColors.primaryBlue;
+        final Color brandColor =
+            currentAccount != null
+                ? MoneySourceColors.colorForWithFallback(
+                  currentAccount.name,
+                  fallback: fallbackColor,
+                )
+                : fallbackColor;
+        final Color onBrand = Colors.white;
+        final String? brandAsset =
+            currentAccount != null
+                ? MoneySourceImages.assetFor(currentAccount.name)
+                : null;
+
         return Container(
           margin: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primaryBlue, AppColors.teal, AppColors.blue],
-            ),
+            color: brandColor.withOpacity(0.8),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -303,17 +354,7 @@ class BalanceCard extends StatelessWidget {
           ),
           child: Container(
             padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  theme.cardColor.withOpacity(0.1),
-                  theme.cardColor.withOpacity(0.05),
-                ],
-              ),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -328,84 +369,162 @@ class BalanceCard extends StatelessWidget {
                           Text(
                             LocalText.localText(context, (l) => l.myAccount),
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textDark.withOpacity(0.8),
+                              color: onBrand,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           SizedBox(height: 4),
-                          Text(
-                            currentAccountName.isNotEmpty
-                                ? currentAccountName
-                                : '---',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: AppColors.textDark,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            children: [
+                              if (brandAsset != null) ...[
+                                ClipOval(
+                                  child: Image.asset(
+                                    brandAsset,
+                                    width: 24,
+                                    height: 24,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                              ],
+                              Expanded(
+                                child: Text(
+                                  currentAccountName.isNotEmpty
+                                      ? currentAccountName
+                                      : '---',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    color: onBrand,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
+                          SizedBox(height: 6),
+                          if (currentAccount != null)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color:
+                                    currentAccount.isActive
+                                        ? AppColors.positiveGreen
+                                        : AppColors.negativeRed,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                currentAccount.isActive
+                                    ? LocalText.localText(
+                                      context,
+                                      (l) => l.active,
+                                    )
+                                    : LocalText.localText(
+                                      context,
+                                      (l) => l.inactive,
+                                    ),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: onBrand,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
-                    // Account Dropdown Button
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: theme.cardColor.withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value:
-                              currentAccountId ??
-                              (listAccounts != null && listAccounts.isNotEmpty
-                                  ? listAccounts.first.id
-                                  : null),
-                          icon: Icon(
-                            Icons.keyboard_arrow_down,
-                            color: AppColors.textDark,
-                            size: 16,
+                    // Brand logo and Account Dropdown Button
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 2,
                           ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textDark,
-                            fontWeight: FontWeight.w600,
+                          decoration: BoxDecoration(
+                            color: onBrand.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: onBrand.withOpacity(0.3),
+                              width: 1,
+                            ),
                           ),
-                          dropdownColor: theme.cardColor,
-                          borderRadius: BorderRadius.circular(16),
-                          items:
-                              listAccounts != null
-                                  ? listAccounts
-                                      .map(
-                                        (e) => DropdownMenuItem(
-                                          value: e.id,
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                MoneySourceIconColorMapper.iconFor(
-                                                  e.type.toString(),
-                                                ),
-                                                color: AppColors.blue,
-                                                size: 18,
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value:
+                                  currentAccountId ??
+                                  (listAccounts != null &&
+                                          listAccounts.isNotEmpty
+                                      ? listAccounts.first.id
+                                      : null),
+                              icon: Icon(
+                                Icons.keyboard_arrow_down,
+                                color: onBrand,
+                                size: 16,
+                              ),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: onBrand,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              dropdownColor: theme.cardColor,
+                              borderRadius: BorderRadius.circular(16),
+                              items:
+                                  listAccounts != null
+                                      ? listAccounts
+                                          .map(
+                                            (e) => DropdownMenuItem(
+                                              value: e.id,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  if (MoneySourceImages.assetFor(
+                                                        e.name,
+                                                      ) !=
+                                                      null)
+                                                    ClipOval(
+                                                      child: Image.asset(
+                                                        MoneySourceImages.assetFor(
+                                                          e.name,
+                                                        )!,
+                                                        width: 18,
+                                                        height: 18,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    )
+                                                  else
+                                                    Icon(
+                                                      MoneySourceIconColorMapper.iconFor(
+                                                        e.type.toString(),
+                                                      ),
+                                                      color:
+                                                          theme
+                                                              .textTheme
+                                                              .bodyMedium
+                                                              ?.color,
+                                                      size: 18,
+                                                    ),
+                                                  SizedBox(width: 6),
+                                                  Text(
+                                                    e.name,
+                                                    style:
+                                                        theme
+                                                            .textTheme
+                                                            .bodyMedium,
+                                                  ),
+                                                ],
                                               ),
-                                              SizedBox(width: 6),
-                                              Text(
-                                                e.name,
-                                                style:
-                                                    theme.textTheme.bodyMedium,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                      .toList()
-                                  : [],
-                          onChanged: changeAccount,
+                                            ),
+                                          )
+                                          .toList()
+                                      : [],
+                              onChanged: changeAccount,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -453,7 +572,7 @@ class BalanceCard extends StatelessWidget {
                                       (l) => l.income,
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.positiveGreen,
+                                      color: onBrand,
                                       fontWeight: FontWeight.w500,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -465,7 +584,7 @@ class BalanceCard extends StatelessWidget {
                             Text(
                               '+${totalIncome.toStringAsFixed(0)} VND',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.positiveGreen,
+                                color: onBrand,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -513,7 +632,7 @@ class BalanceCard extends StatelessWidget {
                                       (l) => l.expense,
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: AppColors.negativeRed,
+                                      color: onBrand,
                                       fontWeight: FontWeight.w500,
                                     ),
                                     overflow: TextOverflow.ellipsis,
@@ -525,7 +644,7 @@ class BalanceCard extends StatelessWidget {
                             Text(
                               '-${totalExpense.toStringAsFixed(0)} VND',
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.negativeRed,
+                                color: onBrand,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
