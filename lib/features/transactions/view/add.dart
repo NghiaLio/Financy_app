@@ -819,7 +819,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       note: noteController.text.trim(),
       transactionDate: date,
       createdAt: DateTime.now(),
-      isSync: false,
+      pendingSync: false,
     );
 
     await context.read<TransactionCubit>().addTransaction(transaction);
@@ -842,7 +842,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       note: noteController.text.trim(),
       transactionDate: date,
       createdAt: editingTransaction!.createdAt,
-      isSync: false,
+      pendingSync: false,
     );
 
     await context.read<TransactionCubit>().updateTransaction(

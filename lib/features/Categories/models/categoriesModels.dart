@@ -27,7 +27,17 @@ class Category extends HiveObject {
   @HiveField(6)
   DateTime createdAt;
 
+  @HiveField(7)
+  String? uid;
 
+  @HiveField(8)
+  String? updatedAt;
+
+  @HiveField(9)
+  bool? isDeleted;
+
+  @HiveField(10)
+  bool? pendingSync;
 
   Category({
     required this.id,
@@ -36,6 +46,10 @@ class Category extends HiveObject {
     required this.type,
     required this.icon,
     required this.createdAt, required this.color,
+    this.uid,
+    this.updatedAt, 
+    this.isDeleted,
+    this.pendingSync,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {

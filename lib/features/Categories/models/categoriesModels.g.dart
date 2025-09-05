@@ -1,7 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: file_names
-
 part of 'categoriesModels.dart';
 
 // **************************************************************************
@@ -26,13 +24,17 @@ class CategoryAdapter extends TypeAdapter<Category> {
       icon: fields[4] as String,
       createdAt: fields[6] as DateTime,
       color: fields[5] as String,
-    );
+    )
+      ..uid = fields[7] as String?
+      ..updatedAt = fields[8] as String?
+      ..isDeleted = fields[9] as bool?
+      ..pendingSync = fields[10] as bool?;
   }
 
   @override
   void write(BinaryWriter writer, Category obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -46,7 +48,15 @@ class CategoryAdapter extends TypeAdapter<Category> {
       ..writeByte(5)
       ..write(obj.color)
       ..writeByte(6)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.uid)
+      ..writeByte(8)
+      ..write(obj.updatedAt)
+      ..writeByte(9)
+      ..write(obj.isDeleted)
+      ..writeByte(10)
+      ..write(obj.pendingSync);
   }
 
   @override

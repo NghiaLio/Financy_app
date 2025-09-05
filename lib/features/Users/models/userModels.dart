@@ -27,6 +27,15 @@ class UserModel extends HiveObject {
   @HiveField(6)
   DateTime createdAt;
 
+  @HiveField(7)
+  String? updatedAt;
+
+  @HiveField(8)
+  bool? isDeleted;
+
+  @HiveField(9)
+  bool? pendingSync;
+
   UserModel({
     required this.id,
     required this.uid,
@@ -35,6 +44,9 @@ class UserModel extends HiveObject {
     required this.picture,
     required this.dateOfBirth,
     required this.createdAt,
+    this.updatedAt,
+    this.isDeleted,
+    this.pendingSync,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -55,6 +67,9 @@ class UserModel extends HiveObject {
       picture: json['photo'] ?? '',
       dateOfBirth: parsedDate ?? DateTime.now(),
       createdAt: createdAt ?? DateTime.now(),
+      updatedAt: json['updatedAt'],
+      isDeleted: json['isDeleted'] ?? false,
+      pendingSync: json['pendingSync'] ?? false,
     );
   }
 
@@ -66,5 +81,8 @@ class UserModel extends HiveObject {
     'picture': picture,
     'dateOfBirth': dateOfBirth.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt,
+    'isDeleted': isDeleted,
+    'pendingSync': pendingSync,
   };
 }

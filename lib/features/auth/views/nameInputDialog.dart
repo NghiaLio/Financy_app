@@ -113,6 +113,8 @@ class _InputDialogState extends State<InputDialog> {
       uid: '',
       email: '',
       dateOfBirth: DateTime(year, month, day),
+      pendingSync: false,
+      updatedAt: DateTime.now().toIso8601String(),
     );
   }
 

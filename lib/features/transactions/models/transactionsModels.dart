@@ -42,7 +42,13 @@ class Transactionsmodels extends HiveObject {
   DateTime? createdAt;
 
   @HiveField(9)
-  bool isSync;
+  String? updatedAt;
+
+  @HiveField(10)
+  bool? isDeleted;
+
+  @HiveField(11)
+  bool? pendingSync;
 
   Transactionsmodels({
     required this.id,
@@ -54,7 +60,9 @@ class Transactionsmodels extends HiveObject {
     this.note,
     this.transactionDate,
     this.createdAt,
-    this.isSync = false,
+    this.updatedAt,
+    this.isDeleted,
+    this.pendingSync,
   });
 
  
@@ -74,7 +82,7 @@ class Transactionsmodels extends HiveObject {
       note: json['note'],
       transactionDate: DateTime.tryParse(json['transactionDate'] ?? ''),
       createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
-      isSync: json['isSync'] ?? false,
+      pendingSync: json['pendingSync'] ?? false,
     );
   }
 
@@ -89,7 +97,7 @@ class Transactionsmodels extends HiveObject {
       'note': note,
       'transactionDate': transactionDate?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
-      'isSync': isSync,
+      'pendingSync': pendingSync,
     };
   }
 }

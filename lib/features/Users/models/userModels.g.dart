@@ -1,7 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: file_names
-
 part of 'userModels.dart';
 
 // **************************************************************************
@@ -26,13 +24,16 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       picture: fields[4] as String,
       dateOfBirth: fields[5] as DateTime,
       createdAt: fields[6] as DateTime,
-    );
+    )
+      ..updatedAt = fields[7] as String?
+      ..isDeleted = fields[8] as bool?
+      ..pendingSync = fields[9] as bool?;
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -46,7 +47,13 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(5)
       ..write(obj.dateOfBirth)
       ..writeByte(6)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.updatedAt)
+      ..writeByte(8)
+      ..write(obj.isDeleted)
+      ..writeByte(9)
+      ..write(obj.pendingSync);
   }
 
   @override

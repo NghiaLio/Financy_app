@@ -55,6 +55,18 @@ class MoneySource extends HiveObject {
   @HiveField(8)
   bool isActive;
 
+  @HiveField(9)
+  String? uid;
+
+  @HiveField(10)
+  String? updatedAt;
+
+  @HiveField(11)
+  bool? isDeleted;
+
+  @HiveField(12)
+  bool? pendingSync;
+
   // Getter for IconData
   IconData? get icon {
     if (iconCode == null) return null;
@@ -76,6 +88,10 @@ class MoneySource extends HiveObject {
     this.color,
     this.description,
     required this.isActive,
+    this.uid,
+    this.updatedAt,
+    this.isDeleted,
+    this.pendingSync,
   });
 
   /// Factory constructor for backend data (no icon/color)

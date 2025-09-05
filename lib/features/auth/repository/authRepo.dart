@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, invalid_return_type_for_catch_error
 
 import 'package:financy_ui/app/services/Server/dio_client.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
@@ -26,7 +26,12 @@ class Authrepo {
   Future<void> loginWithGoogle(String tokenID) async {
     // fetch token
     final data = {"idToken": tokenID};
-    final res = await ApiService().post('google/login', data: data);
+    final res = await ApiService().post('google/login', data: data).catchError((e)=>{
+      throw Exception('Login with Google failed: ${e.toString()}')
+    });
+    if (res.statusCode != 200) {
+      throw Exception('Login with Google failed: ${res.statusMessage}');
+    }
     final accessToken = res.data['accessToken'];
     final refreshToken = res.data['refreshToken'];
     //save to local storage
@@ -37,14 +42,14 @@ class Authrepo {
     final user = await ApiService().get('/google/user');
     // Nếu user có picture là link, tải về app data và lưu path local
     String? localPicturePath;
-    if (user.data['picture'] != null &&
-        user.data['picture'].toString().startsWith('http')) {
+    if (user.data['photo'] != null &&
+        user.data['photo'].toString().startsWith('http')) {
       try {
         final dir = await getApplicationDocumentsDirectory();
         final fileName =
             'google_profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final savePath = '${dir.path}/$fileName';
-        await Dio().download(user.data['picture'], savePath);
+        await Dio().download(user.data['photo'], savePath);
         localPicturePath = savePath;
       } catch (e) {
         localPicturePath = null;
@@ -53,7 +58,7 @@ class Authrepo {
     // Lưu user vào Hive, thay picture = local path nếu có
     final userJson = Map<String, dynamic>.from(user.data);
     if (localPicturePath != null) {
-      userJson['picture'] = localPicturePath;
+      userJson['photo'] = localPicturePath;
     }
     await Hive.box<UserModel>(
       'userBox',
