@@ -1,4 +1,4 @@
-import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/core/constants/icons.dart';
 
@@ -11,15 +11,27 @@ class StatisticsUtils {
     DateTime endDate,
   ) {
     double total = 0.0;
-    
+
     transactions.forEach((date, txList) {
       // Normalize dates for comparison (remove time component)
       final normalizedDate = DateTime(date.year, date.month, date.day);
-      final normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
-      final normalizedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
-      
-      if (normalizedDate.isAfter(normalizedStartDate.subtract(const Duration(days: 1))) &&
-          normalizedDate.isBefore(normalizedEndDate.add(const Duration(days: 1)))) {
+      final normalizedStartDate = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      );
+      final normalizedEndDate = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+      );
+
+      if (normalizedDate.isAfter(
+            normalizedStartDate.subtract(const Duration(days: 1)),
+          ) &&
+          normalizedDate.isBefore(
+            normalizedEndDate.add(const Duration(days: 1)),
+          )) {
         for (var tx in txList) {
           if (tx.type == type) {
             total += tx.amount;
@@ -27,7 +39,7 @@ class StatisticsUtils {
         }
       }
     });
-    
+
     return total;
   }
 
@@ -39,24 +51,36 @@ class StatisticsUtils {
     DateTime endDate,
   ) {
     final categoryTotals = <String, double>{};
-    
+
     transactions.forEach((date, txList) {
       // Normalize dates for comparison (remove time component)
       final normalizedDate = DateTime(date.year, date.month, date.day);
-      final normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
-      final normalizedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
-      
-      if (normalizedDate.isAfter(normalizedStartDate.subtract(const Duration(days: 1))) &&
-          normalizedDate.isBefore(normalizedEndDate.add(const Duration(days: 1)))) {
+      final normalizedStartDate = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      );
+      final normalizedEndDate = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+      );
+
+      if (normalizedDate.isAfter(
+            normalizedStartDate.subtract(const Duration(days: 1)),
+          ) &&
+          normalizedDate.isBefore(
+            normalizedEndDate.add(const Duration(days: 1)),
+          )) {
         for (var tx in txList) {
           if (tx.type == type) {
-            categoryTotals[tx.categoriesId] = 
+            categoryTotals[tx.categoriesId] =
                 (categoryTotals[tx.categoriesId] ?? 0.0) + tx.amount;
           }
         }
       }
     });
-    
+
     return categoryTotals;
   }
 
@@ -68,15 +92,27 @@ class StatisticsUtils {
     DateTime endDate,
   ) {
     final dateTotals = <DateTime, double>{};
-    
+
     transactions.forEach((date, txList) {
       // Normalize dates for comparison (remove time component)
       final normalizedDate = DateTime(date.year, date.month, date.day);
-      final normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
-      final normalizedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
-      
-      if (normalizedDate.isAfter(normalizedStartDate.subtract(const Duration(days: 1))) &&
-          normalizedDate.isBefore(normalizedEndDate.add(const Duration(days: 1)))) {
+      final normalizedStartDate = DateTime(
+        startDate.year,
+        startDate.month,
+        startDate.day,
+      );
+      final normalizedEndDate = DateTime(
+        endDate.year,
+        endDate.month,
+        endDate.day,
+      );
+
+      if (normalizedDate.isAfter(
+            normalizedStartDate.subtract(const Duration(days: 1)),
+          ) &&
+          normalizedDate.isBefore(
+            normalizedEndDate.add(const Duration(days: 1)),
+          )) {
         double dailyTotal = 0.0;
         for (var tx in txList) {
           if (tx.type == type) {
@@ -89,24 +125,30 @@ class StatisticsUtils {
         }
       }
     });
-    
+
     return dateTotals;
   }
 
   /// Lấy danh sách categories với thông tin đầy đủ
   static List<Category> getCategoriesForType(TransactionType type) {
-    return type == TransactionType.expense 
-        ? defaultExpenseCategories 
+    return type == TransactionType.expense
+        ? defaultExpenseCategories
         : defaultIncomeCategories;
   }
 
   /// Tính phần trăm cho pie chart
-  static Map<String, double> calculatePercentages(Map<String, double> categoryTotals) {
-    final total = categoryTotals.values.fold(0.0, (sum, amount) => sum + amount);
+  static Map<String, double> calculatePercentages(
+    Map<String, double> categoryTotals,
+  ) {
+    final total = categoryTotals.values.fold(
+      0.0,
+      (sum, amount) => sum + amount,
+    );
     if (total == 0) return {};
-    
-    return categoryTotals.map((category, amount) => 
-        MapEntry(category, (amount / total) * 100));
+
+    return categoryTotals.map(
+      (category, amount) => MapEntry(category, (amount / total) * 100),
+    );
   }
 
   /// Lấy top categories theo số tiền
@@ -114,9 +156,10 @@ class StatisticsUtils {
     Map<String, double> categoryTotals,
     int limit,
   ) {
-    final sorted = categoryTotals.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-    
+    final sorted =
+        categoryTotals.entries.toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+
     return sorted.take(limit).toList();
   }
 
@@ -158,9 +201,10 @@ class StatisticsUtils {
   ) {
     final sortedDates = dateTotals.keys.toList()..sort();
     final recentDates = sortedDates.take(days).toList();
-    
-    return recentDates.map((date) => 
-        MapEntry(date, dateTotals[date] ?? 0.0)).toList();
+
+    return recentDates
+        .map((date) => MapEntry(date, dateTotals[date] ?? 0.0))
+        .toList();
   }
 
   /// Tính toán dữ liệu cho pie chart
@@ -170,8 +214,9 @@ class StatisticsUtils {
   ) {
     final topCategories = getTopCategories(categoryTotals, limit);
     final percentages = calculatePercentages(categoryTotals);
-    
-    return topCategories.map((entry) => 
-        MapEntry(entry.key, percentages[entry.key] ?? 0.0)).toList();
+
+    return topCategories
+        .map((entry) => MapEntry(entry.key, percentages[entry.key] ?? 0.0))
+        .toList();
   }
 }

@@ -52,19 +52,34 @@ class UserModel extends HiveObject {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     DateTime? parsedDate;
     DateTime? createdAt;
-    try {
-      parsedDate = json['dateOfBirth'] != null ? DateTime.parse(json['date']) : null;
-      createdAt = json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null;
-    } catch (e) {
+    // dateOfBirth can be a String ISO date, an int millis, or missing
+    final dobRaw = json['dateOfBirth'];
+    if (dobRaw is int) {
+      parsedDate = DateTime.fromMillisecondsSinceEpoch(dobRaw);
+    } else if (dobRaw is String) {
+      parsedDate = DateTime.tryParse(dobRaw);
+    } else if (dobRaw is DateTime) {
+      parsedDate = dobRaw;
+    } else {
       parsedDate = null;
-      createdAt = null; // or set a default value
+    }
+
+    final createdRaw = json['createdAt'];
+    if (createdRaw is int) {
+      createdAt = DateTime.fromMillisecondsSinceEpoch(createdRaw);
+    } else if (createdRaw is String) {
+      createdAt = DateTime.tryParse(createdRaw);
+    } else if (createdRaw is DateTime) {
+      createdAt = createdRaw;
+    } else {
+      createdAt = null;
     }
     return UserModel(
-      id: json['_id'] ?? '',
-      uid: json['uid'] ?? '',
-      name: json['userName'] ?? '',
+      id: json['_id'] ?? json['id'] ?? json['userId'] ?? '',
+      uid: json['uid'] ?? json['userUid'] ?? '',
+      name: json['userName'] ?? json['name'] ?? '',
       email: json['email'] ?? '',
-      picture: json['photo'] ?? '',
+      picture: json['photo'] ?? json['picture'] ?? json['avatar'] ?? '',
       dateOfBirth: parsedDate ?? DateTime.now(),
       createdAt: createdAt ?? DateTime.now(),
       updatedAt: json['updatedAt'],
@@ -74,7 +89,6 @@ class UserModel extends HiveObject {
   }
 
   Map<String, dynamic> toJson() => {
-    '_id': id,
     'uid': uid,
     'name': name,
     'email': email,
@@ -82,7 +96,7 @@ class UserModel extends HiveObject {
     'dateOfBirth': dateOfBirth.toIso8601String(),
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt,
-    'isDeleted': isDeleted,
+    'isDeleted': isDeleted ?? false,
     'pendingSync': pendingSync,
   };
 }

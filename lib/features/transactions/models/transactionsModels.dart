@@ -11,7 +11,6 @@ enum TransactionType {
   expense,
 }
 
-
 @HiveType(typeId: 7)
 class Transactionsmodels extends HiveObject {
   @HiveField(0)
@@ -65,30 +64,48 @@ class Transactionsmodels extends HiveObject {
     this.pendingSync,
   });
 
- 
-
   /// Factory constructor for backend data (no icon/color)
   factory Transactionsmodels.fromJson(Map<String, dynamic> json) {
+    DateTime? txnDate;
+    final txnRaw = json['transactionDate'];
+    if (txnRaw is int) {
+      txnDate = DateTime.fromMillisecondsSinceEpoch(txnRaw);
+    } else if (txnRaw is String) {
+      txnDate = DateTime.tryParse(txnRaw);
+    } else if (txnRaw is DateTime) {
+      txnDate = txnRaw;
+    }
+
+    DateTime? createdAt;
+    final createdRaw = json['createdAt'];
+    if (createdRaw is int) {
+      createdAt = DateTime.fromMillisecondsSinceEpoch(createdRaw);
+    } else if (createdRaw is String) {
+      createdAt = DateTime.tryParse(createdRaw);
+    } else if (createdRaw is DateTime) {
+      createdAt = createdRaw;
+    }
+
     return Transactionsmodels(
-      id: json['id'] ?? '',
-      uid: json['uid'] ?? '',
-      accountId: json['accountId'] ?? '',
-      categoriesId: json['categoriesId'] ?? '',
+      id: json['id']?.toString() ?? '',
+      uid: json['uid']?.toString() ?? '',
+      accountId: json['accountId']?.toString() ?? '',
+      categoriesId: json['categoriesId']?.toString() ?? '',
       type: TransactionType.values.firstWhere(
         (e) => e.toString() == 'TransactionType.${json['type']}',
         orElse: () => TransactionType.expense,
       ),
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
-      note: json['note'],
-      transactionDate: DateTime.tryParse(json['transactionDate'] ?? ''),
-      createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
-      pendingSync: json['pendingSync'] ?? false,
+      note: json['note']?.toString(),
+      transactionDate: txnDate,
+      createdAt: createdAt,
+      updatedAt: json['updatedAt']?.toString(),
+      isDeleted: json['isDeleted'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'uid': uid,
       'accountId': accountId,
       'categoriesId': categoriesId,
@@ -98,12 +115,8 @@ class Transactionsmodels extends HiveObject {
       'transactionDate': transactionDate?.toIso8601String(),
       'createdAt': createdAt?.toIso8601String(),
       'pendingSync': pendingSync,
+      'isDeleted': isDeleted ?? false,
+      'updatedAt': updatedAt,
     };
   }
 }
-
-
-
-
-
-

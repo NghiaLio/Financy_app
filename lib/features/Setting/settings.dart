@@ -82,6 +82,15 @@ class Settings extends StatelessWidget {
               Navigator.pushNamed(context, '/notificationSettings');
             },
           ),
+          const SizedBox(height: 12),
+          _buildMenuItem(
+            icon: Icons.sync,
+            title: _localText(context, (l) => l.dataSync),
+            iconColor: Colors.blue,
+            onTap: () {
+              Navigator.pushNamed(context, '/dataSync');
+            },
+          ),
           const Spacer(),
         ],
       ),
@@ -124,7 +133,6 @@ class Settings extends StatelessWidget {
                 ),
               ),
             ),
-            
           ],
         ),
       ),

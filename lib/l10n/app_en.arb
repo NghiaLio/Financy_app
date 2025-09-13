@@ -260,7 +260,14 @@
   "iconMonetizationOn": "Monetization",
   "iconCurrencyBitcoin": "Cryptocurrency",
   "iconWorkOutline": "Work Income",
-  "iconMoreHoriz": "More"
+  "iconMoreHoriz": "More",
+  
+  "dataSync": "Data Synchronization",
+  "lastSync": "Last Synchronized",
+  "syncingData": "Synchronizing Data...",
+  "readyToSync": "Ready to synchronize your data",
+  "uploadData": "Upload Data",
+  "downloadData": "Download Data"
 }
 
 

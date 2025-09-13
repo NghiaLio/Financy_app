@@ -333,7 +333,14 @@
   "iconCurrencyBitcoin": "Tiền điện tử",
   "iconWorkOutline": "Thu nhập công việc",
   "iconMoreHoriz": "Thêm",
-  "weekOf":"theo tuần"
+  "weekOf":"theo tuần",
+  
+  "dataSync": "Đồng bộ dữ liệu",
+  "lastSync": "Lần đồng bộ cuối",
+  "syncingData": "Đang đồng bộ dữ liệu...",
+  "readyToSync": "Sẵn sàng đồng bộ dữ liệu của bạn",
+  "uploadData": "Tải lên",
+  "downloadData": "Tải xuống"
 }
 
 

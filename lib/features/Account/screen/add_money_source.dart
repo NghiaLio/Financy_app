@@ -3,6 +3,7 @@
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
+import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/generateID.dart';
 import 'package:flutter/material.dart';
@@ -615,6 +616,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
     }
     final source = MoneySource(
       id: GenerateID.newID(),
+      uid: context.read<UserCubit>().state.user?.uid ?? '',
       name: nameController.text,
       balance: double.tryParse(balanceController.text) ?? 0.0,
       type: _typeFromString(selectedType),
@@ -625,6 +627,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
               ? null
               : descriptionController.text,
       isActive: true,
+      updatedAt: DateTime.now().toIso8601String(),
     );
     context.read<ManageMoneyCubit>().createAccount(source);
   }

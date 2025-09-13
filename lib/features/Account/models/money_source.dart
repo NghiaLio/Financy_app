@@ -98,9 +98,13 @@ class MoneySource extends HiveObject {
   factory MoneySource.fromJson(Map<String, dynamic> json) {
     final iconData = MoneySourceIconColorMapper.iconFor(json['accountType']);
     return MoneySource(
-      id: json['_id'] as String,
-      name: json['accountName'] as String,
-      balance: (json['accountBalance'] as num).toDouble(),
+      id: json['_id']?.toString(),
+      name: json['accountName']?.toString() ?? '',
+      balance:
+          (json['accountBalance'] is num)
+              ? (json['accountBalance'] as num).toDouble()
+              : double.tryParse(json['accountBalance']?.toString() ?? '0') ??
+                  0.0,
       type: TypeMoney.values.firstWhere(
         (e) => e.toString() == 'TypeMoney.${json['accountType']}',
         orElse: () => TypeMoney.other,
@@ -113,8 +117,9 @@ class MoneySource extends HiveObject {
       color: json['color'] as String? ?? ColorUtils.colorToHex(AppColors.blue),
       // Default color if not provided
       description: json['description'] as String? ?? '',
-      isActive:
-          json['active'] as bool? ?? true, // Default to true if not provided
+      isActive: json['active'] as bool? ?? true,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      updatedAt: json['updatedAt'] as String?,
     );
   }
 
@@ -131,6 +136,8 @@ class MoneySource extends HiveObject {
     ), // Default color if not provided
     'description': description ?? '',
     'active': isActive,
+    'isDeleted': isDeleted ?? false,
+    'updatedAt': updatedAt,
   };
 
   // Helper methods for IconData conversion
@@ -159,5 +166,3 @@ class MoneySource extends HiveObject {
     return Icons.account_balance_wallet;
   }
 }
-
-

@@ -1,6 +1,20 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:financy_ui/app/services/Server/auth_interceptor.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+/// ApiException carries the server status code and the response data (usually JSON)
+/// so callers can read fields like `error` or `message`.
+class ApiException implements Exception {
+  final int? statusCode;
+  final dynamic data;
+
+  ApiException(this.statusCode, this.data);
+
+  @override
+  String toString() => 'ApiException(statusCode: $statusCode, data: $data)';
+}
 
 class ApiService {
   final Dio _dio;
@@ -28,8 +42,18 @@ class ApiService {
 
   Future<Response> post(String path, {dynamic data}) async {
     try {
-      return await _dio.post(path, data: data);
+      return await _dio.post(
+        path,
+        data: data,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
     } on DioException catch (e) {
+      // If server provided structured JSON, throw ApiException with that data
+      final resp = e.response;
+      log('API error [${resp?.statusCode}]: ${resp?.data}');
+      if (resp != null && resp.data != null) {
+        throw ApiException(resp.statusCode, resp.data);
+      }
       throw Exception(e.message);
     }
   }
@@ -41,6 +65,11 @@ class ApiService {
     try {
       return await _dio.get(path, queryParameters: queryParameters);
     } on DioException catch (e) {
+      final resp = e.response;
+      if (resp != null && resp.data != null) {
+        log('API error [${resp.statusCode}]: ${resp.data}');
+        throw ApiException(resp.statusCode, resp.data);
+      }
       throw Exception(e.message);
     }
   }
@@ -49,13 +78,24 @@ class ApiService {
     try {
       return await _dio.put(path, data: data);
     } on DioException catch (e) {
+      final resp = e.response;
+      if (resp != null && resp.data != null) {
+        log('API error [${resp.statusCode}]: ${resp.data}');
+        throw ApiException(resp.statusCode, resp.data);
+      }
       throw Exception(e.message);
     }
   }
+
   Future<Response> delete(String path, {dynamic data}) async {
     try {
       return await _dio.delete(path, data: data);
     } on DioException catch (e) {
+      final resp = e.response;
+      if (resp != null && resp.data != null) {
+        log('API error [${resp.statusCode}]: ${resp.data}');
+        throw ApiException(resp.statusCode, resp.data);
+      }
       throw Exception(e.message);
     }
   }

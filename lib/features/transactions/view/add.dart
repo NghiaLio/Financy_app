@@ -4,10 +4,10 @@ import 'dart:developer';
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
-import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
+import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
-import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
-import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
+import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/generateID.dart';
 import 'package:financy_ui/shared/widgets/resultDialogAnimation.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
@@ -622,19 +622,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ...listAccounts
                     .where((e) => e.isActive == true)
                     .map(
-                  (account) => ListTile(
-                    title: Text(
-                      account.name,
-                      style: theme.textTheme.bodyMedium,
+                      (account) => ListTile(
+                        title: Text(
+                          account.name,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                        onTap: () {
+                          setState(() {
+                            selectedAccount = account.name;
+                          });
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
-                    onTap: () {
-                      setState(() {
-                        selectedAccount = account.name;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
             ],
           ),
         );
@@ -658,9 +658,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   bool _validate(double amount, MoneySource account) {
     if (account.isActive != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected account is inactive')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Selected account is inactive')));
       return false;
     }
     if (amount <= 0) {
@@ -843,6 +843,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       transactionDate: date,
       createdAt: editingTransaction!.createdAt,
       pendingSync: false,
+      updatedAt: DateTime.now().toIso8601String(),
     );
 
     await context.read<TransactionCubit>().updateTransaction(
@@ -945,9 +946,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   ) async {
     // Block if account is inactive (safety net)
     if (account.isActive != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected account is inactive')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Selected account is inactive')));
       return;
     }
     double newBalance = account.balance;
@@ -968,6 +969,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   ) {
     return MoneySource(
       id: original.id,
+      uid: original.uid,
       name: original.name,
       balance: newBalance,
       type: original.type,
@@ -976,6 +978,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       color: original.color,
       description: original.description,
       isActive: original.isActive,
+      updatedAt: DateTime.now().toIso8601String()
     );
   }
 

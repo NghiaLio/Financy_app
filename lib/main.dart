@@ -7,19 +7,18 @@ import 'package:financy_ui/features/Account/screen/add_money_source.dart';
 import 'package:financy_ui/features/Account/screen/manageAccount.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
-import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';
 import 'package:financy_ui/features/Categories/view/edit_categories.dart';
-import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
+import 'package:financy_ui/features/Sync/view/dataSyncScreen.dart';
+
 import 'package:financy_ui/features/Users/Views/profile.dart';
-import 'package:financy_ui/features/Transactions/view/add.dart';
+import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
+import 'package:financy_ui/features/transactions/view/add.dart';
 import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
-import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
 // ignore: unused_import
-import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
-import 'package:financy_ui/features/Transactions/repo/transactionsRepo.dart';
+import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
 import 'package:financy_ui/features/notification/models/notificationModel.dart';
 import 'package:financy_ui/firebase_options.dart';
@@ -68,10 +67,10 @@ void main() async {
   await Hive.openBox('jwt');
 
   // Initialize local storage for MoneySource
-  await ManageMoneyRepo.initializeLocalStorage();
+  await Hive.openBox<MoneySource>('moneySourceBox');
   await Hive.openBox<UserModel>('userBox');
-  await TransactionsRepo.initializeLocalStorage();
-  await Categorierepo.initializeLocalStorage();
+  await Hive.openBox<Category>('categoryBox');
+  await Hive.openBox<Transactionsmodels>('transactionsBox');
   await Hive.openBox<NotificationModel>('notificationSettings');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -96,7 +95,6 @@ class _MyAppState extends State<MyApp> {
             'Hôm nay bạn đã chi tiêu bao nhiêu?',
       );
       await NotiService().saveNotificationSettings();
-      
     });
     super.initState();
   }
@@ -162,7 +160,9 @@ class _MyAppState extends State<MyApp> {
               '/manageCategory': (context) => ExpenseCategoriesScreen(),
               '/languageSelection': (context) => LanguageSelectionScreen(),
               '/editCategory': (context) => AddEditCategoryScreen(),
-              '/notificationSettings': (context) => NotificationSettingsScreen(),
+              '/notificationSettings':
+                  (context) => NotificationSettingsScreen(),
+              '/dataSync': (context) => DataSyncScreen(),
 
               // Add other routes here
             },

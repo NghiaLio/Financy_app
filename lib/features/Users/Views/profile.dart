@@ -52,6 +52,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       _nameController.text = 'Nguyễn Văn A';
       _emailController.text = 'nguyenvana@email.com';
     }
+    log(
+      'User data loaded: ${_nameController.text}, ${_emailController.text}, $_selectedBirthDate, $_avatarPath',
+    );
   }
 
   @override
@@ -496,6 +499,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         name: _nameController.text,
         email: _emailController.text,
         dateOfBirth: _selectedBirthDate,
+        updatedAt: DateTime.now().toString(),
+        isDeleted: widget.user?.isDeleted ?? false,
+        pendingSync: false,
       ),
     );
 

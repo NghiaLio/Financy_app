@@ -26,9 +26,11 @@ class Authrepo {
   Future<void> loginWithGoogle(String tokenID) async {
     // fetch token
     final data = {"idToken": tokenID};
-    final res = await ApiService().post('google/login', data: data).catchError((e)=>{
-      throw Exception('Login with Google failed: ${e.toString()}')
-    });
+    final res = await ApiService()
+        .post('google/login', data: data)
+        .catchError(
+          (e) => {throw Exception('Login with Google failed: ${e.toString()}')},
+        );
     if (res.statusCode != 200) {
       throw Exception('Login with Google failed: ${res.statusMessage}');
     }
@@ -42,14 +44,14 @@ class Authrepo {
     final user = await ApiService().get('/google/user');
     // Nếu user có picture là link, tải về app data và lưu path local
     String? localPicturePath;
-    if (user.data['photo'] != null &&
-        user.data['photo'].toString().startsWith('http')) {
+    if (user.data['picture'] != null &&
+        user.data['picture'].toString().startsWith('http')) {
       try {
         final dir = await getApplicationDocumentsDirectory();
         final fileName =
             'google_profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final savePath = '${dir.path}/$fileName';
-        await Dio().download(user.data['photo'], savePath);
+        await Dio().download(user.data['picture'], savePath);
         localPicturePath = savePath;
       } catch (e) {
         localPicturePath = null;
