@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';

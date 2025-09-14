@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:hive/hive.dart';
 

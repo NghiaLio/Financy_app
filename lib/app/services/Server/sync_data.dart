@@ -35,7 +35,7 @@ class SyncDataService {
 
     final result = await _apiService.post('/sync', data: data);
 
-    log('Sync result: ${result}');
+    log('Sync result: $result');
 
     return result;
   }
@@ -49,17 +49,17 @@ class SyncDataService {
       queryParameters: {'since': since.toString(), 'uid': boxUser?.uid ?? ''},
     );
 
-    // int lastSyncValue;
-    // if (result.data['lastSync'] is int) {
-    //   lastSyncValue = result.data['lastSync'];
-    // } else if (result.data['lastSync'] is String) {
-    //   lastSyncValue =
-    //       int.tryParse(result.data['lastSync']) ??
-    //       DateTime.now().millisecondsSinceEpoch;
-    // } else {
-    //   lastSyncValue = DateTime.now().millisecondsSinceEpoch;
-    // }
-    // Hive.box('settings').put('lastSync', lastSyncValue);
+    int lastSyncValue;
+    if (result.data['lastSync'] is int) {
+      lastSyncValue = result.data['lastSync'];
+    } else if (result.data['lastSync'] is String) {
+      lastSyncValue =
+          int.tryParse(result.data['lastSync']) ??
+          DateTime.now().millisecondsSinceEpoch;
+    } else {
+      lastSyncValue = DateTime.now().millisecondsSinceEpoch;
+    }
+    Hive.box('settings').put('lastSync', lastSyncValue);
     return result;
   }
 }

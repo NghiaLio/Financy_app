@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/features/Sync/models/syncModels.dart';
@@ -11,13 +13,9 @@ class Pullmodels {
   Pullmodels({this.status, this.since, this.data});
 
   factory Pullmodels.fromJson(Map<String, dynamic> json) {
-    int sinceInt;
     if (json['since'] is int) {
-      sinceInt = json['since'];
     } else if (json['since'] is String) {
-      sinceInt = int.tryParse(json['since']) ?? 0;
     } else {
-      sinceInt = 0;
     }
     // parse since: treat explicit string "null" as null
     DateTime? since;
@@ -44,15 +42,15 @@ class Pullmodels {
     }
 
     // helper to convert date-string fields to millis
-    List<Map<String, dynamic>> _asList(dynamic v) {
+    List<Map<String, dynamic>> asList(dynamic v) {
       if (v == null) return [];
       if (v is List) return List<Map<String, dynamic>>.from(v);
       return [];
     }
 
-    Syncmodels _buildSyncmodelsFromMap(Map<String, dynamic> value) {
+    Syncmodels buildSyncmodelsFromMap(Map<String, dynamic> value) {
       // users
-      final usersRaw = _asList(value['users']);
+      final usersRaw = asList(value['users']);
       final users =
           usersRaw.map((user) {
             // Normalize date fields: if server provided millis (int) or DateTime,
@@ -72,7 +70,7 @@ class Pullmodels {
           }).toList();
 
       // accounts
-      final accountsRaw = _asList(value['accounts']);
+      final accountsRaw = asList(value['accounts']);
       final accounts =
           accountsRaw.map((account) {
             for (var dateKey in ['createdAt', 'updatedAt']) {
@@ -88,7 +86,7 @@ class Pullmodels {
           }).toList();
 
       // transactions
-      final transactionsRaw = _asList(value['transactions']);
+      final transactionsRaw = asList(value['transactions']);
       final transactions =
           transactionsRaw.map((transaction) {
             for (var dateKey in ['transactionDate', 'createdAt', 'updatedAt']) {
@@ -104,7 +102,7 @@ class Pullmodels {
           }).toList();
 
       // categories
-      final categoriesRaw = _asList(value['categories']);
+      final categoriesRaw = asList(value['categories']);
       final categories =
           categoriesRaw.map((category) {
             for (var dateKey in ['createdAt', 'updatedAt']) {
@@ -137,14 +135,14 @@ class Pullmodels {
           topKeys.contains('users') ||
           topKeys.contains('accounts') ||
           topKeys.contains('categories')) {
-        mappedData['server'] = _buildSyncmodelsFromMap(
+        mappedData['server'] = buildSyncmodelsFromMap(
           Map<String, dynamic>.from(dataNode),
         );
       } else {
         // data is a map of keyed sync objects
         dataNode.forEach((k, v) {
           if (v is Map<String, dynamic>) {
-            mappedData[k] = _buildSyncmodelsFromMap(
+            mappedData[k] = buildSyncmodelsFromMap(
               Map<String, dynamic>.from(v),
             );
           }

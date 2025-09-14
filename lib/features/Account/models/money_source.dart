@@ -96,9 +96,12 @@ class MoneySource extends HiveObject {
 
   /// Factory constructor for backend data (no icon/color)
   factory MoneySource.fromJson(Map<String, dynamic> json) {
-    final iconData = MoneySourceIconColorMapper.iconFor(json['accountType']);
+    // accountType may be null from backend; pass a safe string to icon mapper
+    final accountTypeStr = json['accountType']?.toString() ?? '';
+    final iconData = MoneySourceIconColorMapper.iconFor(accountTypeStr);
     return MoneySource(
       id: json['_id']?.toString(),
+      uid: json['uid']?.toString(),
       name: json['accountName']?.toString() ?? '',
       balance:
           (json['accountBalance'] is num)
@@ -124,6 +127,7 @@ class MoneySource extends HiveObject {
   }
 
   Map<String, dynamic> toJson() => {
+    'uid': uid,
     'accountName': name,
     "accountBalance": balance,
     'accountType': type?.toString().split('.').last,

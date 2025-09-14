@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 abstract class SyncState {}
 
 class SyncInitial extends SyncState {}

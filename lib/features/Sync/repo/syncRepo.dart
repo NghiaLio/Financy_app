@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:financy_ui/app/services/Server/sync_data.dart';
 import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';

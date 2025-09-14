@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, curly_braces_in_flow_control_structures
+
 import 'dart:developer';
 
 import 'package:financy_ui/features/Sync/models/pullModels.dart';
@@ -55,9 +57,9 @@ class SyncCubit extends Cubit<SyncState> {
       String errorMsg = 'Error: ${e.toString()}';
       if (e is ApiException) {
         final backendErr = _extractBackendError(e.data);
-        if (backendErr != null)
+        if (backendErr != null) {
           errorMsg = backendErr;
-        else if (e.data is Map && e.data['message'] != null)
+        } else if (e.data is Map && e.data['message'] != null)
           errorMsg = e.data['message'].toString();
       } else if (e is Exception) {
         final err = e.toString();
@@ -104,9 +106,9 @@ class SyncCubit extends Cubit<SyncState> {
       String errorMsg = 'Error: ${e.toString()}';
       if (e is ApiException) {
         final backendErr = _extractBackendError(e.data);
-        if (backendErr != null)
+        if (backendErr != null) {
           errorMsg = backendErr;
-        else if (e.data is Map && e.data['message'] != null)
+        } else if (e.data is Map && e.data['message'] != null)
           errorMsg = e.data['message'].toString();
       }
       emit(SyncFailure(message: errorMsg));
@@ -129,8 +131,9 @@ class SyncCubit extends Cubit<SyncState> {
       // If it's a Dio Response-like object (map or object with data)
       if (respOrData is Map) {
         if (respOrData['error'] != null) return respOrData['error'].toString();
-        if (respOrData['message'] != null)
+        if (respOrData['message'] != null) {
           return respOrData['message'].toString();
+        }
         return null;
       }
 
@@ -148,10 +151,12 @@ class SyncCubit extends Cubit<SyncState> {
         final trimmed = respOrData.trim();
         if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
           final decoded = jsonDecode(trimmed);
-          if (decoded is Map && decoded['error'] != null)
+          if (decoded is Map && decoded['error'] != null) {
             return decoded['error'].toString();
-          if (decoded is Map && decoded['message'] != null)
+          }
+          if (decoded is Map && decoded['message'] != null) {
             return decoded['message'].toString();
+          }
         }
       }
 

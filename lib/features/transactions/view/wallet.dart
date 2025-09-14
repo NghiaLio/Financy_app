@@ -165,7 +165,7 @@ class _WalletState extends State<Wallet> {
                         iconColor: iconColor,
                         title: title,
                         subtitle: transaction.note ?? '',
-                        amount: (isIncome ? '+ ' : '- ') + amountStr + ' VND',
+                        amount: '${isIncome ? '+ ' : '- '}$amountStr VND',
                         isPositive: isIncome,
                         transaction: transaction,
                       );
