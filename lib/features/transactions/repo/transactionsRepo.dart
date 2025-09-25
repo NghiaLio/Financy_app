@@ -1,34 +1,12 @@
-// ignore_for_file: file_names, unrelated_type_equality_checks
+// ignore_for_file: file_names
 
-// import 'package:financy_ui/features/Account/models/money_source.dart';
-// import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
-import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:hive/hive.dart';
 
 class TransactionsRepo {
-  // final ManageMoneyRepo _manageMoneyRepo =ManageMoneyRepo();
-
-  static const String _boxName = 'transactions';
-  static Box<Transactionsmodels>? _box;
-
-  /// Initialize Hive box for local storage
-  static Future<void> initializeLocalStorage() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox<Transactionsmodels>(_boxName);
-    }
-  }
-
-  /// Get the Hive box
-  static Box<Transactionsmodels> get _localBox {
-    if (_box == null || !_box!.isOpen) {
-      throw Exception(
-        'Local storage not initialized. Call initializeLocalStorage() first.',
-      );
-    }
-    return _box!;
-  }
-
-  // ==================== LOCAL STORAGE METHODS ====================
+  final Box<Transactionsmodels> _localBox = Hive.box<Transactionsmodels>(
+    'transactionsBox',
+  );
 
   Future<void> saveToLocal(Transactionsmodels transaction) async {
     await _localBox.add(transaction);
@@ -54,8 +32,9 @@ class TransactionsRepo {
     return {for (var key in sortedKeys) key: groupedTransactions[key] ?? []};
   }
 
-  Future<Map<DateTime, List<Transactionsmodels>>>
-  getAllTransactionByAccount(String accountId) async {
+  Future<Map<DateTime, List<Transactionsmodels>>> getAllTransactionByAccount(
+    String accountId,
+  ) async {
     final allTransactions = _localBox.values.toList();
     final groupedTransactions = <DateTime, List<Transactionsmodels>>{};
 
@@ -76,6 +55,10 @@ class TransactionsRepo {
     return {for (var key in sortedKeys) key: groupedTransactions[key] ?? []};
   }
 
+  List<Transactionsmodels> getAllTransactions() {
+    return _localBox.values.toList();
+  }
+
   Future<void> updateInLocal(Transactionsmodels transaction) async {
     final index = _localBox.values.toList().indexWhere(
       (t) => t.id == transaction.id,
@@ -94,5 +77,10 @@ class TransactionsRepo {
     } else {
       throw Exception('Transaction not found');
     }
+  }
+
+  //clear all transactions
+  Future<void> clearAllTransactions() async {
+    await _localBox.clear();
   }
 }

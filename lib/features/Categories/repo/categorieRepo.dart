@@ -5,26 +5,7 @@ import 'package:hive/hive.dart';
 
 class Categorierepo {
 
-  static const String _boxName = 'categories';
-  static Box<Category>? _box;
-
-  /// Initialize Hive box for local storage
-  static Future<void> initializeLocalStorage() async {
-    if (_box == null || !_box!.isOpen) {
-      _box = await Hive.openBox<Category>(_boxName);
-    }
-  }
-
-  /// Get the Hive box
-  static Box<Category> get _localBox {
-    if (_box == null || !_box!.isOpen) {
-      throw Exception(
-        'Local storage not initialized. Call initializeLocalStorage() first.',
-      );
-    }
-    return _box!;
-  }
-
+  final Box<Category> _localBox = Hive.box<Category>('categoryBox');
   // Local storage 
   Future<void> addCategory(Category category) async {
     await _localBox.add(category);

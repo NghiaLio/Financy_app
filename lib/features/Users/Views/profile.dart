@@ -1,11 +1,14 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
+import 'dart:developer';
+
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userState.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/colors.dart';
@@ -33,6 +36,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
+    log(Hive.box('jwt').get('accessToken') ?? '');
     _loadUserData();
   }
 
@@ -48,6 +52,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       _nameController.text = 'Nguyễn Văn A';
       _emailController.text = 'nguyenvana@email.com';
     }
+    log(
+      'User data loaded: ${_nameController.text}, ${_emailController.text}, $_selectedBirthDate, $_avatarPath',
+    );
   }
 
   @override
@@ -492,6 +499,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         name: _nameController.text,
         email: _emailController.text,
         dateOfBirth: _selectedBirthDate,
+        updatedAt: DateTime.now().toString(),
+        isDeleted: widget.user?.isDeleted ?? false,
+        pendingSync: false,
       ),
     );
 

@@ -1,13 +1,13 @@
 // ignore_for_file: file_names
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
-import 'package:financy_ui/features/Transactions/view/add.dart';
+import 'package:financy_ui/features/transactions/view/add.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
-import 'package:financy_ui/features/Transactions/view/home.dart';
+import 'package:financy_ui/features/transactions/view/home.dart';
 import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
 import 'package:financy_ui/features/Setting/settings.dart';
 import 'package:financy_ui/features/transactions/view/statiscal.dart';
-import 'package:financy_ui/features/Transactions/view/wallet.dart';
+import 'package:financy_ui/features/transactions/view/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

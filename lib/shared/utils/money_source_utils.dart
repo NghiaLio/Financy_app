@@ -9,8 +9,8 @@ class MoneySourceIconColorMapper {
     'default': Icons.account_balance_wallet,
   };
 
-  static IconData iconFor(String name) {
-    final key = name.toLowerCase();
+  static IconData iconFor(String? name) {
+    final key = (name ?? '').toLowerCase();
     return _iconMap.entries
         .firstWhere(
           (e) => key.contains(e.key),
@@ -18,4 +18,4 @@ class MoneySourceIconColorMapper {
         )
         .value;
   }
-} 
+}

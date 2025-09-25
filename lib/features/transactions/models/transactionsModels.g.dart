@@ -1,6 +1,8 @@
+// ignore: file_names
+// ignore: file_names
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: file_names
+// ignore_for_file: file_names, duplicate_ignore
 
 part of 'transactionsModels.dart';
 
@@ -28,14 +30,16 @@ class TransactionsmodelsAdapter extends TypeAdapter<Transactionsmodels> {
       note: fields[6] as String?,
       transactionDate: fields[7] as DateTime?,
       createdAt: fields[8] as DateTime?,
-      isSync: fields[9] as bool,
+      updatedAt: fields[9] as String?,
+      isDeleted: fields[10] as bool?,
+      pendingSync: fields[11] as bool?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Transactionsmodels obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -55,7 +59,11 @@ class TransactionsmodelsAdapter extends TypeAdapter<Transactionsmodels> {
       ..writeByte(8)
       ..write(obj.createdAt)
       ..writeByte(9)
-      ..write(obj.isSync);
+      ..write(obj.updatedAt)
+      ..writeByte(10)
+      ..write(obj.isDeleted)
+      ..writeByte(11)
+      ..write(obj.pendingSync);
   }
 
   @override

@@ -55,6 +55,18 @@ class MoneySource extends HiveObject {
   @HiveField(8)
   bool isActive;
 
+  @HiveField(9)
+  String? uid;
+
+  @HiveField(10)
+  String? updatedAt;
+
+  @HiveField(11)
+  bool? isDeleted;
+
+  @HiveField(12)
+  bool? pendingSync;
+
   // Getter for IconData
   IconData? get icon {
     if (iconCode == null) return null;
@@ -76,17 +88,26 @@ class MoneySource extends HiveObject {
     this.color,
     this.description,
     required this.isActive,
+    this.uid,
+    this.updatedAt,
+    this.isDeleted,
+    this.pendingSync,
   });
 
   /// Factory constructor for backend data (no icon/color)
   factory MoneySource.fromJson(Map<String, dynamic> json) {
-    final iconData = MoneySourceIconColorMapper.iconFor(json['accountType']);
+    final accountTypeStr = json['type']?.toString() ?? '';
+    final iconData = MoneySourceIconColorMapper.iconFor(accountTypeStr);
     return MoneySource(
-      id: json['_id'] as String,
-      name: json['accountName'] as String,
-      balance: (json['accountBalance'] as num).toDouble(),
+      id: json['_id']?.toString(),
+      uid: json['uid']?.toString(),
+      name: json['accountName']?.toString() ?? '',
+      balance:
+          (json['balance'] is num)
+              ? (json['balance'] as num).toDouble()
+              : double.tryParse(json['balance']?.toString() ?? '0') ?? 0.0,
       type: TypeMoney.values.firstWhere(
-        (e) => e.toString() == 'TypeMoney.${json['accountType']}',
+        (e) => e.toString() == 'TypeMoney.${json['type']}',
         orElse: () => TypeMoney.other,
       ),
       currency: CurrencyType.values.firstWhere(
@@ -95,26 +116,32 @@ class MoneySource extends HiveObject {
       ),
       iconCode: _getCodeFromIcon(iconData),
       color: json['color'] as String? ?? ColorUtils.colorToHex(AppColors.blue),
-      // Default color if not provided
       description: json['description'] as String? ?? '',
-      isActive:
-          json['active'] as bool? ?? true, // Default to true if not provided
+      isActive: json['isActive'] as bool? ?? true,
+      isDeleted: json['isDeleted'] as bool? ?? false,
+      updatedAt: json['updatedAt'] as String?,
+      pendingSync:
+          json['pendingSync'] as bool? ??
+          false, // Set default pendingSync to false for synced data
     );
   }
 
   Map<String, dynamic> toJson() => {
+    'uid': uid,
     'accountName': name,
-    "accountBalance": balance,
-    'accountType': type?.toString().split('.').last,
+    "balance": balance,
+    'type': type?.toString().split('.').last,
     'currency': currency?.toString().split('.').last,
     'color': color ?? ColorUtils.colorToHex(AppColors.blue),
-    'icon': _getCodeFromIcon(
+    'iconCode': _getCodeFromIcon(
       MoneySourceIconColorMapper.iconFor(
         type?.toString().split('.').last ?? '',
       ),
     ), // Default color if not provided
     'description': description ?? '',
-    'active': isActive,
+    'isActive': isActive,
+    'isDeleted': isDeleted ?? false,
+    'updatedAt': updatedAt,
   };
 
   // Helper methods for IconData conversion
@@ -143,5 +170,3 @@ class MoneySource extends HiveObject {
     return Icons.account_balance_wallet;
   }
 }
-
-

@@ -27,7 +27,17 @@ class Category extends HiveObject {
   @HiveField(6)
   DateTime createdAt;
 
+  @HiveField(7)
+  String? uid;
 
+  @HiveField(8)
+  String? updatedAt;
+
+  @HiveField(9)
+  bool? isDeleted;
+
+  @HiveField(10)
+  bool? pendingSync;
 
   Category({
     required this.id,
@@ -35,29 +45,43 @@ class Category extends HiveObject {
     required this.name,
     required this.type,
     required this.icon,
-    required this.createdAt, required this.color,
+    required this.createdAt,
+    required this.color,
+    this.uid,
+    this.updatedAt,
+    this.isDeleted,
+    this.pendingSync,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
-      id: json['_id'] as String,
-      userId: json['userId'] as String?,
-      name: json['name'] as String,
-      type: json['type'] as String,
-      icon: json['icon'] as String,
-      color: json['color'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      id: json['_id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
+      icon: json['icon']?.toString() ?? '',
+      color: json['color']?.toString() ?? '',
+      createdAt:
+          json['createdAt'] is int
+              ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
+              : DateTime.parse(
+                json['createdAt']?.toString() ??
+                    DateTime.now().toIso8601String(),
+              ),
+      uid: json['uid']?.toString(),
+      updatedAt: json['updatedAt']?.toString(),
+      isDeleted: json['isDeleted'] as bool? ?? false,
     );
   }
 
-  Map<String,dynamic> toJson() {
+  Map<String, dynamic> toJson() {
     return {
-      '_id': id,
-      'userId': userId,
+      'uid': uid,
       'name': name,
       'type': type,
       'icon': icon,
-      'createdAt': createdAt.toIso8601String(),
+      'color': color,
+      'updatedAt': updatedAt,
+      'isDeleted': isDeleted ?? false,
     };
   }
 }

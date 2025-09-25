@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
+import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/shared/widgets/resultDialogAnimation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -100,6 +101,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
     context.read<ManageMoneyCubit>().updateAccount(
       MoneySource(
         id: widget.account?.id ?? '',
+        uid: context.read<UserCubit>().state.user?.uid ?? '',
         name: nameController.text,
         balance: double.tryParse(balanceController.text) ?? 0.0,
         type: widget.account?.type ?? TypeMoney.cash,
@@ -107,6 +109,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
         description: descriptionController.text,
         color: ColorUtils.colorToHex(selectedColor),
         isActive: isActive,
+        updatedAt: DateTime.now().toIso8601String(),
       ),
     );
   }

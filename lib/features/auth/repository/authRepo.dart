@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, invalid_return_type_for_catch_error
 
 import 'package:financy_ui/app/services/Server/dio_client.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
@@ -12,8 +12,11 @@ import 'package:path_provider/path_provider.dart';
 class Authrepo {
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw Exception('Google sign-in aborted by user');
+    }
     final GoogleSignInAuthentication googleAuth =
-        await googleUser!.authentication;
+        await googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
@@ -26,7 +29,14 @@ class Authrepo {
   Future<void> loginWithGoogle(String tokenID) async {
     // fetch token
     final data = {"idToken": tokenID};
-    final res = await ApiService().post('google/login', data: data);
+    final res = await ApiService()
+        .post('google/login', data: data)
+        .catchError(
+          (e) => {throw Exception('Login with Google failed: ${e.toString()}')},
+        );
+    if (res.statusCode != 200) {
+      throw Exception('Login with Google failed: ${res.statusMessage}');
+    }
     final accessToken = res.data['accessToken'];
     final refreshToken = res.data['refreshToken'];
     //save to local storage
@@ -53,12 +63,13 @@ class Authrepo {
     // Lưu user vào Hive, thay picture = local path nếu có
     final userJson = Map<String, dynamic>.from(user.data);
     if (localPicturePath != null) {
-      userJson['picture'] = localPicturePath;
+      userJson['photo'] = localPicturePath;
     }
     await Hive.box<UserModel>(
       'userBox',
     ).put('currentUser', UserModel.fromJson(userJson));
     await SettingsService.setAppState(true);
+    await SettingsService.setAuthMode('google');
   }
 
   Future<Map<String, dynamic>> authenticated() async {
@@ -79,5 +90,29 @@ class Authrepo {
   Future<void> loginWithNoAccount(UserModel guestUser) async {
     await Hive.box<UserModel>('userBox').put('currentUser', guestUser);
     await SettingsService.setAppState(true);
+    await SettingsService.setAuthMode('guest');
+  }
+
+  // Logout for Google-authenticated users
+  Future<void> logout() async {
+    try {
+      // Sign out from Firebase and Google
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+    } catch (_) {
+      // swallow sign-out errors
+    }
+
+    // Clear tokens and user data
+    final jwtBox = Hive.box('jwt');
+    jwtBox.delete('accessToken');
+    jwtBox.delete('refreshToken');
+
+    // Keep local user and data intact (do not delete currentUser or lastSync)
+
+    // Keep app state as logged-in (guest) so app stays on main screen
+    await SettingsService.setAppState(true);
+    await SettingsService.setAuthMode('guest');
+    await SettingsService.setJustLoggedOut(true);
   }
 }

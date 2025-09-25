@@ -3,6 +3,7 @@
 import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
+import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:flutter/material.dart';
@@ -526,11 +527,14 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
     setState(() => _isLoading = true);
     Category new_category = Category(
       id: category?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      uid: context.read<UserCubit>().state.user?.uid ?? '',
       name: _nameController.text.trim(),
       icon: IconMapping.mapIconToString(_selectedIcon ?? Icons.category),
       color: ColorUtils.colorToHex(_selectedColor ?? Colors.grey),
       type: _selectedType ?? '',
+      userId: context.read<UserCubit>().state.user?.uid,
       createdAt: category?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now().toIso8601String(),
     );
 
     if (isEdit) {

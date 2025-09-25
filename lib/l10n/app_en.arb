@@ -260,7 +260,26 @@
   "iconMonetizationOn": "Monetization",
   "iconCurrencyBitcoin": "Cryptocurrency",
   "iconWorkOutline": "Work Income",
-  "iconMoreHoriz": "More"
+  "iconMoreHoriz": "More",
+  
+  "dataSync": "Data Synchronization",
+  "lastSync": "Last Synchronized",
+  "syncingData": "Synchronizing Data...",
+  "readyToSync": "Ready to synchronize your data",
+  "uploadData": "Upload Data",
+  "downloadData": "Download Data"
+  ,
+  "logout": "Logout",
+  "loggedOut": "Logged out",
+  "syncRequiresGoogleLogin": "Sync requires Google sign-in",
+
+  "noTransactions": "No transactions.",
+  "done": "Done",
+  "restore": "Restore",
+  "restoreDefault": "Restore Defaults",
+  "restoreDefaultConfirm": "Do you want to restore all categories to default? This will delete all custom categories.",
+  "titleNotification": "Control spending",
+  "bodyNotification": "How much have you spent today?"
 }
 
 

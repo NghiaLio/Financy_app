@@ -8,9 +8,9 @@ import 'package:financy_ui/core/constants/money_source_icons.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
-import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
-import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
-import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
+import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
+import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/shared/utils/localText.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
@@ -65,6 +65,7 @@ class _WalletState extends State<Wallet> {
 
   @override
   void initState() {
+    context.read<ManageMoneyCubit>().getAllAccount();
     super.initState();
     // Lấy id tài khoản hiện tại từ ManageMoneyCubit (nếu có)
     final manageMoneyCubit = context.read<ManageMoneyCubit>();
@@ -91,6 +92,7 @@ class _WalletState extends State<Wallet> {
           SnackBar(
             content: Text('No account exists'),
             duration: Duration(seconds: 2),
+            backgroundColor: Theme.of(context).primaryColor,
           ),
         );
       }
@@ -165,7 +167,7 @@ class _WalletState extends State<Wallet> {
                         iconColor: iconColor,
                         title: title,
                         subtitle: transaction.note ?? '',
-                        amount: (isIncome ? '+ ' : '- ') + amountStr + ' VND',
+                        amount: '${isIncome ? '+ ' : '- '}$amountStr VND',
                         isPositive: isIncome,
                         transaction: transaction,
                       );

@@ -3,13 +3,13 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:financy_ui/features/Transactions/Cubit/transactionCubit.dart';
+import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userState.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
-import 'package:financy_ui/features/Transactions/Cubit/transctionState.dart';
-import 'package:financy_ui/features/Transactions/models/transactionsModels.dart';
+import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
+import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:flutter/material.dart';
@@ -601,20 +601,57 @@ class _HomeState extends State<Home> {
                       child:
                           (user?.picture ?? '').isNotEmpty
                               ? ClipOval(
-                                child: Image.file(
-                                  File(user!.picture),
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: theme.colorScheme.surfaceVariant,
-                                      child: Icon(
-                                        Icons.person,
-                                        size: 40,
-                                        color: theme.colorScheme.onSurface
-                                            .withOpacity(0.5),
-                                      ),
+                                child: Builder(
+                                  builder: (context) {
+                                    final pic = user!.picture;
+                                    if (pic.startsWith('http')) {
+                                      return Image.network(
+                                        pic,
+                                        width: 60,
+                                        height: 60,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (
+                                          context,
+                                          error,
+                                          stackTrace,
+                                        ) {
+                                          return Container(
+                                            color:
+                                                theme
+                                                    .colorScheme
+                                                    .surfaceVariant,
+                                            child: Icon(
+                                              Icons.person,
+                                              size: 40,
+                                              color: theme.colorScheme.onSurface
+                                                  .withOpacity(0.5),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }
+                                    // assume local file path
+                                    return Image.file(
+                                      File(pic),
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (
+                                        context,
+                                        error,
+                                        stackTrace,
+                                      ) {
+                                        return Container(
+                                          color:
+                                              theme.colorScheme.surfaceVariant,
+                                          child: Icon(
+                                            Icons.person,
+                                            size: 40,
+                                            color: theme.colorScheme.onSurface
+                                                .withOpacity(0.5),
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
                                 ),
@@ -770,6 +807,7 @@ class _HomeState extends State<Home> {
                         stateTransaction.errorMessage ??
                             'Error fetching transactions',
                       ),
+                      backgroundColor: Theme.of(context).primaryColor,
                     ),
                   );
                 }

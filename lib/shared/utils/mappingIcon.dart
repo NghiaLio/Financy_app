@@ -97,7 +97,11 @@ class IconMapping {
     Category category,
     dynamic l10n,
   ) {
-    if (l10n == null) return category.name;
+    // Nếu là category do người dùng tạo (userId hoặc uid có giá trị), luôn trả về tên do người dùng đặt
+    if (category.userId != null || category.uid != null) {
+      return category.name;
+    }
+    // Nếu là category mặc định, trả về tên l10n theo icon
     return getLocalizedCategoryName(category.icon, l10n);
   }
 

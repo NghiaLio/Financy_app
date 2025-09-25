@@ -8,8 +8,11 @@
 
   "wallet": "Wallet",
   "@wallet": {
-    "description": "User's personal wallet section"
+    "description": "Wallet menu"
   },
+  "logout": "Logout",
+  "loggedOut": "Logged out",
+  "syncRequiresGoogleLogin": "Sync requires Google sign-in",
 
   "statistics": "Statistics",
   "@statistics": {
@@ -193,6 +196,60 @@
   "iconMonetizationOn": "Monetisation",
   "iconCurrencyBitcoin": "Cryptocurrency",
   "iconWorkOutline": "Work Income",
-  "iconMoreHoriz": "More"
+  "iconMoreHoriz": "More",
+
+  "notificationSettings": "Notification Settings",
+  "generalNotifications": "General Notifications",
+  "enableNotifications": "Enable Notifications",
+  "enableNotificationsDesc": "Receive all notifications from the app",
+  "notificationSound": "Notification Sound",
+  "reminders": "Reminders",
+  "dailyReminder": "Daily Reminder",
+  "dailyReminderDesc": "Receive daily reminder notifications",
+  "reminderTime": "Reminder Time",
+  "weeklyReport": "Weekly Report",
+  "weeklyReportDesc": "Receive weekly summary reports",
+  "testNotification": "Send Test Notification",
+  "testNotificationSent": "Test notification sent!",
+  "reminderTimeFormat": "Reminder time: {time}",
+
+  "allCategories": "All Categories",
+  "dailyView": "Daily View",
+  "weeklyView": "Weekly View",
+  "monthlyView": "Monthly View",
+  "yearlyView": "Yearly View",
+  "dailyExpenses": "Daily Expenses",
+  "weeklyExpenses": "Weekly Expenses",
+  "monthlyExpenses": "Monthly Expenses",
+  "yearlyExpenses": "Yearly Expenses",
+  "dailyIncome": "Daily Income",
+  "weeklyIncome": "Weekly Income",
+  "monthlyIncome": "Monthly Income",
+  "yearlyIncome": "Yearly Income",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "scrollToSeeMore": "Scroll to see more",
+  "noDataAvailable": "No data available",
+  "noData": "No Data",
+  "selectView": "Select View",
+  "selectCategory": "Select Category",
+  "selectYear": "Select Year",
+  "selectMonth": "Select Month",
+  "selectWeek": "Select Week",
+  "weekOf": "Week commencing",
+
+  "dataSync": "Data Synchronisation",
+  "lastSync": "Last synchronised",
+  "syncingData": "Synchronising data...",
+  "readyToSync": "Ready to synchronise your data",
+  "uploadData": "Upload data",
+  "downloadData": "Download data",
+  "noTransactions": "No transactions.",
+  "done": "Done",
+  "restore": "Restore",
+  "restoreDefault": "Restore defaults",
+  "restoreDefaultConfirm": "Do you want to restore all categories to default? This will delete all custom categories.",
+  "titleNotification": "Control spending",
+  "bodyNotification": "How much have you spent today?"
 }
   

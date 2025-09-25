@@ -134,6 +134,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
           });
           return const SizedBox.shrink();
         } else {
+          log(state.listAccounts.toString());
           return Scaffold(
             backgroundColor: colorScheme.background,
             appBar: AppBar(
