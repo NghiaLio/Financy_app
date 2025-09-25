@@ -26,11 +26,11 @@ class MoneySourceAdapter extends TypeAdapter<MoneySource> {
       color: fields[6] as String?,
       description: fields[7] as String?,
       isActive: fields[8] as bool,
-    )
-      ..uid = fields[9] as String?
-      ..updatedAt = fields[10] as String?
-      ..isDeleted = fields[11] as bool?
-      ..pendingSync = fields[12] as bool?;
+      uid: fields[9] as String?,
+      updatedAt: fields[10] as String?,
+      isDeleted: fields[11] as bool?,
+      pendingSync: fields[12] as bool?,
+    );
   }
 
   @override

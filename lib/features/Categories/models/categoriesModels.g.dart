@@ -26,11 +26,11 @@ class CategoryAdapter extends TypeAdapter<Category> {
       icon: fields[4] as String,
       createdAt: fields[6] as DateTime,
       color: fields[5] as String,
-    )
-      ..uid = fields[7] as String?
-      ..updatedAt = fields[8] as String?
-      ..isDeleted = fields[9] as bool?
-      ..pendingSync = fields[10] as bool?;
+      uid: fields[7] as String?,
+      updatedAt: fields[8] as String?,
+      isDeleted: fields[9] as bool?,
+      pendingSync: fields[10] as bool?,
+    );
   }
 
   @override

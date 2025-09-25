@@ -65,6 +65,7 @@ class _WalletState extends State<Wallet> {
 
   @override
   void initState() {
+    context.read<ManageMoneyCubit>().getAllAccount();
     super.initState();
     // Lấy id tài khoản hiện tại từ ManageMoneyCubit (nếu có)
     final manageMoneyCubit = context.read<ManageMoneyCubit>();
@@ -91,6 +92,7 @@ class _WalletState extends State<Wallet> {
           SnackBar(
             content: Text('No account exists'),
             duration: Duration(seconds: 2),
+            backgroundColor: Theme.of(context).primaryColor,
           ),
         );
       }

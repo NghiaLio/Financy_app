@@ -340,7 +340,10 @@
   "syncingData": "Đang đồng bộ dữ liệu...",
   "readyToSync": "Sẵn sàng đồng bộ dữ liệu của bạn",
   "uploadData": "Tải lên",
-  "downloadData": "Tải xuống"
+  "downloadData": "Tải xuống",
+  "logout":"Đăng xuất",
+  "loggedOut": "Đã đăng xuất",
+  "syncRequiresGoogleLogin": "Đồng bộ yêu cầu đăng nhập Google"
 }
 
 

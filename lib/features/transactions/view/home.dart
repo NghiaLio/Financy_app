@@ -807,6 +807,7 @@ class _HomeState extends State<Home> {
                         stateTransaction.errorMessage ??
                             'Error fetching transactions',
                       ),
+                      backgroundColor: Theme.of(context).primaryColor,
                     ),
                   );
                 }

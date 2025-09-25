@@ -12,8 +12,11 @@ import 'package:path_provider/path_provider.dart';
 class Authrepo {
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    if (googleUser == null) {
+      throw Exception('Google sign-in aborted by user');
+    }
     final GoogleSignInAuthentication googleAuth =
-        await googleUser!.authentication;
+        await googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
@@ -66,6 +69,7 @@ class Authrepo {
       'userBox',
     ).put('currentUser', UserModel.fromJson(userJson));
     await SettingsService.setAppState(true);
+    await SettingsService.setAuthMode('google');
   }
 
   Future<Map<String, dynamic>> authenticated() async {
@@ -86,5 +90,29 @@ class Authrepo {
   Future<void> loginWithNoAccount(UserModel guestUser) async {
     await Hive.box<UserModel>('userBox').put('currentUser', guestUser);
     await SettingsService.setAppState(true);
+    await SettingsService.setAuthMode('guest');
+  }
+
+  // Logout for Google-authenticated users
+  Future<void> logout() async {
+    try {
+      // Sign out from Firebase and Google
+      await FirebaseAuth.instance.signOut();
+      await GoogleSignIn().signOut();
+    } catch (_) {
+      // swallow sign-out errors
+    }
+
+    // Clear tokens and user data
+    final jwtBox = Hive.box('jwt');
+    jwtBox.delete('accessToken');
+    jwtBox.delete('refreshToken');
+
+    // Keep local user and data intact (do not delete currentUser or lastSync)
+
+    // Keep app state as logged-in (guest) so app stays on main screen
+    await SettingsService.setAppState(true);
+    await SettingsService.setAuthMode('guest');
+    await SettingsService.setJustLoggedOut(true);
   }
 }

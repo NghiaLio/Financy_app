@@ -203,6 +203,21 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     appState = SettingsService.getAppState();
+    // Show one-time logout snackbar if applicable
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (SettingsService.getJustLoggedOut()) {
+        final ctx = context;
+        final appLocal = AppLocalizations.of(ctx);
+        final theme = Theme.of(ctx);
+        ScaffoldMessenger.of(ctx).showSnackBar(
+          SnackBar(
+            content: Text(appLocal?.loggedOut ?? 'Logged out'),
+            backgroundColor: theme.primaryColor,
+          ),
+        );
+        await SettingsService.setJustLoggedOut(false);
+      }
+    });
     super.initState();
   }
 

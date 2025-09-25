@@ -42,6 +42,8 @@ class AddTransactionScreen extends StatefulWidget {
 }
 
 class _AddTransactionScreenState extends State<AddTransactionScreen> {
+  // Placeholder when the transaction's original account no longer exists
+  static const String missingAccountPlaceholder = 'Tài khoản đã không tồn tại';
   int selectedTransactionType = 0;
   TextEditingController amountController = TextEditingController();
   TextEditingController noteController = TextEditingController();
@@ -91,12 +93,18 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           selectedDate = "${date.day}/${date.month}/${date.year}";
         }
 
-        // Set account
-        final account = listAccounts.firstWhere(
-          (acc) => acc.id == editingTransaction!.accountId,
-          orElse: () => listAccounts.first,
-        );
-        selectedAccount = account.name;
+        // Set account: if original account no longer exists, show placeholder instead of defaulting
+        final matches =
+            listAccounts
+                .where((acc) => acc.id == editingTransaction!.accountId)
+                .toList();
+        if (matches.isEmpty) {
+          selectedAccount = missingAccountPlaceholder;
+          oldAccount = null;
+        } else {
+          selectedAccount = matches.first.name;
+          oldAccount = matches.first;
+        }
 
         // Set note
         noteController.text = editingTransaction!.note ?? '';
@@ -120,10 +128,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       if (args is Map) {
         if (args['transaction'] is Transactionsmodels) {
           editingTransaction = args['transaction'];
-          oldAccount = listAccounts.firstWhere(
-            (e) => e.id == editingTransaction?.accountId,
-            orElse: () => listAccounts.first,
-          );
+          final found =
+              listAccounts
+                  .where((e) => e.id == editingTransaction?.accountId)
+                  .toList();
+          oldAccount = found.isNotEmpty ? found.first : null;
           isEditing = true;
           _populateFieldsForEditing();
         }
@@ -132,10 +141,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
         }
       } else if (args is Transactionsmodels) {
         editingTransaction = args;
-        oldAccount = listAccounts.firstWhere(
-          (e) => e.id == editingTransaction?.accountId,
-          orElse: () => listAccounts.first,
-        );
+        final found =
+            listAccounts
+                .where((e) => e.id == editingTransaction?.accountId)
+                .toList();
+        oldAccount = found.isNotEmpty ? found.first : null;
         isEditing = true;
         _populateFieldsForEditing();
       }
@@ -658,15 +668,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
 
   bool _validate(double amount, MoneySource account) {
     if (account.isActive != true) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Selected account is inactive')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Selected account is inactive'),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+      );
       return false;
     }
     if (amount <= 0) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Amount must be greater than 0')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Amount must be greater than 0'),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+      );
       return false;
     }
 
@@ -687,22 +703,31 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     // Only validate balance for expense transactions
     if (selectedTransactionType == 1 && amount > effectiveBalance) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Insufficient balance in account')),
+        SnackBar(
+          content: Text('Insufficient balance in account'),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
       );
       return false;
     }
 
     if (selectedCategory == 'Select Category') {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Please select a category')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select a category'),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+      );
       return false;
     }
 
     if (selectedAccount == 'Select Account') {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Please select an account')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select an account'),
+          backgroundColor: Theme.of(context).primaryColor,
+        ),
+      );
       return false;
     }
 
@@ -780,13 +805,19 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       }
     }
 
+    // Ensure account selection is valid
+    if (selectedAccount == 'Select Account' ||
+        selectedAccount == missingAccountPlaceholder) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Vui lòng chọn tài khoản hợp lệ')));
+      return ValidationResult(isValid: false);
+    }
+
     // Get selected account
     final account = listAccounts
         .where((e) => e.isActive == true)
-        .firstWhere(
-          (e) => e.name == selectedAccount,
-          orElse: () => listAccounts.first,
-        );
+        .firstWhere((e) => e.name == selectedAccount);
 
     // Validate input
     if (!_validate(amount, account)) {
@@ -870,6 +901,13 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     MoneySource account,
     TransactionType type,
   ) async {
+    // If there was no valid original account (e.g., it was deleted),
+    // treat this like creating a new transaction impact on the selected account.
+    if (oldAccount == null) {
+      await _updateAccountBalanceForNew(amount, account, type);
+      return;
+    }
+
     // If account changed
     if (oldAccount?.id != account.id) {
       await _handleAccountChange(amount, account, type);
@@ -978,7 +1016,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       color: original.color,
       description: original.description,
       isActive: original.isActive,
-      updatedAt: DateTime.now().toIso8601String()
+      updatedAt: DateTime.now().toIso8601String(),
     );
   }
 

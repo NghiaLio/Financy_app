@@ -17,14 +17,23 @@ class LanguageSelectionScreen extends StatefulWidget {
 
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   late String selectedLanguage;
-
-  final List languages = LangOptions.languages;
+  late List<LanguageOption> languages;
 
   @override
   void initState() {
     selectedLanguage = LocaleUtils.localeToString(
-      context.read<ThemeCubit>().state.lang ?? Locale('vi'),
+      context.read<ThemeCubit>().state.lang ?? const Locale('vi'),
     );
+
+    // Keep only languages that are actually supported by l10n
+    final supportedCodes =
+        AppLocalizations.supportedLocales
+            .map((l) => LocaleUtils.localeToString(l))
+            .toSet();
+    languages =
+        LangOptions.languages
+            .where((opt) => supportedCodes.contains(opt.code))
+            .toList();
     super.initState();
   }
 
@@ -85,7 +94,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          selectedLanguage = language.name;
+          selectedLanguage = language.code;
         });
         _onLanguageSelected(language);
       },

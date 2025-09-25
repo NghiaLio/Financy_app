@@ -1,6 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
+import 'package:financy_ui/features/auth/repository/authRepo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -15,6 +17,27 @@ class Settings extends StatelessWidget {
   ) {
     final appLocal = AppLocalizations.of(context);
     return appLocal != null ? getter(appLocal) : '';
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    await Authrepo().logout();
+    if (context.mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/expenseTracker',
+        (route) => false,
+      );
+      final appLocal = AppLocalizations.of(context);
+      final theme = Theme.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(appLocal?.loggedOut ?? 'Logged out'),
+          backgroundColor: theme.primaryColor,
+        ),
+      );
+      // Clear one-time flag since we've already shown the snackbar here
+      await SettingsService.setJustLoggedOut(false);
+    }
   }
 
   @override
@@ -91,6 +114,14 @@ class Settings extends StatelessWidget {
               Navigator.pushNamed(context, '/dataSync');
             },
           ),
+          const SizedBox(height: 12),
+          if (SettingsService.isGoogleLogin())
+            _buildMenuItem(
+              icon: Icons.logout,
+              title: _localText(context, (l) => l.logout),
+              iconColor: Colors.red,
+              onTap: () => _logout(context),
+            ),
           const Spacer(),
         ],
       ),

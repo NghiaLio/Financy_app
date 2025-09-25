@@ -4,11 +4,10 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class ManageMoneyRepo {
-  
   final Box<MoneySource> _localBox = Hive.box<MoneySource>('moneySourceBox');
+
   /// Save money source to local storage
   Future<void> saveToLocal(MoneySource source) async {
-    
     await _localBox.add(source);
   }
 
@@ -28,20 +27,24 @@ class ManageMoneyRepo {
 
   /// Update money source in local storage
   Future<void> updateInLocal(MoneySource source) async {
-    final index = _localBox.values.toList().indexWhere((s) => s.id == source.id);
+    final index = _localBox.values.toList().indexWhere(
+      (s) => s.id == source.id,
+    );
     if (index != -1) {
       await _localBox.putAt(index, source);
-    }else{
+    } else {
       throw Exception('Account not found');
     }
   }
 
   /// Delete money source from local storage
   Future<void> deleteFromLocal(String id) async {
-    final index = _localBox.values.toList().indexWhere((source) => source.id == id);
+    final index = _localBox.values.toList().indexWhere(
+      (source) => source.id == id,
+    );
     if (index != -1) {
       await _localBox.deleteAt(index);
-    }else{
+    } else {
       throw Exception('Account not found');
     }
   }

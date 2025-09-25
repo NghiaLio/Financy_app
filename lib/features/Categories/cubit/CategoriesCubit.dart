@@ -17,19 +17,24 @@ class Categoriescubit extends Cubit<CategoriesState> {
       if (categories.isEmpty) {
         await addDefaultCategory(defaultExpenseCategories);
         await addDefaultCategory(defaultIncomeCategories);
-
-        emit(
-          CategoriesState.loaded(
-            defaultExpenseCategories,
-            defaultIncomeCategories,
-          ),
-        );
+        // Ensure defaults are shown sorted by name
+        final defExp = [
+          ...defaultExpenseCategories,
+        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        final defInc = [
+          ...defaultIncomeCategories,
+        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        emit(CategoriesState.loaded(defExp, defInc));
         return;
       }
       final categoriesExpense =
-          categories.where((c) => c.type == 'expense').toList();
+          categories.where((c) => c.type == 'expense').toList()..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
       final categoriesIncome =
-          categories.where((c) => c.type == 'income').toList();
+          categories.where((c) => c.type == 'income').toList()..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
       emit(CategoriesState.loaded(categoriesExpense, categoriesIncome));
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
@@ -50,13 +55,19 @@ class Categoriescubit extends Cubit<CategoriesState> {
     try {
       await _categorierepo.addCategory(category);
       if (category.type == 'income') {
-        final categoriesIncome = [...state.categoriesIncome, category];
+        final categoriesIncome = [
+          ...state.categoriesIncome,
+          category,
+        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         emit(
           CategoriesState.success(state.categoriesExpense, categoriesIncome),
         );
         return;
       } else {
-        final categoriesExpense = [...state.categoriesExpense, category];
+        final categoriesExpense = [
+          ...state.categoriesExpense,
+          category,
+        ]..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         emit(
           CategoriesState.success(categoriesExpense, state.categoriesIncome),
         );
@@ -82,9 +93,13 @@ class Categoriescubit extends Cubit<CategoriesState> {
       await _categorierepo.deleteCategory(index);
       final allCategories = await _categorierepo.getCategories();
       final categoriesExpense =
-          allCategories.where((c) => c.type == 'expense').toList();
+          allCategories.where((c) => c.type == 'expense').toList()..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
       final categoriesIncome =
-          allCategories.where((c) => c.type == 'income').toList();
+          allCategories.where((c) => c.type == 'income').toList()..sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+          );
       emit(CategoriesState.success(categoriesExpense, categoriesIncome));
     } catch (e) {
       emit(CategoriesState.failure(e.toString()));
@@ -101,11 +116,11 @@ class Categoriescubit extends Cubit<CategoriesState> {
     try {
       // Clear all existing categories
       await _categorierepo.clearAllCategories();
-      
+
       // Add default categories
       await addDefaultCategory(defaultExpenseCategories);
       await addDefaultCategory(defaultIncomeCategories);
-      
+
       // Emit loaded state with default categories
       emit(
         CategoriesState.loaded(

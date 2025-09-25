@@ -6,8 +6,11 @@ import 'package:intl/intl.dart';
 import 'package:financy_ui/features/Sync/cubit/syncCubit.dart';
 import 'package:financy_ui/features/Sync/cubit/syncState.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:financy_ui/features/auth/repository/authRepo.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DataSyncScreen extends StatefulWidget {
   const DataSyncScreen({super.key});
@@ -17,6 +20,7 @@ class DataSyncScreen extends StatefulWidget {
 }
 
 class _DataSyncScreenState extends State<DataSyncScreen> {
+  bool _authLoading = false;
   // Hàm tiện ích
   String _localText(
     BuildContext context,
@@ -24,6 +28,48 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
   ) {
     final appLocal = AppLocalizations.of(context);
     return appLocal != null ? getter(appLocal) : '';
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _authLoading = true);
+    final appLocal = AppLocalizations.of(context);
+    try {
+      // 1) Firebase Google sign-in (may throw if aborted)
+      await Authrepo().signInWithGoogle();
+
+      // 2) Retrieve ID token from current Firebase user
+      final idToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (idToken == null) {
+        throw Exception('No ID token');
+      }
+
+      // 3) Backend login to obtain API tokens and set app state/mode
+      await Authrepo().loginWithGoogle(idToken);
+
+      // 4) Refresh UI so sync becomes enabled
+      if (mounted) {
+        setState(() {});
+        final theme = Theme.of(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(appLocal?.success ?? 'Success'),
+            backgroundColor: theme.primaryColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      final msg = appLocal?.error ?? 'Error';
+      final theme = Theme.of(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$msg: ${e.toString()}'),
+          backgroundColor: theme.primaryColor,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _authLoading = false);
+    }
   }
 
   @override
@@ -68,6 +114,7 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
             final formattedLastSync = DateFormat(
               'dd/MM/yyyy HH:mm',
             ).format(lastSyncTime);
+            final syncEnabled = SettingsService.isSyncEnabled();
 
             return Padding(
               padding: const EdgeInsets.all(16.0),
@@ -131,7 +178,7 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Animation
+                  // Animation / hint
                   if (state is SyncLoading)
                     Expanded(
                       child: Center(
@@ -179,6 +226,77 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          if (!syncEnabled) ...[
+                            const SizedBox(height: 12),
+                            Text(
+                              _localText(
+                                context,
+                                (l) => l.syncRequiresGoogleLogin,
+                              ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.orange[800],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: 260,
+                              child: ElevatedButton(
+                                onPressed:
+                                    _authLoading ? null : _handleGoogleSignIn,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black87,
+                                  elevation: 0,
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    if (!_authLoading)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                        ),
+                                        child: Image.asset(
+                                          'assets/image/google.png',
+                                          width: 20,
+                                          height: 20,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                    if (_authLoading)
+                                      const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        _localText(
+                                          context,
+                                          (l) => l.continue_with_google,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -192,7 +310,7 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
                           title: _localText(context, (l) => l.uploadData),
                           color: Colors.blue,
                           onTap:
-                              state is SyncLoading
+                              state is SyncLoading || !syncEnabled
                                   ? null
                                   : () => syncCubit.syncData(),
                         ),
@@ -204,7 +322,7 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
                           title: _localText(context, (l) => l.downloadData),
                           color: Colors.green,
                           onTap:
-                              state is SyncLoading
+                              state is SyncLoading || !syncEnabled
                                   ? null
                                   : () => syncCubit.fetchData(),
                         ),

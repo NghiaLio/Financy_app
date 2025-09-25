@@ -1,6 +1,8 @@
+// ignore: file_names
+// ignore: file_names
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: file_names
+// ignore_for_file: file_names, duplicate_ignore
 
 part of 'transactionsModels.dart';
 
@@ -28,10 +30,10 @@ class TransactionsmodelsAdapter extends TypeAdapter<Transactionsmodels> {
       note: fields[6] as String?,
       transactionDate: fields[7] as DateTime?,
       createdAt: fields[8] as DateTime?,
-    )
-      ..updatedAt = fields[9] as String?
-      ..isDeleted = fields[10] as bool?
-      ..pendingSync = fields[11] as bool?;
+      updatedAt: fields[9] as String?,
+      isDeleted: fields[10] as bool?,
+      pendingSync: fields[11] as bool?,
+    );
   }
 
   @override

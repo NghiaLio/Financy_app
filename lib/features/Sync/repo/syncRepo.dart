@@ -1,4 +1,5 @@
 // ignore_for_file: file_names
+import 'dart:developer';
 
 import 'package:financy_ui/app/services/Server/sync_data.dart';
 import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
@@ -14,25 +15,67 @@ class SyncRepo {
   final categoryRepo = Categorierepo();
 
   Future<void> updateData(Pullmodels pullmodels) async {
-    transactionRepo.clearAllTransactions();
-    accountRepo.clearLocalData();
-    categoryRepo.clearAllCategories();
+    log('Updating data with pullmodels:');
+
+    // Ensure clearing completes before saving new data to avoid race conditions
+    log('Clearing local transactions and accounts...');
+    await transactionRepo.clearAllTransactions();
+    await accountRepo.clearLocalData();
+    log('Cleared local transactions and accounts.');
+    //categoryRepo.clearAllCategories();
 
     for (var user in pullmodels.data?.values.first.users ?? []) {
       await userRepo.updateUser(user);
     }
 
-    for (var account in pullmodels.data?.values.first.accounts ?? []) {
-      await accountRepo.saveToLocal(account);
+    final accounts = pullmodels.data?.values.first.accounts ?? [];
+    log('Number of accounts to save: ${accounts.length}');
+
+    for (var account in accounts) {
+      log('Saving account: ${account.name} with id: ${account.id}');
+      try {
+        await accountRepo.saveToLocal(account);
+        log('Successfully saved account: ${account.name}');
+      } catch (e) {
+        log('Error saving account ${account.name}: $e');
+      }
     }
+
+    // Verify accounts were saved
+    final savedAccounts = accountRepo.getAllFromLocal();
+    log('Total accounts after saving: ${savedAccounts.length}');
 
     for (var transaction in pullmodels.data?.values.first.transactions ?? []) {
       await transactionRepo.saveToLocal(transaction);
     }
 
-    for (var category in pullmodels.data?.values.first.categories ?? []) {
-      await categoryRepo.addCategory(category);
+    // Merge categories: keep existing defaults, upsert server categories, skip deleted
+    final pulledCategories = pullmodels.data?.values.first.categories ?? [];
+    final existingCategories = await categoryRepo.getCategories();
+    log('Existing categories: ${existingCategories.length}');
+    log('Categories from server: ${pulledCategories.length}');
+
+    for (var category in pulledCategories) {
+      // Skip categories flagged as deleted from server to avoid wiping local defaults
+      if (category.isDeleted == true) {
+        log('Skipping deleted category from server: ${category.name}');
+        continue;
+      }
+      try {
+        final idx = await categoryRepo.getIndexOfCategory(category);
+        if (idx != -1) {
+          await categoryRepo.updateCategory(idx, category);
+          log('Updated category: ${category.name}');
+        } else {
+          await categoryRepo.addCategory(category);
+          log('Added new category: ${category.name}');
+        }
+      } catch (e) {
+        log('Error merging category ${category.name}: $e');
+      }
     }
+    final categoriesAfter = await categoryRepo.getCategories();
+    log('Total categories after merge: ${categoriesAfter.length}');
   }
 
   Future syncData() async {
@@ -42,20 +85,32 @@ class SyncRepo {
     final transactions = transactionRepo.getAllTransactions();
     final categories = await categoryRepo.getCategories();
 
+    log('Total accounts from local: ${accounts.length}');
+    for (var acc in accounts) {
+      log('Account: ${acc.name}, pendingSync: ${acc.pendingSync}');
+    }
+
     final filteredAccounts =
         accounts
-            .where((acc) => acc.pendingSync == false || acc.pendingSync == null)
+            .where(
+              (acc) => acc.pendingSync != true,
+            ) // Include accounts that are not pending sync
             .toList();
+
+    log('Filtered accounts for sync: ${filteredAccounts.length}');
     final filteredTransactions =
         transactions
-            .where((tx) => tx.pendingSync == false || tx.pendingSync == null)
+            .where(
+              (tx) => tx.pendingSync != true,
+            ) // Include transactions that are not pending sync
             .toList();
     final filteredCategories =
         categories
             .where(
               (cat) =>
-                  cat.pendingSync == false ||
-                  cat.pendingSync == null && cat.updatedAt != null,
+                  cat.pendingSync != true &&
+                  cat.updatedAt !=
+                      null, // Include categories that are not pending sync and have updatedAt
             )
             .toList();
 

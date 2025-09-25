@@ -96,20 +96,18 @@ class MoneySource extends HiveObject {
 
   /// Factory constructor for backend data (no icon/color)
   factory MoneySource.fromJson(Map<String, dynamic> json) {
-    // accountType may be null from backend; pass a safe string to icon mapper
-    final accountTypeStr = json['accountType']?.toString() ?? '';
+    final accountTypeStr = json['type']?.toString() ?? '';
     final iconData = MoneySourceIconColorMapper.iconFor(accountTypeStr);
     return MoneySource(
       id: json['_id']?.toString(),
       uid: json['uid']?.toString(),
       name: json['accountName']?.toString() ?? '',
       balance:
-          (json['accountBalance'] is num)
-              ? (json['accountBalance'] as num).toDouble()
-              : double.tryParse(json['accountBalance']?.toString() ?? '0') ??
-                  0.0,
+          (json['balance'] is num)
+              ? (json['balance'] as num).toDouble()
+              : double.tryParse(json['balance']?.toString() ?? '0') ?? 0.0,
       type: TypeMoney.values.firstWhere(
-        (e) => e.toString() == 'TypeMoney.${json['accountType']}',
+        (e) => e.toString() == 'TypeMoney.${json['type']}',
         orElse: () => TypeMoney.other,
       ),
       currency: CurrencyType.values.firstWhere(
@@ -118,28 +116,30 @@ class MoneySource extends HiveObject {
       ),
       iconCode: _getCodeFromIcon(iconData),
       color: json['color'] as String? ?? ColorUtils.colorToHex(AppColors.blue),
-      // Default color if not provided
       description: json['description'] as String? ?? '',
-      isActive: json['active'] as bool? ?? true,
+      isActive: json['isActive'] as bool? ?? true,
       isDeleted: json['isDeleted'] as bool? ?? false,
       updatedAt: json['updatedAt'] as String?,
+      pendingSync:
+          json['pendingSync'] as bool? ??
+          false, // Set default pendingSync to false for synced data
     );
   }
 
   Map<String, dynamic> toJson() => {
     'uid': uid,
     'accountName': name,
-    "accountBalance": balance,
-    'accountType': type?.toString().split('.').last,
+    "balance": balance,
+    'type': type?.toString().split('.').last,
     'currency': currency?.toString().split('.').last,
     'color': color ?? ColorUtils.colorToHex(AppColors.blue),
-    'icon': _getCodeFromIcon(
+    'iconCode': _getCodeFromIcon(
       MoneySourceIconColorMapper.iconFor(
         type?.toString().split('.').last ?? '',
       ),
     ), // Default color if not provided
     'description': description ?? '',
-    'active': isActive,
+    'isActive': isActive,
     'isDeleted': isDeleted ?? false,
     'updatedAt': updatedAt,
   };

@@ -26,10 +26,10 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       picture: fields[4] as String,
       dateOfBirth: fields[5] as DateTime,
       createdAt: fields[6] as DateTime,
-    )
-      ..updatedAt = fields[7] as String?
-      ..isDeleted = fields[8] as bool?
-      ..pendingSync = fields[9] as bool?;
+      updatedAt: fields[7] as String?,
+      isDeleted: fields[8] as bool?,
+      pendingSync: fields[9] as bool?,
+    );
   }
 
   @override
