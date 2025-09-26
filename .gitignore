@@ -46,6 +46,7 @@ app.*.map.json
 
 #firebase data
 .env
+.env.prod
 lib/firebase_options.dart
 l10n.yaml
 firebase.json
