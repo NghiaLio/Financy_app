@@ -4,6 +4,9 @@ import 'dart:developer';
 import 'package:financy_ui/app/services/Server/sync_data.dart';
 import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';
+import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
+import 'package:financy_ui/core/constants/icons.dart'
+    show defaultExpenseCategories, defaultIncomeCategories;
 import 'package:financy_ui/features/Sync/models/pullModels.dart';
 import 'package:financy_ui/features/Users/Repo/userRepo.dart';
 import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
@@ -76,6 +79,47 @@ class SyncRepo {
     }
     final categoriesAfter = await categoryRepo.getCategories();
     log('Total categories after merge: ${categoriesAfter.length}');
+
+    // Ensure default categories still exist. Criteria for presence:
+    // - match by id OR by (type + icon) if ids were regenerated
+    try {
+      final existingById = {for (var c in categoriesAfter) c.id};
+      final existingSignature = <String>{
+        for (var c in categoriesAfter) '${c.type}|${c.icon}'.toLowerCase(),
+      };
+
+      Future<void> ensureDefaults(List<Category> defaults) async {
+        for (final def in defaults) {
+          final sig = '${def.type}|${def.icon}'.toLowerCase();
+          if (existingById.contains(def.id) ||
+              existingSignature.contains(sig)) {
+            continue; // already present
+          }
+          // Clone default to avoid mutating global list
+          final clone = Category(
+            id: def.id,
+            name: def.name,
+            type: def.type,
+            icon: def.icon,
+            color: def.color,
+            createdAt: def.createdAt,
+            userId: null,
+            pendingSync: false,
+          );
+          try {
+            await categoryRepo.addCategory(clone);
+            log('Restored missing default category: ${clone.name}');
+          } catch (e) {
+            log('Failed to restore default category ${clone.name}: $e');
+          }
+        }
+      }
+
+      await ensureDefaults(defaultExpenseCategories);
+      await ensureDefaults(defaultIncomeCategories);
+    } catch (e) {
+      log('Error ensuring default categories: $e');
+    }
   }
 
   Future syncData() async {

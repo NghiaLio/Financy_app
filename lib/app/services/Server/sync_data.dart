@@ -60,7 +60,7 @@ class SyncDataService {
     } else {
       lastSyncValue = DateTime.now().millisecondsSinceEpoch;
     }
-    //Hive.box('settings').put('lastSync', lastSyncValue);
+    Hive.box('settings').put('lastSync', lastSyncValue);
     return result;
   }
 }
