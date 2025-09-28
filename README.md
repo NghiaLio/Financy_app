@@ -57,7 +57,6 @@ Tạo file `.env` trong thư mục gốc:
 API_BASE_URL=http://localhost:3000
 FIREBASE_PROJECT_ID=your-project-id
 ```
-
 ---
 
 ### 📁 Cấu trúc thư mục
@@ -66,8 +65,6 @@ FIREBASE_PROJECT_ID=your-project-id
 lib/
 ├── main.dart                 # Entry point của ứng dụng
 ├── myApp.dart               # Cấu hình app chính
-├── firebase_options.dart    # Cấu hình Firebase
-├──
 ├── app/                     # Cấu hình ứng dụng
 │   ├── cubit/              # App-level state management
 │   ├── router/             # Định tuyến ứng dụng
@@ -78,7 +75,6 @@ lib/
 ├──
 ├── core/                   # Core utilities
 │   └── constants/         # Constants (colors, icons, language options)
-├──
 ├── features/              # Các tính năng chính
 │   ├── Account/          # Quản lý tài khoản/ví
 │   │   ├── cubit/       # State management
@@ -86,57 +82,20 @@ lib/
 │   │   ├── repo/        # Repository layer
 │   │   └── screen/      # UI screens
 │   ├── auth/            # Xác thực người dùng
-│   │   ├── cubits/      # Auth state management
-│   │   ├── repository/  # Auth repository
-│   │   └── views/       # Auth UI
 │   ├── Categories/      # Quản lý danh mục
-│   │   ├── cubit/       # Categories state management
-│   │   ├── models/      # Category models
-│   │   ├── repo/        # Categories repository
-│   │   └── view/        # Categories UI
 │   ├── notification/    # Thông báo
-│   │   ├── cubit/       # Notification state
-│   │   ├── models/      # Notification models
-│   │   ├── repo/        # Notification repository
-│   │   └── view/        # Notification UI
 │   ├── transactions/    # Giao dịch thu chi
-│   │   ├── Cubit/       # Transaction state management
-│   │   ├── models/      # Transaction models
-│   │   ├── repo/        # Transaction repository
-│   │   └── view/        # Transaction UI
 │   └── Users/           # Quản lý người dùng
-│       ├── Cubit/       # User state management
-│       ├── models/      # User models
-│       ├── Repo/        # User repository
-│       └── Views/       # User UI
 ├──
 ├── shared/               # Shared components
 │   ├── utils/           # Utility functions
-│   │   ├── color_utils.dart
-│   │   ├── generateID.dart
-│   │   ├── locale_utils.dart
-│   │   ├── localText.dart
-│   │   ├── mappingIcon.dart
-│   │   ├── money_source_utils.dart
-│   │   ├── statistics_utils.dart
-│   │   └── theme_utils.dart
 │   └── widgets/         # Shared widgets
 ├──
 ├── l10n/                # Internationalization
 │   ├── app_en.arb       # English translations
-│   ├── app_fr.arb       # French translations
-│   ├── app_ja.arb       # Japanese translations
-│   ├── app_ru.arb       # Russian translations
+│   ....
 │   ├── app_vi.arb       # Vietnamese translations
 │   └── l10n.dart        # Localization configuration
-├──
-├── income.dart          # Màn hình thu nhập
-├── spending.dart        # Màn hình chi tiêu
-├── statiscal.dart       # Màn hình thống kê
-├── settings.dart        # Màn hình cài đặt
-├── interfaceSettings.dart    # Cài đặt giao diện
-├── languageSettings.dart     # Cài đặt ngôn ngữ
-└── tran.txt            # File text giao dịch
 ```
 
 ---
@@ -208,16 +167,6 @@ void setToken(String? token) {
 
 ---
 
-### 📡 API endpoint config
-
-lib/core/constants.dart:
-
-```dart
-const baseUrl = 'http://localhost:3000';
-```
-
----
-
 ### ▶️ Chạy ứng dụng
 
 #### Development
@@ -226,20 +175,17 @@ const baseUrl = 'http://localhost:3000';
 flutter pub get
 flutter run
 ```
-
----
 ---
 
-### 📞 Liên hệ
-
-- **Developer**: [Your Name]
-- **Email**: [your.email@example.com]
-- **GitHub**: [github.com/yourusername]
+### 📱 Video demo & cài đặt ứng dụng
+Video demo, file APK có sẵn tại đây:  
+👉 [Google Drive](https://drive.google.com/drive/folders/1Fe48WZxZOVdHyJiVlq2p4rmDCrmMPfyp)
 
 ---
 
 📌 Ghi chú:
 
 - App hiện tại đang ở giai đoạn 1: CRUD + Auth
-- Giai đoạn 2: thêm sync, ngân hàng, báo cáo nâng cao
+- Giai đoạn 2: ngân hàng, báo cáo nâng cao
+
 
