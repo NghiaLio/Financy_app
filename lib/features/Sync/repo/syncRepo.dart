@@ -20,37 +20,87 @@ class SyncRepo {
   Future<void> updateData(Pullmodels pullmodels) async {
     log('Updating data with pullmodels:');
 
-    // Ensure clearing completes before saving new data to avoid race conditions
-    log('Clearing local transactions and accounts...');
-    await transactionRepo.clearAllTransactions();
-    await accountRepo.clearLocalData();
-    log('Cleared local transactions and accounts.');
-    //categoryRepo.clearAllCategories();
+    // DO NOT clear all data - use upsert pattern instead
+    // This prevents data loss when server returns empty arrays (no new updates)
 
     for (var user in pullmodels.data?.values.first.users ?? []) {
+      // Mark as synced since it's from server
+      user.pendingSync = true;
       await userRepo.updateUser(user);
     }
 
+    // Upsert accounts: update if exists, insert if new, delete if marked
     final accounts = pullmodels.data?.values.first.accounts ?? [];
-    log('Number of accounts to save: ${accounts.length}');
+    log('Number of accounts from server: ${accounts.length}');
 
     for (var account in accounts) {
-      log('Saving account: ${account.name} with id: ${account.id}');
       try {
-        await accountRepo.saveToLocal(account);
-        log('Successfully saved account: ${account.name}');
+        account.pendingSync = true;
+
+        if (account.isDeleted == true) {
+          // Delete if marked as deleted
+          try {
+            await accountRepo.deleteFromLocal(account.id ?? '');
+            log('Deleted account: ${account.name}');
+          } catch (e) {
+            log('Cannot delete account ${account.name}: $e');
+          }
+        } else {
+          // Upsert: update if exists, insert if new
+          final existing = accountRepo.getFromLocalById(account.id ?? '');
+          if (existing != null) {
+            await accountRepo.updateInLocal(account);
+            log('Updated account: ${account.name}');
+          } else {
+            await accountRepo.saveToLocal(account);
+            log('Added new account: ${account.name}');
+          }
+        }
       } catch (e) {
-        log('Error saving account ${account.name}: $e');
+        log('Error processing account ${account.name}: $e');
       }
     }
 
-    // Verify accounts were saved
     final savedAccounts = accountRepo.getAllFromLocal();
-    log('Total accounts after saving: ${savedAccounts.length}');
+    log('Total accounts after sync: ${savedAccounts.length}');
 
-    for (var transaction in pullmodels.data?.values.first.transactions ?? []) {
-      await transactionRepo.saveToLocal(transaction);
+    // Upsert transactions: update if exists, insert if new, delete if marked
+    final transactions = pullmodels.data?.values.first.transactions ?? [];
+    log('Number of transactions from server: ${transactions.length}');
+
+    for (var transaction in transactions) {
+      try {
+        transaction.pendingSync = true;
+
+        if (transaction.isDeleted == true) {
+          // Delete if marked as deleted
+          try {
+            await transactionRepo.deleteFromLocal(transaction.id);
+            log('Deleted transaction: ${transaction.id}');
+          } catch (e) {
+            log('Cannot delete transaction ${transaction.id}: $e');
+          }
+        } else {
+          // Upsert: update if exists, insert if new
+          final allTransactions = transactionRepo.getAllTransactions();
+          final existing =
+              allTransactions.where((t) => t.id == transaction.id).firstOrNull;
+
+          if (existing != null) {
+            await transactionRepo.updateInLocal(transaction);
+            log('Updated transaction: ${transaction.id}');
+          } else {
+            await transactionRepo.saveToLocal(transaction);
+            log('Added new transaction: ${transaction.id}');
+          }
+        }
+      } catch (e) {
+        log('Error processing transaction ${transaction.id}: $e');
+      }
     }
+
+    final savedTransactions = transactionRepo.getAllTransactions();
+    log('Total transactions after sync: ${savedTransactions.length}');
 
     // Merge categories: keep existing defaults, upsert server categories, skip deleted
     final pulledCategories = pullmodels.data?.values.first.categories ?? [];
@@ -65,6 +115,8 @@ class SyncRepo {
         continue;
       }
       try {
+        // Mark as synced since it's from server
+        category.pendingSync = true;
         final idx = await categoryRepo.getIndexOfCategory(category);
         if (idx != -1) {
           await categoryRepo.updateCategory(idx, category);
@@ -137,26 +189,44 @@ class SyncRepo {
     final filteredAccounts =
         accounts
             .where(
-              (acc) => acc.pendingSync != true,
-            ) // Include accounts that are not pending sync
+              (acc) =>
+                  acc.pendingSync != true &&
+                  acc.uid != null &&
+                  acc.uid!.isNotEmpty, // Only sync accounts with valid uid
+            )
             .toList();
 
     log('Filtered accounts for sync: ${filteredAccounts.length}');
     final filteredTransactions =
         transactions
             .where(
-              (tx) => tx.pendingSync != true,
-            ) // Include transactions that are not pending sync
+              (tx) =>
+                  tx.pendingSync != true &&
+                  tx.uid.isNotEmpty &&
+                  tx.accountId.isNotEmpty &&
+                  tx
+                      .categoriesId
+                      .isNotEmpty, // Only sync transactions with valid uid, accountId, and categoriesId
+            )
             .toList();
+    log(
+      'Filtered transactions for sync: ${filteredTransactions.length} of ${transactions.length}',
+    );
     final filteredCategories =
         categories
             .where(
               (cat) =>
                   cat.pendingSync != true &&
-                  cat.updatedAt !=
-                      null, // Include categories that are not pending sync and have updatedAt
+                  cat.updatedAt != null &&
+                  cat.uid != null &&
+                  cat
+                      .uid!
+                      .isNotEmpty, // Only sync categories with valid uid and updatedAt
             )
             .toList();
+    log(
+      'Filtered categories for sync: ${filteredCategories.length} of ${categories.length}',
+    );
 
     final result = await SyncDataService().syncData(
       currentUser,
@@ -164,6 +234,45 @@ class SyncRepo {
       filteredTransactions,
       filteredCategories,
     );
+
+    // After successful sync, update pendingSync to true for all synced items
+    log('Updating pendingSync status for synced items...');
+
+    // Update accounts
+    for (var account in filteredAccounts) {
+      account.pendingSync = true;
+      await accountRepo.updateInLocal(account);
+      log('Updated account ${account.name} pendingSync to true');
+    }
+
+    // Update transactions
+    for (var transaction in filteredTransactions) {
+      transaction.pendingSync = true;
+      await transactionRepo.updateInLocal(transaction);
+    }
+    log(
+      'Updated ${filteredTransactions.length} transactions pendingSync to true',
+    );
+
+    // Update categories
+    for (var category in filteredCategories) {
+      category.pendingSync = true;
+      final index = await categoryRepo.getIndexOfCategory(category);
+      if (index != -1) {
+        await categoryRepo.updateCategory(index, category);
+      }
+    }
+    log('Updated ${filteredCategories.length} categories pendingSync to true');
+
+    // Update user if it was synced
+    if (currentUser != null &&
+        (currentUser.pendingSync == false || currentUser.pendingSync == null)) {
+      currentUser.pendingSync = true;
+      await userRepo.updateUser(currentUser);
+      log('Updated user pendingSync to true');
+    }
+
+    log('Sync completed successfully');
     return result;
   }
 }

@@ -53,6 +53,8 @@ class Categoriescubit extends Cubit<CategoriesState> {
 
   Future<void> addCategory(Category category) async {
     try {
+      // Mark as pending sync before saving
+      category.pendingSync = false;
       await _categorierepo.addCategory(category);
       if (category.type == 'income') {
         final categoriesIncome = [
@@ -79,6 +81,8 @@ class Categoriescubit extends Cubit<CategoriesState> {
 
   Future<void> updateCategory(int index, Category category) async {
     try {
+      // Mark as pending sync before updating
+      category.pendingSync = false;
       await _categorierepo.updateCategory(index, category);
 
       // Reload categories to get the updated state

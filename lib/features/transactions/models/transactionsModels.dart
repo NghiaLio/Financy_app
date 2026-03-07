@@ -69,21 +69,21 @@ class Transactionsmodels extends HiveObject {
     DateTime? txnDate;
     final txnRaw = json['transactionDate'];
     if (txnRaw is int) {
-      txnDate = DateTime.fromMillisecondsSinceEpoch(txnRaw);
+      txnDate = DateTime.fromMillisecondsSinceEpoch(txnRaw).toLocal();
     } else if (txnRaw is String) {
-      txnDate = DateTime.tryParse(txnRaw);
+      txnDate = DateTime.tryParse(txnRaw)?.toLocal();
     } else if (txnRaw is DateTime) {
-      txnDate = txnRaw;
+      txnDate = txnRaw.toLocal();
     }
 
     DateTime? createdAt;
     final createdRaw = json['createdAt'];
     if (createdRaw is int) {
-      createdAt = DateTime.fromMillisecondsSinceEpoch(createdRaw);
+      createdAt = DateTime.fromMillisecondsSinceEpoch(createdRaw).toLocal();
     } else if (createdRaw is String) {
-      createdAt = DateTime.tryParse(createdRaw);
+      createdAt = DateTime.tryParse(createdRaw)?.toLocal();
     } else if (createdRaw is DateTime) {
-      createdAt = createdRaw;
+      createdAt = createdRaw.toLocal();
     }
 
     return Transactionsmodels(
@@ -105,18 +105,30 @@ class Transactionsmodels extends HiveObject {
   }
 
   Map<String, dynamic> toJson() {
+    // Ensure updatedAt is always in ISO8601 format
+    String? formattedUpdatedAt;
+    if (updatedAt != null) {
+      try {
+        final dt = DateTime.parse(updatedAt!);
+        formattedUpdatedAt = dt.toUtc().toIso8601String();
+      } catch (e) {
+        formattedUpdatedAt = DateTime.now().toUtc().toIso8601String();
+      }
+    }
+
     return {
+      'id': id,
       'uid': uid,
       'accountId': accountId,
       'categoriesId': categoriesId,
       'type': type.toString().split('.').last,
       'amount': amount,
       'note': note,
-      'transactionDate': transactionDate?.toIso8601String(),
-      'createdAt': createdAt?.toIso8601String(),
+      'transactionDate': transactionDate?.toUtc().toIso8601String(),
+      'createdAt': createdAt?.toUtc().toIso8601String(),
       'pendingSync': pendingSync,
       'isDeleted': isDeleted ?? false,
-      'updatedAt': updatedAt,
+      'updatedAt': formattedUpdatedAt,
     };
   }
 }

@@ -13,30 +13,30 @@ class Pullmodels {
   Pullmodels({this.status, this.since, this.data});
 
   factory Pullmodels.fromJson(Map<String, dynamic> json) {
-    if (json['since'] is int) {
-    } else if (json['since'] is String) {
-    } else {
-    }
-    // parse since: treat explicit string "null" as null
+    // Parse 'since' field: should be ISO8601 string from /pull API
     DateTime? since;
     final rawSince = json['since'];
     if (rawSince == null ||
         (rawSince is String && rawSince.toLowerCase() == 'null')) {
       since = null;
-    } else if (rawSince is int) {
-      since = DateTime.fromMillisecondsSinceEpoch(rawSince);
     } else if (rawSince is String) {
-      // try parse as int then as date string
-      final tryInt = int.tryParse(rawSince);
-      if (tryInt != null) {
-        since = DateTime.fromMillisecondsSinceEpoch(tryInt);
-      } else {
-        try {
-          since = DateTime.parse(rawSince);
-        } catch (_) {
+      try {
+        since =
+            DateTime.parse(
+              rawSince,
+            ).toLocal(); // Parse ISO8601 string and convert to local
+      } catch (_) {
+        // Fallback: try parsing as milliseconds int
+        final tryInt = int.tryParse(rawSince);
+        if (tryInt != null) {
+          since = DateTime.fromMillisecondsSinceEpoch(tryInt).toLocal();
+        } else {
           since = null;
         }
       }
+    } else if (rawSince is int) {
+      // Backward compatibility: if server sends int
+      since = DateTime.fromMillisecondsSinceEpoch(rawSince).toLocal();
     } else {
       since = null;
     }

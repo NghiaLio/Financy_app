@@ -356,6 +356,12 @@
   "restoreDefault": "デフォルトに戻す",
   "restoreDefaultConfirm": "すべてのカテゴリをデフォルトに戻しますか？ カスタムカテゴリはすべて削除されます。",
   "titleNotification": "支出を管理",
-  "bodyNotification": "今日はどれくらい使いましたか？"
+  "bodyNotification": "今日はどれくらい使いましたか？",
+  "signInRequired": "サインインが必要です",
+  "signInToManageProfile": "プロフィールを管理してデータを同期するには、サインインしてください",
+  "signIn": "サインイン",
+  "continueAsGuest": "ゲストとして続ける",
+  "guestModeDescription": "サインインせずに続けようとしています。デバイス間でデータを同期できません。",
+  "continues": "続ける"
 }
   

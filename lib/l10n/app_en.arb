@@ -279,7 +279,14 @@
   "restoreDefault": "Restore Defaults",
   "restoreDefaultConfirm": "Do you want to restore all categories to default? This will delete all custom categories.",
   "titleNotification": "Control spending",
-  "bodyNotification": "How much have you spent today?"
+  "bodyNotification": "How much have you spent today?",
+  
+  "signInRequired": "Sign In Required",
+  "signInToManageProfile": "Sign in with Google to manage your profile and sync data across devices.",
+  "signIn": "Sign In",
+  "continueAsGuest": "Continue as Guest",
+  "guestModeDescription": "You can use the app without signing in. Sign in later to sync your data across devices.",
+  "continues": "Continue"
 }
 
 

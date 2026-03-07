@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:financy_ui/features/Sync/cubit/syncCubit.dart';
 import 'package:financy_ui/features/Sync/cubit/syncState.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:financy_ui/app/services/Local/settings_service.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -99,6 +99,8 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
                   backgroundColor: Colors.green,
                 ),
               );
+              // Force rebuild to update lastSyncTime
+              setState(() {});
             } else if (state is SyncFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -106,6 +108,14 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
                   backgroundColor: Colors.red,
                 ),
               );
+            } else if (state is BackgroundSyncComplete) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              setState(() {}); // Update lastSyncTime
             }
           },
           builder: (context, state) {
@@ -178,8 +188,70 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
 
                   const SizedBox(height: 24),
 
-                  // Animation / hint
-                  if (state is SyncLoading)
+                  // Background sync progress widget
+                  if (state is BackgroundSyncInProgress)
+                    Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 200,
+                              height: 200,
+                              child: Lottie.asset(
+                                'assets/animation/sync_animation.json',
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            Text(
+                              state.message ??
+                                  _localText(context, (l) => l.syncingData),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            // Progress bar
+                            if (state.total > 0)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 32.0,
+                                ),
+                                child: Column(
+                                  children: [
+                                    LinearProgressIndicator(
+                                      value: state.progress,
+                                      backgroundColor: Colors.grey[200],
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        theme.primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      '${state.current}/${state.total}',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  theme.primaryColor,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    )
+                  // Download animation
+                  else if (state is SyncLoading)
                     Expanded(
                       child: Center(
                         child: Column(
@@ -301,34 +373,17 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
                       ),
                     ),
 
-                  // Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildActionButton(
-                          icon: Icons.cloud_upload,
-                          title: _localText(context, (l) => l.uploadData),
-                          color: Colors.blue,
-                          onTap:
-                              state is SyncLoading || !syncEnabled
-                                  ? null
-                                  : () => syncCubit.syncData(),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _buildActionButton(
-                          icon: Icons.cloud_download,
-                          title: _localText(context, (l) => l.downloadData),
-                          color: Colors.green,
-                          onTap:
-                              state is SyncLoading || !syncEnabled
-                                  ? null
-                                  : () => syncCubit.fetchData(),
-                        ),
-                      ),
-                    ],
-                  ),
+                  // Download button only (upload is automatic via background sync)
+                  if (syncEnabled && state is! BackgroundSyncInProgress)
+                    _buildActionButton(
+                      icon: Icons.cloud_download,
+                      title: _localText(context, (l) => l.downloadData),
+                      color: Colors.green,
+                      onTap:
+                          state is SyncLoading
+                              ? null
+                              : () => syncCubit.fetchData(),
+                    ),
                 ],
               ),
             );

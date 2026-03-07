@@ -14,7 +14,6 @@ import 'package:financy_ui/features/transactions/models/transactionsModels.dart'
 import 'package:financy_ui/shared/utils/localText.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:financy_ui/shared/utils/money_source_utils.dart';
-import 'package:financy_ui/shared/utils/statistics_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 
@@ -65,29 +64,33 @@ class _WalletState extends State<Wallet> {
 
   @override
   void initState() {
-    context.read<ManageMoneyCubit>().getAllAccount();
     super.initState();
-    // Lấy id tài khoản hiện tại từ ManageMoneyCubit (nếu có)
-    final manageMoneyCubit = context.read<ManageMoneyCubit>();
-    final listAccounts = manageMoneyCubit.listAccounts ?? [];
-    if (listAccounts.isNotEmpty) {
-      // Nếu đã có currentAccountName (tên), tìm id tương ứng
-      final currentName = manageMoneyCubit.currentAccountName;
-      final found = listAccounts.firstWhere(
-        (acc) => acc.name == currentName,
-        orElse: () => listAccounts.first,
-      );
-      currentAccountId = found.id;
-      // Cập nhật TransactionCubit với id tài khoản hiện tại
-      context.read<TransactionCubit>().fetchTransactionsByAccount(
-        currentAccountId ?? listAccounts.first.id ?? '',
-      );
-    } else {
-      currentAccountId = null;
-    }
+    // Load accounts first, then fetch transactions after accounts are loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<ManageMoneyCubit>().getAllAccount();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (currentAccountId == null) {
+      // After accounts are loaded, get the current account and fetch transactions
+      final manageMoneyCubit = context.read<ManageMoneyCubit>();
+      final listAccounts = manageMoneyCubit.listAccounts ?? [];
+
+      if (listAccounts.isNotEmpty) {
+        // Nếu đã có currentAccountName (tên), tìm id tương ứng
+        final currentName = manageMoneyCubit.currentAccountName;
+        final found = listAccounts.firstWhere(
+          (acc) => acc.name == currentName,
+          orElse: () => listAccounts.first,
+        );
+        setState(() {
+          currentAccountId = found.id;
+        });
+
+        // Cập nhật TransactionCubit với id tài khoản hiện tại
+        if (currentAccountId != null) {
+          context.read<TransactionCubit>().fetchTransactionsByAccount(
+            currentAccountId!,
+          );
+        }
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('No account exists'),
@@ -145,22 +148,17 @@ class _WalletState extends State<Wallet> {
                       final isIncome =
                           transaction.type == TransactionType.income;
                       final amountStr = _formatAmount(transaction.amount);
-                      // Lấy category object từ id
-                      final categories =
-                          isIncome
-                              ? StatisticsUtils.getCategoriesForType(
-                                TransactionType.income,
-                              )
-                              : StatisticsUtils.getCategoriesForType(
-                                TransactionType.expense,
-                              );
-                      final category = categories.firstWhere(
-                        (cat) => cat.id == transaction.categoriesId,
-                        orElse: () => categories.first,
+                      // Get category by name if needed for default categories
+                      final categoryData = IconMapping.getCategoryByName(
+                        transaction.categoriesId,
                       );
-                      final iconData = IconMapping.stringToIcon(category.icon);
-                      final iconColor = Color(int.parse(category.color));
-                      final title = category.name;
+                      final iconData = IconMapping.stringToIcon(
+                        categoryData?.icon ?? 'Home',
+                      );
+                      final iconColor = Color(
+                        int.parse(categoryData?.color ?? '0xFF000000'),
+                      );
+                      final title = categoryData?.name ?? 'Unknown';
                       return _buildTransactionItem(
                         context,
                         icon: iconData,
@@ -326,16 +324,13 @@ class BalanceCard extends StatelessWidget {
           }
         }
 
-        // Determine brand color and logo for current account
+        // Determine brand background and logo for current account
         final Color fallbackColor = AppColors.primaryBlue;
-        final Color brandColor =
-            currentAccount != null
-                ? MoneySourceColors.colorForWithFallback(
-                  currentAccount.name,
-                  fallback: fallbackColor,
-                )
-                : fallbackColor;
         final Color onBrand = Colors.white;
+        final String? brandBackground =
+            currentAccount != null
+                ? MoneySourceBackgrounds.backgroundFor(currentAccount.name)
+                : null;
         final String? brandAsset =
             currentAccount != null
                 ? MoneySourceImages.assetFor(currentAccount.name)
@@ -344,7 +339,15 @@ class BalanceCard extends StatelessWidget {
         return Container(
           margin: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: brandColor.withOpacity(0.8),
+            image:
+                brandBackground != null
+                    ? DecorationImage(
+                      image: AssetImage(brandBackground),
+                      fit: BoxFit.cover,
+                    )
+                    : null,
+            color:
+                brandBackground == null ? fallbackColor.withOpacity(0.8) : null,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -356,7 +359,21 @@ class BalanceCard extends StatelessWidget {
           ),
           child: Container(
             padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              // Add darker overlay to make text readable on background image
+              gradient:
+                  brandBackground != null
+                      ? LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0.6),
+                          Colors.black.withOpacity(0.5),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                      : null,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -373,6 +390,16 @@ class BalanceCard extends StatelessWidget {
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: onBrand,
                               fontWeight: FontWeight.w500,
+                              shadows:
+                                  brandBackground != null
+                                      ? [
+                                        Shadow(
+                                          color: Colors.black.withOpacity(0.5),
+                                          blurRadius: 4,
+                                          offset: Offset(0, 1),
+                                        ),
+                                      ]
+                                      : null,
                             ),
                           ),
                           SizedBox(height: 4),
@@ -397,6 +424,18 @@ class BalanceCard extends StatelessWidget {
                                   style: theme.textTheme.titleLarge?.copyWith(
                                     color: onBrand,
                                     fontWeight: FontWeight.bold,
+                                    shadows:
+                                        brandBackground != null
+                                            ? [
+                                              Shadow(
+                                                color: Colors.black.withOpacity(
+                                                  0.7,
+                                                ),
+                                                blurRadius: 6,
+                                                offset: Offset(0, 2),
+                                              ),
+                                            ]
+                                            : null,
                                   ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -447,12 +486,28 @@ class BalanceCard extends StatelessWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: onBrand.withOpacity(0.1),
+                            color:
+                                brandBackground != null
+                                    ? Colors.white.withOpacity(0.2)
+                                    : onBrand.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: onBrand.withOpacity(0.3),
-                              width: 1,
+                              color:
+                                  brandBackground != null
+                                      ? Colors.white.withOpacity(0.4)
+                                      : onBrand.withOpacity(0.3),
+                              width: 1.5,
                             ),
+                            boxShadow:
+                                brandBackground != null
+                                    ? [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        blurRadius: 4,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ]
+                                    : null,
                           ),
                           child: DropdownButtonHideUnderline(
                             child: DropdownButton<String>(
@@ -467,6 +522,32 @@ class BalanceCard extends StatelessWidget {
                                 color: onBrand,
                                 size: 16,
                               ),
+                              selectedItemBuilder: (BuildContext context) {
+                                return listAccounts?.map((e) {
+                                      return Center(
+                                        child: Text(
+                                          e.name,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                            shadows:
+                                                brandBackground != null
+                                                    ? [
+                                                      Shadow(
+                                                        color: Colors.black
+                                                            .withOpacity(0.5),
+                                                        blurRadius: 3,
+                                                        offset: Offset(0, 1),
+                                                      ),
+                                                    ]
+                                                    : null,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList() ??
+                                    [];
+                              },
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: onBrand,
                                 fontWeight: FontWeight.w600,
@@ -509,12 +590,16 @@ class BalanceCard extends StatelessWidget {
                                                       size: 18,
                                                     ),
                                                   SizedBox(width: 6),
-                                                  Text(
-                                                    e.name,
-                                                    style:
-                                                        theme
-                                                            .textTheme
-                                                            .bodyMedium,
+                                                  Flexible(
+                                                    child: Text(
+                                                      e.name,
+                                                      style:
+                                                          theme
+                                                              .textTheme
+                                                              .bodyMedium,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -540,12 +625,28 @@ class BalanceCard extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.positiveGreen.withOpacity(0.08),
+                          color:
+                              brandBackground != null
+                                  ? Colors.white.withOpacity(0.15)
+                                  : AppColors.positiveGreen.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.positiveGreen.withOpacity(0.15),
-                            width: 1,
+                            color:
+                                brandBackground != null
+                                    ? Colors.white.withOpacity(0.3)
+                                    : AppColors.positiveGreen.withOpacity(0.15),
+                            width: 1.5,
                           ),
+                          boxShadow:
+                              brandBackground != null
+                                  ? [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,14 +656,19 @@ class BalanceCard extends StatelessWidget {
                                 Container(
                                   padding: EdgeInsets.all(6),
                                   decoration: BoxDecoration(
-                                    color: AppColors.positiveGreen.withOpacity(
-                                      0.2,
-                                    ),
+                                    color:
+                                        brandBackground != null
+                                            ? Colors.white.withOpacity(0.3)
+                                            : AppColors.positiveGreen
+                                                .withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Icon(
                                     Icons.trending_up,
-                                    color: AppColors.positiveGreen,
+                                    color:
+                                        brandBackground != null
+                                            ? Colors.white
+                                            : AppColors.positiveGreen,
                                     size: 12,
                                   ),
                                 ),
@@ -575,7 +681,18 @@ class BalanceCard extends StatelessWidget {
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: onBrand,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w600,
+                                      shadows:
+                                          brandBackground != null
+                                              ? [
+                                                Shadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.5),
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ]
+                                              : null,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -588,6 +705,18 @@ class BalanceCard extends StatelessWidget {
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: onBrand,
                                 fontWeight: FontWeight.bold,
+                                shadows:
+                                    brandBackground != null
+                                        ? [
+                                          Shadow(
+                                            color: Colors.black.withOpacity(
+                                              0.6,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 1),
+                                          ),
+                                        ]
+                                        : null,
                               ),
                             ),
                           ],
@@ -600,12 +729,28 @@ class BalanceCard extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.negativeRed.withOpacity(0.08),
+                          color:
+                              brandBackground != null
+                                  ? Colors.white.withOpacity(0.15)
+                                  : AppColors.negativeRed.withOpacity(0.08),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.negativeRed.withOpacity(0.15),
-                            width: 1,
+                            color:
+                                brandBackground != null
+                                    ? Colors.white.withOpacity(0.3)
+                                    : AppColors.negativeRed.withOpacity(0.15),
+                            width: 1.5,
                           ),
+                          boxShadow:
+                              brandBackground != null
+                                  ? [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ]
+                                  : null,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -615,14 +760,20 @@ class BalanceCard extends StatelessWidget {
                                 Container(
                                   padding: EdgeInsets.all(6),
                                   decoration: BoxDecoration(
-                                    color: AppColors.negativeRed.withOpacity(
-                                      0.2,
-                                    ),
+                                    color:
+                                        brandBackground != null
+                                            ? Colors.white.withOpacity(0.3)
+                                            : AppColors.negativeRed.withOpacity(
+                                              0.2,
+                                            ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Icon(
                                     Icons.trending_down,
-                                    color: AppColors.negativeRed,
+                                    color:
+                                        brandBackground != null
+                                            ? Colors.white
+                                            : AppColors.negativeRed,
                                     size: 12,
                                   ),
                                 ),
@@ -635,7 +786,18 @@ class BalanceCard extends StatelessWidget {
                                     ),
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: onBrand,
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w600,
+                                      shadows:
+                                          brandBackground != null
+                                              ? [
+                                                Shadow(
+                                                  color: Colors.black
+                                                      .withOpacity(0.5),
+                                                  blurRadius: 3,
+                                                  offset: Offset(0, 1),
+                                                ),
+                                              ]
+                                              : null,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -648,6 +810,18 @@ class BalanceCard extends StatelessWidget {
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: onBrand,
                                 fontWeight: FontWeight.bold,
+                                shadows:
+                                    brandBackground != null
+                                        ? [
+                                          Shadow(
+                                            color: Colors.black.withOpacity(
+                                              0.6,
+                                            ),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 1),
+                                          ),
+                                        ]
+                                        : null,
                               ),
                             ),
                           ],

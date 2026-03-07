@@ -281,6 +281,12 @@
   "downloadData": "Télécharger",
   "logout": "Se déconnecter",
   "loggedOut": "Déconnecté",
-  "syncRequiresGoogleLogin": "La synchronisation nécessite une connexion Google"
+  "syncRequiresGoogleLogin": "La synchronisation nécessite une connexion Google",
+  "signInRequired": "Connexion requise",
+  "signInToManageProfile": "Veuillez vous connecter pour gérer votre profil et synchroniser les données",
+  "signIn": "Se connecter",
+  "continueAsGuest": "Continuer en tant qu'invité",
+  "guestModeDescription": "Vous êtes sur le point de continuer sans vous connecter. Vous ne pourrez pas synchroniser vos données entre les appareils.",
+  "continues": "Continuer"
 }
   

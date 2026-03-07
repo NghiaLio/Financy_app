@@ -78,7 +78,11 @@ class ManageMoneyRepo {
 
   /// Get current account name by id from local storage
   String? getCurrentAccountNameById(String id) {
-    return _localBox.values.firstWhere((source) => source.id == id).name;
+    try {
+      return _localBox.values.firstWhere((source) => source.id == id).name;
+    } catch (e) {
+      return null;
+    }
   }
 
   MoneySource? getCurrentAccountByName(String name) {

@@ -30,38 +30,42 @@ class Authrepo {
     // fetch token
     final data = {"idToken": tokenID};
     final res = await ApiService()
-        .post('google/login', data: data)
+        .post('/auth/login', data: data)
         .catchError(
           (e) => {throw Exception('Login with Google failed: ${e.toString()}')},
         );
     if (res.statusCode != 200) {
       throw Exception('Login with Google failed: ${res.statusMessage}');
     }
+
+    // Get tokens and user data from response
     final accessToken = res.data['accessToken'];
     final refreshToken = res.data['refreshToken'];
-    //save to local storage
+    final userData = res.data['user']; // User data is now in the login response
+
+    //save tokens to local storage
     Hive.box('jwt').put('accessToken', accessToken);
     Hive.box('jwt').put('refreshToken', refreshToken);
     ApiService().setToken(accessToken);
-    // fetch user data
-    final user = await ApiService().get('/google/user');
+
     // Nếu user có picture là link, tải về app data và lưu path local
     String? localPicturePath;
-    if (user.data['picture'] != null &&
-        user.data['picture'].toString().startsWith('http')) {
+    if (userData['picture'] != null &&
+        userData['picture'].toString().startsWith('http')) {
       try {
         final dir = await getApplicationDocumentsDirectory();
         final fileName =
             'google_profile_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final savePath = '${dir.path}/$fileName';
-        await Dio().download(user.data['picture'], savePath);
+        await Dio().download(userData['picture'], savePath);
         localPicturePath = savePath;
       } catch (e) {
         localPicturePath = null;
       }
     }
+
     // Lưu user vào Hive, thay picture = local path nếu có
-    final userJson = Map<String, dynamic>.from(user.data);
+    final userJson = Map<String, dynamic>.from(userData);
     if (localPicturePath != null) {
       userJson['photo'] = localPicturePath;
     }
@@ -72,13 +76,6 @@ class Authrepo {
     await SettingsService.setAuthMode('google');
   }
 
-  Future<Map<String, dynamic>> authenticated() async {
-    final accessToken = Hive.box('jwt').get('accessToken');
-    ApiService().setToken(accessToken);
-    final res = await ApiService().get('/google/user');
-    return res.data;
-  }
-
   //get user data from local storage
   Future<UserModel?> getCurrentUser() async {
     final boxUser = Hive.box<UserModel>('userBox').get('currentUser');
@@ -86,9 +83,8 @@ class Authrepo {
     return boxUser;
   }
 
-  //login with no account
-  Future<void> loginWithNoAccount(UserModel guestUser) async {
-    await Hive.box<UserModel>('userBox').put('currentUser', guestUser);
+  //login with no account (guest mode)
+  Future<void> loginWithNoAccount() async {
     await SettingsService.setAppState(true);
     await SettingsService.setAuthMode('guest');
   }

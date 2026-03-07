@@ -272,4 +272,46 @@ class IconMapping {
       (category) => category.icon,
     );
   }
+
+  /// Get category info by name from default categories
+  static Category? getCategoryByName(String categoryName) {
+    // First check in default expense categories
+    final expenseCategory = defaultExpenseCategories.firstWhere(
+      (category) => category.name == categoryName,
+      orElse:
+          () => Category(
+            id: '',
+            name: '',
+            type: '',
+            icon: '',
+            color: '',
+            createdAt: DateTime.now(),
+          ),
+    );
+
+    if (expenseCategory.name.isNotEmpty) {
+      return expenseCategory;
+    }
+
+    // Then check in default income categories
+    final incomeCategory = defaultIncomeCategories.firstWhere(
+      (category) => category.name == categoryName,
+      orElse:
+          () => Category(
+            id: '',
+            name: '',
+            type: '',
+            icon: '',
+            color: '',
+            createdAt: DateTime.now(),
+          ),
+    );
+
+    if (incomeCategory.name.isNotEmpty) {
+      return incomeCategory;
+    }
+
+    // If not found in defaults, return null
+    return null;
+  }
 }

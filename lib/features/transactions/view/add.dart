@@ -16,7 +16,7 @@ import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:financy_ui/core/constants/colors.dart';
 
 // Helper class for validation results
@@ -874,7 +874,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       transactionDate: date,
       createdAt: editingTransaction!.createdAt,
       pendingSync: false,
-      updatedAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toUtc().toIso8601String(),
     );
 
     await context.read<TransactionCubit>().updateTransaction(
@@ -1016,7 +1016,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       color: original.color,
       description: original.description,
       isActive: original.isActive,
-      updatedAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toUtc().toIso8601String(),
     );
   }
 

@@ -55,22 +55,22 @@ class UserModel extends HiveObject {
     // dateOfBirth can be a String ISO date, an int millis, or missing
     final dobRaw = json['dateOfBirth'];
     if (dobRaw is int) {
-      parsedDate = DateTime.fromMillisecondsSinceEpoch(dobRaw);
+      parsedDate = DateTime.fromMillisecondsSinceEpoch(dobRaw).toLocal();
     } else if (dobRaw is String) {
-      parsedDate = DateTime.tryParse(dobRaw);
+      parsedDate = DateTime.tryParse(dobRaw)?.toLocal();
     } else if (dobRaw is DateTime) {
-      parsedDate = dobRaw;
+      parsedDate = dobRaw.toLocal();
     } else {
       parsedDate = null;
     }
 
     final createdRaw = json['createdAt'];
     if (createdRaw is int) {
-      createdAt = DateTime.fromMillisecondsSinceEpoch(createdRaw);
+      createdAt = DateTime.fromMillisecondsSinceEpoch(createdRaw).toLocal();
     } else if (createdRaw is String) {
-      createdAt = DateTime.tryParse(createdRaw);
+      createdAt = DateTime.tryParse(createdRaw)?.toLocal();
     } else if (createdRaw is DateTime) {
-      createdAt = createdRaw;
+      createdAt = createdRaw.toLocal();
     } else {
       createdAt = null;
     }
@@ -88,15 +88,30 @@ class UserModel extends HiveObject {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'uid': uid,
-    'name': name,
-    'email': email,
-    'picture': picture,
-    'dateOfBirth': dateOfBirth.toIso8601String(),
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt,
-    'isDeleted': isDeleted ?? false,
-    'pendingSync': pendingSync,
-  };
+  Map<String, dynamic> toJson() {
+    // Ensure updatedAt is always in ISO8601 format
+    String? formattedUpdatedAt;
+    if (updatedAt != null) {
+      try {
+        // Try to parse it first in case it's already a valid date string
+        final dt = DateTime.parse(updatedAt!);
+        formattedUpdatedAt = dt.toUtc().toIso8601String();
+      } catch (e) {
+        // If parsing fails, use current time
+        formattedUpdatedAt = DateTime.now().toUtc().toIso8601String();
+      }
+    }
+
+    return {
+      'uid': uid,
+      'name': name,
+      'email': email,
+      'picture': picture,
+      'dateOfBirth': dateOfBirth.toUtc().toIso8601String(),
+      'createdAt': createdAt.toUtc().toIso8601String(),
+      'updatedAt': formattedUpdatedAt,
+      'isDeleted': isDeleted ?? false,
+      'pendingSync': pendingSync,
+    };
+  }
 }

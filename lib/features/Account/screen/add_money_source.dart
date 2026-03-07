@@ -8,7 +8,7 @@ import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/generateID.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import '../../../core/constants/colors.dart';
 import '../../../core/constants/money_source_icons.dart';
 
@@ -89,10 +89,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
                 setState(() {
                   selectedBrandKey = key;
                   nameController.text = _brandDisplayName(key);
-                  selectedColor = MoneySourceColors.colorForWithFallback(
-                    key,
-                    fallback: AppColors.primaryBlue,
-                  );
+                  selectedColor = AppColors.primaryBlue; // Use default color
                 });
               },
               child: Container(
@@ -627,7 +624,7 @@ class _AddMoneySourceScreenState extends State<AddMoneySourceScreen> {
               ? null
               : descriptionController.text,
       isActive: true,
-      updatedAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toUtc().toIso8601String(),
     );
     context.read<ManageMoneyCubit>().createAccount(source);
   }

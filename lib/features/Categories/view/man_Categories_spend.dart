@@ -6,7 +6,7 @@ import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/app/services/Local/settings_service.dart';
 
@@ -166,7 +166,6 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
     );
   }
 
-
   Widget _buildCategoryGridGrouped(List<Category> categories) {
     final groupedCategories = IconMapping.groupCategoriesByType(categories);
 
@@ -303,7 +302,10 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    IconMapping.getLocalizedCategoryNameFromCategory(category, l10n),
+                    IconMapping.getLocalizedCategoryNameFromCategory(
+                      category,
+                      l10n,
+                    ),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w500,
                     ),
@@ -411,54 +413,59 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   void _showRestoreDefaultDialog() {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: theme.cardColor,
-        title: Text(
-          l10n?.restoreDefault ?? 'Restore Default',
-          style: theme.textTheme.titleLarge,
-        ),
-        content: Text(
-          l10n?.restoreDefaultConfirm ?? 'Are you sure you want to restore all categories to default? This will delete all custom categories.',
-          style: theme.textTheme.bodyMedium,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              l10n?.cancel ?? 'Cancel',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.hintColor,
-              ),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: theme.cardColor,
+            title: Text(
+              l10n?.restoreDefault ?? 'Restore Default',
+              style: theme.textTheme.titleLarge,
             ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await context.read<Categoriescubit>().restoreDefaultCategories().then((value) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(l10n?.success ?? 'Success'),
-                    backgroundColor: theme.primaryColor,
+            content: Text(
+              l10n?.restoreDefaultConfirm ??
+                  'Are you sure you want to restore all categories to default? This will delete all custom categories.',
+              style: theme.textTheme.bodyMedium,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  l10n?.cancel ?? 'Cancel',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.hintColor,
                   ),
-                );
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                ),
               ),
-            ),
-            child: Text(
-              l10n?.restore ?? 'Restore',
-              style: const TextStyle(color: Colors.white),
-            ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await context
+                      .read<Categoriescubit>()
+                      .restoreDefaultCategories()
+                      .then((value) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(l10n?.success ?? 'Success'),
+                            backgroundColor: theme.primaryColor,
+                          ),
+                        );
+                      });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  l10n?.restore ?? 'Restore',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -570,36 +577,32 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen>
   Widget _buildDeleteButton(Category category) {
     return isEdit
         ? Positioned(
-            top: -5,
-            right: -5,
-            child: GestureDetector(
-              onTap: () => _showDialogConfirmDelete(category),
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: AppColors.negativeRed,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    width: 2,
+          top: -5,
+          right: -5,
+          child: GestureDetector(
+            onTap: () => _showDialogConfirmDelete(category),
+            child: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: AppColors.negativeRed,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  width: 2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 3,
+                    offset: const Offset(0, 1),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 14,
-                ),
+                ],
               ),
+              child: const Icon(Icons.close, color: Colors.white, size: 14),
             ),
-          )
+          ),
+        )
         : Container();
   }
 }

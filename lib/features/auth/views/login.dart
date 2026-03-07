@@ -5,7 +5,7 @@ import 'package:financy_ui/features/auth/views/nameInputDialog.dart';
 import 'package:financy_ui/features/auth/cubits/authState.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});

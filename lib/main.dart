@@ -37,7 +37,7 @@ import 'package:path_provider/path_provider.dart';
 import 'features/auth/views/login.dart';
 import 'app/theme/app_theme.dart';
 import 'core/constants/colors.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:financy_ui/app/services/Local/settings_service.dart';
 
@@ -65,6 +65,10 @@ void main() async {
   await dotenv.load(fileName: ".env");
   await Hive.openBox('settings');
   await Hive.openBox('jwt');
+
+  // Store baseUrl for isolate access
+  final baseUrl = dotenv.env['URL_DB'] ?? 'http://10.0.2.2:2310/api';
+  await Hive.box('settings').put('baseUrl', baseUrl);
 
   // Initialize local storage for MoneySource
   await Hive.openBox<MoneySource>('moneySourceBox');

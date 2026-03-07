@@ -30,6 +30,8 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   // create account
   Future<void> createAccount(MoneySource source) async {
     try {
+      // Mark as pending sync before saving
+      source.pendingSync = false;
       await _manageMoneyRepo.saveToLocal(source);
       await getAllAccount(); // Đảm bảo luôn lấy danh sách mới nhất từ local
       emit(ManageMoneyState.success('Account created successfully'));
@@ -41,6 +43,8 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   //update account
   Future<void> updateAccount(MoneySource source) async {
     try {
+      // Mark as pending sync before updating
+      source.pendingSync = false;
       await _manageMoneyRepo.updateInLocal(source);
       final updatedList =
           state.listAccounts

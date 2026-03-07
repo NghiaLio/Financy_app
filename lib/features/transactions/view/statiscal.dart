@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'spending.dart';
 import 'income.dart';
 
@@ -34,7 +34,7 @@ class _StatiscalState extends State<Statiscal>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context);
-    
+
     return Column(
       children: [
         // Tab Bar

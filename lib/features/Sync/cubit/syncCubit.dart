@@ -1,9 +1,11 @@
 // ignore_for_file: file_names, curly_braces_in_flow_control_structures
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:financy_ui/features/Sync/models/pullModels.dart';
 import 'package:financy_ui/features/Sync/repo/syncRepo.dart';
+import 'package:financy_ui/features/Sync/services/background_sync_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/app/services/Server/sync_data.dart';
 import 'package:financy_ui/features/Sync/cubit/syncState.dart';
@@ -13,11 +15,76 @@ import 'package:financy_ui/app/services/Server/dio_client.dart';
 
 class SyncCubit extends Cubit<SyncState> {
   final SyncDataService _syncDataService = SyncDataService();
+  StreamSubscription? _syncProgressSubscription;
 
-  SyncCubit() : super(SyncInitial());
+  SyncCubit() : super(BackgroundSyncIdle()) {
+    // Listen to background sync progress
+    _syncProgressSubscription = BackgroundSyncService.progressStream.listen(
+      (progress) {
+        emit(
+          BackgroundSyncInProgress(
+            stage: progress.stage,
+            current: progress.current,
+            total: progress.total,
+            message: progress.message,
+          ),
+        );
+
+        // If sync is complete, transition to complete state
+        if (progress.stage == 'complete') {
+          emit(
+            BackgroundSyncComplete(
+              message: progress.message ?? 'Sync completed',
+            ),
+          );
+          // Return to idle after 2 seconds
+          Future.delayed(const Duration(seconds: 2), () {
+            if (!isClosed) emit(BackgroundSyncIdle());
+          });
+        }
+      },
+      onError: (error) {
+        emit(SyncFailure(message: error.toString()));
+        // Return to idle after error
+        Future.delayed(const Duration(seconds: 2), () {
+          if (!isClosed) emit(BackgroundSyncIdle());
+        });
+      },
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _syncProgressSubscription?.cancel();
+    return super.close();
+  }
 
   final SyncRepo _syncRepo = SyncRepo();
 
+  /// Start background sync (runs in isolate)
+  Future<void> startBackgroundSync() async {
+    if (BackgroundSyncService.isSyncing) {
+      log('Background sync already in progress');
+      return;
+    }
+
+    try {
+      emit(
+        BackgroundSyncInProgress(
+          stage: 'preparing',
+          message: 'Starting background sync...',
+        ),
+      );
+      await BackgroundSyncService.startBackgroundSync();
+    } catch (e) {
+      emit(SyncFailure(message: 'Failed to start background sync: $e'));
+      Future.delayed(const Duration(seconds: 2), () {
+        if (!isClosed) emit(BackgroundSyncIdle());
+      });
+    }
+  }
+
+  /// Legacy manual sync (for compatibility)
   Future<void> syncData() async {
     try {
       emit(SyncLoading());
@@ -167,9 +234,27 @@ class SyncCubit extends Cubit<SyncState> {
   }
 
   DateTime getLastSyncTime() {
-    final lastSync = Hive.box('settings').get('lastSync') ?? 0;
-    return DateTime.fromMillisecondsSinceEpoch(
-      lastSync is int ? lastSync : int.tryParse(lastSync.toString()) ?? 0,
-    );
+    final lastSync = Hive.box('settings').get('lastSync');
+    if (lastSync == null) {
+      return DateTime.fromMillisecondsSinceEpoch(0).toLocal();
+    }
+
+    // Handle both int (milliseconds) and String (ISO8601) formats
+    if (lastSync is int) {
+      return DateTime.fromMillisecondsSinceEpoch(lastSync).toLocal();
+    } else if (lastSync is String) {
+      try {
+        return DateTime.parse(lastSync).toLocal();
+      } catch (_) {
+        // Try parsing as milliseconds string
+        final millis = int.tryParse(lastSync);
+        if (millis != null) {
+          return DateTime.fromMillisecondsSinceEpoch(millis).toLocal();
+        }
+        return DateTime.fromMillisecondsSinceEpoch(0).toLocal();
+      }
+    }
+
+    return DateTime.fromMillisecondsSinceEpoch(0).toLocal();
   }
 }

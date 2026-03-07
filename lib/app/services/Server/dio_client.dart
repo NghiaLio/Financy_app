@@ -42,11 +42,13 @@ class ApiService {
 
   Future<Response> post(String path, {dynamic data}) async {
     try {
-      return await _dio.post(
-        path,
-        data: data,
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
+      // Don't set Content-Type when sending FormData, let Dio handle it
+      final options =
+          data is FormData
+              ? Options()
+              : Options(headers: {'Content-Type': 'application/json'});
+
+      return await _dio.post(path, data: data, options: options);
     } on DioException catch (e) {
       // If server provided structured JSON, throw ApiException with that data
       final resp = e.response;

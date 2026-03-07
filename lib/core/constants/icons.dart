@@ -64,117 +64,105 @@ const Map<String, IconData> iconMap = {
   'more_horiz': Icons.more_horiz,
 };
 
-//fix cứng 
+//fix cứng
 final List<Category> defaultExpenseCategories = [
   Category(
-    id: 'exp_home',
+    id: GenerateID.newID(),
     name: 'Nhà',
     icon: IconMapping.mapIconToString(Icons.home),
     color: ColorUtils.colorToHex(AppColors.red),
     type: 'expense',
-    createdAt: DateTime.now()
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_shopping',
+    id: GenerateID.newID(),
     name: 'Mua sắm',
     icon: IconMapping.mapIconToString(Icons.shopping_cart),
     color: ColorUtils.colorToHex(AppColors.pink),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_food',
+    id: GenerateID.newID(),
     name: 'Ăn uống',
     icon: IconMapping.mapIconToString(Icons.fastfood),
     color: ColorUtils.colorToHex(AppColors.orange),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_car',
+    id: GenerateID.newID(),
     name: 'Xe cộ',
     icon: IconMapping.mapIconToString(Icons.directions_car),
     color: ColorUtils.colorToHex(AppColors.lightBlue),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_coffee',
+    id: GenerateID.newID(),
     name: 'Cà phê',
     icon: IconMapping.mapIconToString(Icons.local_cafe),
     color: ColorUtils.colorToHex(AppColors.brown),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_travel',
+    id: GenerateID.newID(),
     name: 'Du lịch',
     icon: IconMapping.mapIconToString(Icons.flight),
     color: ColorUtils.colorToHex(AppColors.indigo),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_health',
+    id: GenerateID.newID(),
     name: 'Sức khỏe',
     icon: IconMapping.mapIconToString(Icons.healing),
     color: ColorUtils.colorToHex(AppColors.green),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_entertain',
+    id: GenerateID.newID(),
     name: 'Giải trí',
     icon: IconMapping.mapIconToString(Icons.movie),
     color: ColorUtils.colorToHex(AppColors.deepPurple),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_education',
+    id: GenerateID.newID(),
     name: 'Học tập',
     icon: IconMapping.mapIconToString(Icons.school),
     color: ColorUtils.colorToHex(AppColors.blue),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_gift',
+    id: GenerateID.newID(),
     name: 'Quà tặng',
     icon: IconMapping.mapIconToString(Icons.card_giftcard),
     color: ColorUtils.colorToHex(AppColors.purple),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_pet',
+    id: GenerateID.newID(),
     name: 'Thú cưng',
     icon: IconMapping.mapIconToString(Icons.pets),
     color: ColorUtils.colorToHex(AppColors.cyan),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
   Category(
-    id: 'exp_party',
+    id: GenerateID.newID(),
     name: 'Tiệc tùng',
     icon: IconMapping.mapIconToString(Icons.cake),
     color: ColorUtils.colorToHex(AppColors.accentPink),
     type: 'expense',
-    createdAt: DateTime.now()
-
+    createdAt: DateTime.now(),
   ),
 ];
-
 
 final List<Category> defaultIncomeCategories = [
   Category(
@@ -218,5 +206,3 @@ final List<Category> defaultIncomeCategories = [
     createdAt: DateTime.now(),
   ),
 ];
-
-

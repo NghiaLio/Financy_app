@@ -250,6 +250,12 @@
   "restoreDefault": "Restore defaults",
   "restoreDefaultConfirm": "Do you want to restore all categories to default? This will delete all custom categories.",
   "titleNotification": "Control spending",
-  "bodyNotification": "How much have you spent today?"
+  "bodyNotification": "How much have you spent today?",
+  "signInRequired": "Sign In Required",
+  "signInToManageProfile": "Please sign in to manage your profile and synchronise data",
+  "signIn": "Sign In",
+  "continueAsGuest": "Continue as Guest",
+  "guestModeDescription": "You are about to continue without signing in. You won't be able to synchronise your data across devices.",
+  "continues": "Continue"
 }
   

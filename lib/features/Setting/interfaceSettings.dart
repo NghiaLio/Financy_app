@@ -7,7 +7,7 @@ import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/theme_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 
 class InterfaceSettings extends StatefulWidget {
   const InterfaceSettings({super.key});
@@ -39,7 +39,8 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     _selectedColorTheme = ColorUtils.colorToHex(
       context.read<ThemeCubit>().state.color ?? Colors.blue,
     );
-    _preThemeMode = context.read<ThemeCubit>().state.themeMode ?? ThemeMode.system;
+    _preThemeMode =
+        context.read<ThemeCubit>().state.themeMode ?? ThemeMode.system;
     _selectedTheme = ThemeUtils.themeModeToString(_preThemeMode);
 
     _fontSize = context.read<ThemeCubit>().state.fontSize ?? 14.0;
@@ -154,34 +155,34 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Theme Section
-            _buildSectionTitle(_localText((l) => l.theme)),
-            _buildThemeSelector(),
-            SizedBox(height: 24),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Theme Section
+              _buildSectionTitle(_localText((l) => l.theme)),
+              _buildThemeSelector(),
+              SizedBox(height: 24),
 
-            // Color Theme Section
-            _buildSectionTitle(_localText((l) => l.primaryColor)),
-            _buildColorThemeSelector(),
-            SizedBox(height: 24),
+              // Color Theme Section
+              _buildSectionTitle(_localText((l) => l.primaryColor)),
+              _buildColorThemeSelector(),
+              SizedBox(height: 24),
 
-            // Font Section
-            _buildSectionTitle(_localText((l) => l.fontFamily)),
-            _buildFontSelector(),
-            SizedBox(height: 16),
-            _buildFontSizeSlider(),
-            SizedBox(height: 24),
+              // Font Section
+              _buildSectionTitle(_localText((l) => l.fontFamily)),
+              _buildFontSelector(),
+              SizedBox(height: 16),
+              _buildFontSizeSlider(),
+              SizedBox(height: 24),
 
-            // Animation Section
-            _buildSectionTitle(_localText((l) => l.effect)),
-            
-            SizedBox(height: 24),
+              // Animation Section
+              _buildSectionTitle(_localText((l) => l.effect)),
 
-            // Action Buttons
-            _buildActionButtons(),
-          ],
-        ),
+              SizedBox(height: 24),
+
+              // Action Buttons
+              _buildActionButtons(),
+            ],
+          ),
         ),
       ),
     );
@@ -384,7 +385,6 @@ class _InterfaceSettingsState extends State<InterfaceSettings> {
     );
   }
 
-  
   Widget _buildActionButtons() {
     return Row(
       children: [

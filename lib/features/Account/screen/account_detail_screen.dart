@@ -5,7 +5,7 @@ import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/shared/widgets/resultDialogAnimation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import '../../Account/models/money_source.dart';
 import '../../../core/constants/colors.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
@@ -38,7 +38,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
       text: widget.account?.description ?? '',
     );
     selectedColor =
-        ColorUtils.parseColor(widget.account?.color ?? '') ?? AppColors.primaryBlue;
+        ColorUtils.parseColor(widget.account?.color ?? '') ??
+        AppColors.primaryBlue;
     isActive = widget.account?.isActive ?? false;
   }
 
@@ -109,7 +110,7 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
         description: descriptionController.text,
         color: ColorUtils.colorToHex(selectedColor),
         isActive: isActive,
-        updatedAt: DateTime.now().toIso8601String(),
+        updatedAt: DateTime.now().toUtc().toIso8601String(),
       ),
     );
   }
@@ -132,15 +133,15 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
             barrierDismissible: false,
             builder: (context) => ResultDialogAnimation(isSuccess: isSuccess),
           );
-          
+
           // Wait 2 seconds, then close dialog and navigate
           await Future.delayed(const Duration(milliseconds: 1200));
-          
+
           // Close dialog if still open
           if (Navigator.of(listenerContext).canPop()) {
             Navigator.of(listenerContext).pop();
           }
-          
+
           // Navigate back to previous screen
           if (mounted) {
             Navigator.of(_rootContext).pop();
@@ -253,7 +254,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.attach_money),
-                    hintText: localizations?.initialBalance ?? 'Initial Balance',
+                    hintText:
+                        localizations?.initialBalance ?? 'Initial Balance',
                     hintStyle: const TextStyle(color: Colors.black54),
                     filled: true,
                     fillColor: Colors.white,
@@ -285,7 +287,8 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  localizations?.descriptionOptional ?? 'Description (Optional)',
+                  localizations?.descriptionOptional ??
+                      'Description (Optional)',
                   style: textTheme.labelLarge?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -295,7 +298,9 @@ class _AccountDetailScreenState extends State<AccountDetailScreen> {
                   controller: descriptionController,
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.notes),
-                    hintText: localizations?.descriptionOptional ?? 'Description (Optional)',
+                    hintText:
+                        localizations?.descriptionOptional ??
+                        'Description (Optional)',
                     hintStyle: const TextStyle(color: Colors.black54),
                     filled: true,
                     fillColor: Colors.white,

@@ -6,8 +6,9 @@ import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:financy_ui/shared/utils/mappingIcon.dart';
+import 'package:financy_ui/shared/utils/generateID.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AddEditCategoryScreen extends StatefulWidget {
@@ -58,7 +59,8 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           ColorUtils.parseColor(category?.color ?? '#0000FF') ??
           _availableColors[0];
       // Ensure the category's color appears in the palette and is selectable
-      if (_selectedColor != null && !_availableColors.contains(_selectedColor)) {
+      if (_selectedColor != null &&
+          !_availableColors.contains(_selectedColor)) {
         _availableColors.insert(0, _selectedColor!);
       }
     });
@@ -204,14 +206,18 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
-              _selectedType == null ? '' : (_selectedType == 'income'
-                      ? (AppLocalizations.of(context)?.income ?? 'Income')
-                      : (AppLocalizations.of(context)?.expense ?? 'Expense'))
-                  .toUpperCase(),
+              _selectedType == null
+                  ? ''
+                  : (_selectedType == 'income'
+                          ? (AppLocalizations.of(context)?.income ?? 'Income')
+                          : (AppLocalizations.of(context)?.expense ??
+                              'Expense'))
+                      .toUpperCase(),
               style: theme.textTheme.bodySmall?.copyWith(
-                color: _selectedType == 'income'
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.error,
+                color:
+                    _selectedType == 'income'
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.error,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -224,9 +230,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
     );
   }
 
@@ -303,18 +309,23 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     Text(
                       AppLocalizations.of(context)?.income ?? 'Income',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: _selectedType == 'income'
+                        color:
+                            _selectedType == 'income'
                                 ? theme.colorScheme.onPrimary
                                 : theme.hintColor,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          Container(width: 1, height: 20, color: Theme.of(context).dividerColor),
+          Container(
+            width: 1,
+            height: 20,
+            color: Theme.of(context).dividerColor,
+          ),
           Expanded(
             child: GestureDetector(
               onTap: () => setState(() => _selectedType = 'expense'),
@@ -345,11 +356,12 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     Text(
                       AppLocalizations.of(context)?.expense ?? 'Expense',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: _selectedType == 'expense'
+                        color:
+                            _selectedType == 'expense'
                                 ? theme.colorScheme.onError
                                 : theme.hintColor,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -418,14 +430,17 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                                   color:
                                       isSelected
                                           ? _selectedColor?.withOpacity(0.2) ??
-                                              theme.colorScheme.primary.withOpacity(0.2)
-                                          : theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                                              theme.colorScheme.primary
+                                                  .withOpacity(0.2)
+                                          : theme.colorScheme.surfaceVariant
+                                              .withOpacity(0.3),
                                   borderRadius: BorderRadius.circular(8),
                                   border:
                                       isSelected
                                           ? Border.all(
                                             color:
-                                                _selectedColor ?? theme.colorScheme.primary,
+                                                _selectedColor ??
+                                                theme.colorScheme.primary,
                                             width: 2,
                                           )
                                           : Border.all(
@@ -435,7 +450,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                                 child: Icon(
                                   icon,
                                   color:
-                                      isSelected ? _selectedColor : theme.hintColor,
+                                      isSelected
+                                          ? _selectedColor
+                                          : theme.hintColor,
                                   size: 20,
                                 ),
                               ),
@@ -475,12 +492,19 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
                     shape: BoxShape.circle,
                     border:
                         isSelected
-                            ? Border.all(color: theme.colorScheme.onSurface, width: 3)
+                            ? Border.all(
+                              color: theme.colorScheme.onSurface,
+                              width: 3,
+                            )
                             : Border.all(color: theme.dividerColor, width: 1),
                   ),
                   child:
                       isSelected
-                          ? Icon(Icons.check, color: theme.colorScheme.onPrimary, size: 20)
+                          ? Icon(
+                            Icons.check,
+                            color: theme.colorScheme.onPrimary,
+                            size: 20,
+                          )
                           : null,
                 ),
               );
@@ -526,7 +550,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
 
     setState(() => _isLoading = true);
     Category new_category = Category(
-      id: category?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id: category?.id ?? GenerateID.newID(),
       uid: context.read<UserCubit>().state.user?.uid ?? '',
       name: _nameController.text.trim(),
       icon: IconMapping.mapIconToString(_selectedIcon ?? Icons.category),
@@ -534,7 +558,7 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       type: _selectedType ?? '',
       userId: context.read<UserCubit>().state.user?.uid,
       createdAt: category?.createdAt ?? DateTime.now(),
-      updatedAt: DateTime.now().toIso8601String(),
+      updatedAt: DateTime.now().toUtc().toIso8601String(),
     );
 
     if (isEdit) {
@@ -544,12 +568,18 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
       );
       // updateCategory
       if (index != -1) {
-        await context.read<Categoriescubit>().updateCategory(index, new_category);
+        await context.read<Categoriescubit>().updateCategory(
+          index,
+          new_category,
+        );
       } else {
         final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Category not found', style: theme.textTheme.bodyMedium),
+            content: Text(
+              'Category not found',
+              style: theme.textTheme.bodyMedium,
+            ),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -578,7 +608,9 @@ class _AddEditCategoryScreenState extends State<AddEditCategoryScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          title: Text('${l10n?.delete ?? 'Delete'} ${l10n?.category ?? 'Category'}'),
+          title: Text(
+            '${l10n?.delete ?? 'Delete'} ${l10n?.category ?? 'Category'}',
+          ),
           content: Text('Are you sure you want to delete "${category!.name}"?'),
           actions: [
             TextButton(

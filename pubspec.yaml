@@ -2,7 +2,7 @@ name: financy_ui
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -39,7 +39,7 @@ dependencies:
   hive_flutter: ^1.1.0
   path_provider: ^2.1.5
   flutter_bloc: ^9.1.1
-  intl: ^0.19.0
+  intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
   firebase_auth: ^5.6.2
@@ -58,7 +58,8 @@ dependencies:
   permission_handler: ^12.0.1
   image_picker: ^1.2.0
   flutter_svg: ^2.0.7
-
+  flutter_gen: ^5.9.0
+  flutter_slidable: ^3.1.1
 
 dev_dependencies:
   flutter_test:
@@ -76,9 +77,8 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icon/1024.png"
+  image_path: "assets/icon/icon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
-
 
 flutter_native_splash:
   color: "#FFFFFF"
@@ -97,12 +97,11 @@ flutter_native_splash:
 # The following section is specific to Flutter packages.
 flutter:
   uses-material-design: true
-  generate: true  # vẫn giữ để tạo localization
-  
+  generate: true # vẫn giữ để tạo localization
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
-  
 
   # To add assets to your application, add an assets section, like this:
   assets:
@@ -110,6 +109,7 @@ flutter:
     - .env
     - assets/animation/
     - assets/icon/
+    - assets/background/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
