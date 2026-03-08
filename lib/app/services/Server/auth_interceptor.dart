@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:financy_ui/core/utils/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 
@@ -14,7 +14,7 @@ class AuthInterceptor extends Interceptor {
                     true));
 
     if (isTokenExpired) {
-      log('Token expired, attempting refresh...');
+      debugLog('Token expired, attempting refresh...');
       final refreshToken = Hive.box('jwt').get('refreshToken');
       final oldAccessToken = Hive.box('jwt').get('accessToken');
 
@@ -31,12 +31,12 @@ class AuthInterceptor extends Interceptor {
             ),
           );
 
-          log('Refresh token response: ${res.data}');
+          debugLog('Refresh token response: ${res.data}');
           final newAccessToken = res.data['accessToken'];
 
           // Lưu lại accessToken mới
           Hive.box('jwt').put('accessToken', newAccessToken);
-          log('New access token saved');
+          debugLog('New access token saved');
 
           // Gắn accessToken mới vào header và retry request cũ
           final opts = err.requestOptions;
@@ -49,15 +49,15 @@ class AuthInterceptor extends Interceptor {
             queryParameters: opts.queryParameters,
           );
 
-          log('Retry request successful');
+          debugLog('Retry request successful');
           return handler.resolve(cloneReq);
         } catch (e) {
-          log('Refresh token failed: $e');
+          debugLog('Refresh token failed: $e');
           // Nếu refresh cũng lỗi, logout hoặc chuyển về màn login
           return handler.reject(err);
         }
       } else {
-        log('No refresh token available');
+        debugLog('No refresh token available');
       }
     }
 

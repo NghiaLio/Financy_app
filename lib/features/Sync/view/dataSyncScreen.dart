@@ -21,6 +21,7 @@ class DataSyncScreen extends StatefulWidget {
 
 class _DataSyncScreenState extends State<DataSyncScreen> {
   bool _authLoading = false;
+
   // Hàm tiện ích
   String _localText(
     BuildContext context,
@@ -75,18 +76,23 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
+        elevation: 0,
         title: Text(
           _localText(context, (l) => l.dataSync),
           style: theme.textTheme.bodyLarge?.copyWith(
             color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            letterSpacing: 0.5,
           ),
         ),
         backgroundColor: theme.primaryColor,
+        centerTitle: true,
       ),
       body: BlocProvider(
         create: (context) => SyncCubit(),
@@ -95,27 +101,56 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
             if (state is SyncSuccess) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Row(
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(state.message)),
+                    ],
+                  ),
                   backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
-              // Force rebuild to update lastSyncTime
               setState(() {});
             } else if (state is SyncFailure) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Row(
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(state.message)),
+                    ],
+                  ),
                   backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
             } else if (state is BackgroundSyncComplete) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(state.message),
+                  content: Row(
+                    children: [
+                      const Icon(Icons.cloud_done, color: Colors.white),
+                      const SizedBox(width: 12),
+                      Expanded(child: Text(state.message)),
+                    ],
+                  ),
                   backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               );
-              setState(() {}); // Update lastSyncTime
+              setState(() {});
             }
           },
           builder: (context, state) {
@@ -126,265 +161,164 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
             ).format(lastSyncTime);
             final syncEnabled = SettingsService.isSyncEnabled();
 
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Last sync info
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 3,
-                          offset: const Offset(0, 1),
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Status Card with gradient
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            theme.primaryColor,
+                            theme.primaryColor.withOpacity(0.7),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: theme.primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.primaryColor.withOpacity(0.3),
+                            spreadRadius: 2,
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
-                          child: Icon(
-                            Icons.access_time,
-                            color: theme.primaryColor,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          Row(
                             children: [
-                              Text(
-                                _localText(context, (l) => l.lastSync),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black87,
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.cloud_sync,
+                                  color: Colors.white,
+                                  size: 32,
                                 ),
                               ),
-                              Text(
-                                formattedLastSync,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Sync Status',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        letterSpacing: 0.5,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      syncEnabled
+                                          ? 'Connected & Active'
+                                          : 'Not Connected',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              ),
+                              Icon(
+                                syncEnabled
+                                    ? Icons.check_circle
+                                    : Icons.error_outline,
+                                color: Colors.white,
+                                size: 28,
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Background sync progress widget
-                  if (state is BackgroundSyncInProgress)
-                    Expanded(
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 200,
-                              height: 200,
-                              child: Lottie.asset(
-                                'assets/animation/sync_animation.json',
-                                fit: BoxFit.contain,
-                              ),
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            const SizedBox(height: 20),
-                            Text(
-                              state.message ??
-                                  _localText(context, (l) => l.syncingData),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            // Progress bar
-                            if (state.total > 0)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32.0,
-                                ),
-                                child: Column(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    LinearProgressIndicator(
-                                      value: state.progress,
-                                      backgroundColor: Colors.grey[200],
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        theme.primaryColor,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
                                     Text(
-                                      '${state.current}/${state.total}',
+                                      _localText(context, (l) => l.lastSync),
                                       style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
+                                        fontSize: 13,
+                                        color: Colors.white.withOpacity(0.9),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      formattedLastSync,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
                                 ),
-                              )
-                            else
-                              CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  theme.primaryColor,
+                                const Icon(
+                                  Icons.access_time,
+                                  color: Colors.white,
+                                  size: 24,
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    )
-                  // Download animation
-                  else if (state is SyncLoading)
-                    Expanded(
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 200,
-                              height: 200,
-                              child: Lottie.asset(
-                                'assets/animation/sync_animation.json',
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              _localText(context, (l) => l.syncingData),
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 200,
-                            height: 200,
-                            child: SvgPicture.asset(
-                              'assets/image/sync_image.svg',
-                              fit: BoxFit.contain,
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          Text(
-                            _localText(context, (l) => l.readyToSync),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          if (!syncEnabled) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              _localText(
-                                context,
-                                (l) => l.syncRequiresGoogleLogin,
-                              ),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.orange[800],
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: 260,
-                              child: ElevatedButton(
-                                onPressed:
-                                    _authLoading ? null : _handleGoogleSignIn,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.black87,
-                                  elevation: 0,
-                                  side: BorderSide(color: Colors.grey.shade300),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12,
-                                    horizontal: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    if (!_authLoading)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 8.0,
-                                        ),
-                                        child: Image.asset(
-                                          'assets/image/google.png',
-                                          width: 20,
-                                          height: 20,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    if (_authLoading)
-                                      const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      ),
-                                    const SizedBox(width: 8),
-                                    Flexible(
-                                      child: Text(
-                                        _localText(
-                                          context,
-                                          (l) => l.continue_with_google,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ),
 
-                  // Download button only (upload is automatic via background sync)
-                  if (syncEnabled && state is! BackgroundSyncInProgress)
-                    _buildActionButton(
-                      icon: Icons.cloud_download,
-                      title: _localText(context, (l) => l.downloadData),
-                      color: Colors.green,
-                      onTap:
-                          state is SyncLoading
-                              ? null
-                              : () => syncCubit.fetchData(),
-                    ),
-                ],
+                    const SizedBox(height: 24),
+
+                    // Main Content Area
+                    if (state is BackgroundSyncInProgress)
+                      _buildSyncProgressCard(context, state, theme)
+                    else if (state is SyncLoading)
+                      _buildLoadingCard(context, theme)
+                    else if (!syncEnabled)
+                      _buildLoginCard(context, theme)
+                    else
+                      _buildReadyCard(context, theme, size),
+
+                    // Action Buttons Section
+                    if (syncEnabled && state is! BackgroundSyncInProgress)
+                      ...[
+                      const SizedBox(height: 24),
+                      _buildActionButton(
+                        context: context,
+                        icon: Icons.cloud_download_outlined,
+                        title: _localText(context, (l) => l.downloadData),
+                        subtitle: 'Pull latest data from cloud',
+                        gradient: LinearGradient(
+                          colors: [Colors.green[400]!, Colors.green[600]!],
+                        ),
+                        onTap:
+                            state is SyncLoading
+                                ? null
+                                : () => context.read<SyncCubit>().fetchData(),
+                      ),
+                    ],
+                  ],
+                ),
               ),
             );
           },
@@ -393,10 +327,294 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
     );
   }
 
+  Widget _buildSyncProgressCard(
+    BuildContext context,
+    BackgroundSyncInProgress state,
+    ThemeData theme,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 180,
+            height: 180,
+            child: Lottie.asset(
+              'assets/animation/sync_animation.json',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            state.message ?? _localText(context, (l) => l.syncingData),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.primaryColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          if (state.total > 0) ...[
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Progress',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                      Text(
+                        '${state.current}/${state.total}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: LinearProgressIndicator(
+                      value: state.progress,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.primaryColor,
+                      ),
+                      minHeight: 8,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else
+            CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
+              strokeWidth: 3,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingCard(BuildContext context, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 180,
+            height: 180,
+            child: Lottie.asset(
+              'assets/animation/sync_animation.json',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            _localText(context, (l) => l.syncingData),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: theme.primaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoginCard(BuildContext context, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.orange[50],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.cloud_off,
+              size: 60,
+              color: Colors.orange[700],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Sync Not Available',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _localText(context, (l) => l.syncRequiresGoogleLogin),
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey[600],
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 28),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _authLoading ? null : _handleGoogleSignIn,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+                elevation: 0,
+                side: BorderSide(color: Colors.grey.shade300, width: 1.5),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (!_authLoading)
+                    Image.asset(
+                      'assets/image/google.png',
+                      width: 24,
+                      height: 24,
+                      fit: BoxFit.contain,
+                    ),
+                  if (_authLoading)
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  const SizedBox(width: 12),
+                  Text(
+                    _localText(context, (l) => l.continue_with_google),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReadyCard(
+    BuildContext context,
+    ThemeData theme,
+    Size size,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.15),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            width: 200,
+            height: 200,
+            child: SvgPicture.asset(
+              'assets/image/sync_image.svg',
+              fit: BoxFit.contain,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            _localText(context, (l) => l.readyToSync),
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: theme.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Your data is ready to be synchronized',
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButton({
+    required BuildContext context,
     required IconData icon,
     required String title,
-    required Color color,
+    required String subtitle,
+    required Gradient gradient,
     required VoidCallback? onTap,
   }) {
     final isDisabled = onTap == null;
@@ -404,24 +622,60 @@ class _DataSyncScreenState extends State<DataSyncScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isDisabled ? Colors.grey[300] : color,
-          borderRadius: BorderRadius.circular(12),
+          gradient: isDisabled ? null : gradient,
+          color: isDisabled ? Colors.grey[300] : null,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: isDisabled
+              ? null
+              : [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.3),
+                    spreadRadius: 1,
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Row(
           children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
               ),
-              textAlign: TextAlign.center,
+              child: Icon(icon, color: Colors.white, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withOpacity(0.9),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white,
+              size: 18,
             ),
           ],
         ),

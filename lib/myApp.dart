@@ -15,7 +15,7 @@ import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/auth/cubits/authState.dart';
 import 'package:financy_ui/app/services/Local/settings_service.dart';
 import 'package:financy_ui/features/Sync/services/background_sync_service.dart';
-import 'dart:developer';
+import 'package:financy_ui/core/utils/logger.dart';
 
 class ExpenseTrackerScreen extends StatefulWidget {
   const ExpenseTrackerScreen({super.key});
@@ -48,13 +48,13 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen> {
 
     // Start background sync if user is logged in with Google
     if (!SettingsService.isGuestLogin()) {
-      log('Starting background sync on app start');
+      debugLog('Starting background sync on app start');
       BackgroundSyncService.startBackgroundSync()
           .then((_) {
-            log('Background sync initiated');
+            debugLog('Background sync initiated');
           })
           .catchError((e) {
-            log('Failed to start background sync: $e');
+            debugLog('Failed to start background sync: $e');
           });
     }
 

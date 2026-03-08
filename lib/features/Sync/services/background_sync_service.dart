@@ -1,15 +1,17 @@
-// ignore_for_file: file_names
+// ignore_for_file: unrelated_type_equality_checks, file_names
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:isolate';
+import 'package:financy_ui/core/utils/logger.dart';
 import 'package:dio/dio.dart';
 import 'package:financy_ui/features/Account/repo/manageMoneyRepo.dart';
 import 'package:financy_ui/features/Categories/repo/categorieRepo.dart';
 import 'package:financy_ui/features/Users/Repo/userRepo.dart';
 import 'package:financy_ui/features/transactions/repo/transactionsRepo.dart';
 import 'package:hive/hive.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 /// Message types for communication between isolates
 class SyncMessage {
@@ -65,14 +67,45 @@ class BackgroundSyncService {
   /// Start background sync
   static Future<void> startBackgroundSync() async {
     if (_isSyncing) {
-      log('[BackgroundSync] Sync is already running');
+      debugLog('[BackgroundSync] Sync is already running');
       return;
     }
 
+    // Check if user is logged in with Google (not guest mode)
+    if (SettingsService.isGuestLogin()) {
+      debugLog('[BackgroundSync] User is in guest mode - sync disabled');
+      _progressController?.add(
+        SyncProgress(
+          stage: 'complete',
+          message: 'Sync is only available for logged in users',
+        ),
+      );
+      return;
+    }
+
+    // Check internet connectivity
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      debugLog('[BackgroundSync] No internet connection available');
+      _progressController?.add(
+        SyncProgress(
+          stage: 'complete',
+          message: 'No internet connection - sync cancelled',
+        ),
+      );
+      return;
+    }
+
+    debugLog(
+      '[BackgroundSync] Internet connection detected: $connectivityResult',
+    );
+    debugLog(
+      '[BackgroundSync] User is logged in with Google - proceeding with sync',
+    );
     _isSyncing = true;
 
     try {
-      log('[BackgroundSync] Starting in main thread...');
+      debugLog('[BackgroundSync] Starting in main thread...');
 
       // Send initial progress
       _progressController?.add(
@@ -90,7 +123,7 @@ class BackgroundSyncService {
       final transactions = transactionRepo.getAllTransactions();
       final categories = await categoryRepo.getCategories();
 
-      log(
+      debugLog(
         '[BackgroundSync] Loaded data - Accounts: ${accounts.length}, Transactions: ${transactions.length}, Categories: ${categories.length}',
       );
 
@@ -111,7 +144,7 @@ class BackgroundSyncService {
       final hasPendingUser =
           boxUser?.pendingSync == false || boxUser?.pendingSync == null;
 
-      log(
+      debugLog(
         '[BackgroundSync] Pending items - User: $hasPendingUser, Accounts: ${pendingAccounts.length}, Transactions: ${pendingTransactions.length}, Categories: ${pendingCategories.length}',
       );
 
@@ -120,7 +153,7 @@ class BackgroundSyncService {
           pendingAccounts.isEmpty &&
           pendingTransactions.isEmpty &&
           pendingCategories.isEmpty) {
-        log('[BackgroundSync] No pending data to sync');
+        debugLog('[BackgroundSync] No pending data to sync');
         _progressController?.add(
           SyncProgress(stage: 'complete', message: 'No pending data to sync'),
         );
@@ -156,7 +189,7 @@ class BackgroundSyncService {
       // Try to refresh token if we have refresh token
       if (refreshToken != null) {
         try {
-          log('[BackgroundSync] Attempting to refresh token...');
+          debugLog('[BackgroundSync] Attempting to refresh token...');
           final dio = Dio(BaseOptions(baseUrl: baseUrl));
           final res = await dio.post(
             '/auth/refresh',
@@ -167,16 +200,16 @@ class BackgroundSyncService {
           if (res.statusCode == 200 && res.data['accessToken'] != null) {
             accessToken = res.data['accessToken'];
             await Hive.box('jwt').put('accessToken', accessToken);
-            log('[BackgroundSync] Token refreshed successfully');
+            debugLog('[BackgroundSync] Token refreshed successfully');
           }
         } catch (e) {
-          log('[BackgroundSync] Token refresh failed: $e');
+          debugLog('[BackgroundSync] Token refresh failed: $e');
           // Continue with old token, let the sync attempt and fail if needed
         }
       }
 
       if (accessToken == null || accessToken.toString().isEmpty) {
-        log('[BackgroundSync] No access token available');
+        debugLog('[BackgroundSync] No access token available');
         _progressController?.add(
           SyncProgress(
             stage: 'complete',
@@ -229,7 +262,9 @@ class BackgroundSyncService {
               }
               break;
             case 'complete':
-              log('[BackgroundSync] Sync completed, updating local data...');
+              debugLog(
+                '[BackgroundSync] Sync completed, updating local data...',
+              );
 
               // Mark items as synced in main thread
               if (hasPendingUser && boxUser != null) {
@@ -259,7 +294,7 @@ class BackgroundSyncService {
               final currentTime = DateTime.now().toUtc().toIso8601String();
               await Hive.box('settings').put('lastSync', currentTime);
 
-              log('[BackgroundSync] All data marked as synced');
+              debugLog('[BackgroundSync] All data marked as synced');
               _progressController?.add(
                 SyncProgress(
                   stage: 'complete',
@@ -269,7 +304,7 @@ class BackgroundSyncService {
               _cleanup();
               break;
             case 'error':
-              log('[BackgroundSync] Error: ${message['data']}');
+              debugLog('[BackgroundSync] Error: ${message['data']}');
               _progressController?.addError(message['data'] ?? 'Sync failed');
               _cleanup();
               break;
@@ -277,7 +312,7 @@ class BackgroundSyncService {
         }
       });
     } catch (e) {
-      log('[BackgroundSync] Error starting background sync: $e');
+      debugLog('[BackgroundSync] Error starting background sync: $e');
       _progressController?.addError('Failed to start sync: $e');
       _cleanup();
     }
@@ -289,19 +324,19 @@ class BackgroundSyncService {
     final Map<String, dynamic> payload = params['payload'];
 
     try {
-      log('[BackgroundSync] Isolate started, uploading to server...');
+      debugLog('[BackgroundSync] Isolate started, uploading to server...');
 
       final accessToken = payload['accessToken'] as String;
       final baseUrl = payload['baseUrl'] as String;
       final syncDataObject = payload['syncDataObject'] as Map<String, dynamic>;
       final totalItems = payload['totalItems'] as int;
 
-      log('[BackgroundSync] Using baseUrl: $baseUrl');
-      log('[BackgroundSync] Token length: ${accessToken.length}');
-      log(
+      debugLog('[BackgroundSync] Using baseUrl: $baseUrl');
+      debugLog('[BackgroundSync] Token length: ${accessToken.length}');
+      debugLog(
         '[BackgroundSync] Token prefix: ${accessToken.length > 20 ? accessToken.substring(0, 20) : accessToken}...',
       );
-      log(
+      debugLog(
         '[BackgroundSync] Syncing: ${syncDataObject['users']?.length ?? 0} users, ${syncDataObject['accounts']?.length ?? 0} accounts, ${syncDataObject['transactions']?.length ?? 0} transactions, ${syncDataObject['categories']?.length ?? 0} categories',
       );
 
@@ -337,7 +372,7 @@ class BackgroundSyncService {
         ),
       );
 
-      log('[BackgroundSync] Server response: ${response.statusCode}');
+      debugLog('[BackgroundSync] Server response: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         // Send progress updates
@@ -359,7 +394,9 @@ class BackgroundSyncService {
           'data': 'Successfully uploaded $totalItems items',
         });
       } else {
-        log('[BackgroundSync] Upload failed - Status: ${response.statusCode}');
+        debugLog(
+          '[BackgroundSync] Upload failed - Status: ${response.statusCode}',
+        );
         sendPort.send({
           'type': 'error',
           'data': 'Upload failed: Server returned ${response.statusCode}',
@@ -370,9 +407,11 @@ class BackgroundSyncService {
       String errorDetail = e.toString();
       if (e is DioException) {
         final response = e.response;
-        log('[BackgroundSync] DioException - Status: ${response?.statusCode}');
-        log('[BackgroundSync] Response data: ${response?.data}');
-        log('[BackgroundSync] Response headers: ${response?.headers}');
+        debugLog(
+          '[BackgroundSync] DioException - Status: ${response?.statusCode}',
+        );
+        debugLog('[BackgroundSync] Response data: ${response?.data}');
+        debugLog('[BackgroundSync] Response headers: ${response?.headers}');
 
         if (response?.statusCode == 403) {
           errorDetail =
@@ -383,7 +422,7 @@ class BackgroundSyncService {
         }
       }
 
-      log('[BackgroundSync] Error in isolate: $e\n$stackTrace');
+      debugLog('[BackgroundSync] Error in isolate: $e\n$stackTrace');
       sendPort.send({'type': 'error', 'data': errorDetail});
     }
   }

@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'package:financy_ui/core/utils/logger.dart';
 
 import 'package:dio/dio.dart';
 import 'package:financy_ui/app/services/Server/dio_client.dart';
@@ -35,7 +35,7 @@ class SyncDataService {
           categoriesData.map((category) => category.toJson()).toList(),
     };
 
-    log('Sync data object: $syncDataObject');
+    debugLog('Sync data object: $syncDataObject');
 
     // Create FormData with JSON stringified in 'data' field
     final formData = FormData.fromMap({
@@ -48,7 +48,7 @@ class SyncDataService {
 
     final result = await _apiService.post('/sync', data: formData);
 
-    log('Sync result: $result');
+    debugLog('Sync result: $result');
 
     return result;
   }
@@ -76,18 +76,18 @@ class SyncDataService {
     }
 
     final result = await _apiService.get('/pull', queryParameters: queryParams);
-    log('Fetch result: ${result.data}');
+    debugLog('Fetch result: ${result.data}');
 
     // Parse 'since' from response and save as ISO8601 string
     final responseSince = result.data['since'];
     if (responseSince != null && responseSince is String) {
       Hive.box('settings').put('lastSync', responseSince);
-      log('Updated lastSync to: $responseSince');
+      debugLog('Updated lastSync to: $responseSince');
     } else {
       // Fallback: use current time in ISO8601
       final currentTime = DateTime.now().toUtc().toIso8601String();
       Hive.box('settings').put('lastSync', currentTime);
-      log('No valid since from server, using current time: $currentTime');
+      debugLog('No valid since from server, using current time: $currentTime');
     }
     return result;
   }

@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:financy_ui/core/utils/logger.dart';
 
 import 'package:dio/dio.dart';
 import 'package:financy_ui/app/services/Server/auth_interceptor.dart';
@@ -52,7 +52,7 @@ class ApiService {
     } on DioException catch (e) {
       // If server provided structured JSON, throw ApiException with that data
       final resp = e.response;
-      log('API error [${resp?.statusCode}]: ${resp?.data}');
+      debugLog('API error [${resp?.statusCode}]: ${resp?.data}');
       if (resp != null && resp.data != null) {
         throw ApiException(resp.statusCode, resp.data);
       }
@@ -69,7 +69,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        log('API error [${resp.statusCode}]: ${resp.data}');
+        debugLog('API error [${resp.statusCode}]: ${resp.data}');
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
@@ -82,7 +82,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        log('API error [${resp.statusCode}]: ${resp.data}');
+        debugLog('API error [${resp.statusCode}]: ${resp.data}');
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
@@ -95,7 +95,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        log('API error [${resp.statusCode}]: ${resp.data}');
+        debugLog('API error [${resp.statusCode}]: ${resp.data}');
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
