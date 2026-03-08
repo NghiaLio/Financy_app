@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'package:financy_ui/core/utils/logger.dart';
 
 import 'package:dio/dio.dart';
 import 'package:financy_ui/app/services/Server/auth_interceptor.dart';
@@ -42,15 +42,17 @@ class ApiService {
 
   Future<Response> post(String path, {dynamic data}) async {
     try {
-      return await _dio.post(
-        path,
-        data: data,
-        options: Options(headers: {'Content-Type': 'application/json'}),
-      );
+      // Don't set Content-Type when sending FormData, let Dio handle it
+      final options =
+          data is FormData
+              ? Options()
+              : Options(headers: {'Content-Type': 'application/json'});
+
+      return await _dio.post(path, data: data, options: options);
     } on DioException catch (e) {
       // If server provided structured JSON, throw ApiException with that data
       final resp = e.response;
-      log('API error [${resp?.statusCode}]: ${resp?.data}');
+      debugLog('API error [${resp?.statusCode}]: ${resp?.data}');
       if (resp != null && resp.data != null) {
         throw ApiException(resp.statusCode, resp.data);
       }
@@ -67,7 +69,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        log('API error [${resp.statusCode}]: ${resp.data}');
+        debugLog('API error [${resp.statusCode}]: ${resp.data}');
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
@@ -80,7 +82,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        log('API error [${resp.statusCode}]: ${resp.data}');
+        debugLog('API error [${resp.statusCode}]: ${resp.data}');
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);
@@ -93,7 +95,7 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        log('API error [${resp.statusCode}]: ${resp.data}');
+        debugLog('API error [${resp.statusCode}]: ${resp.data}');
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);

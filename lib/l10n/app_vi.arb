@@ -343,7 +343,14 @@
   "downloadData": "Tải xuống",
   "logout":"Đăng xuất",
   "loggedOut": "Đã đăng xuất",
-  "syncRequiresGoogleLogin": "Đồng bộ yêu cầu đăng nhập Google"
+  "syncRequiresGoogleLogin": "Đồng bộ yêu cầu đăng nhập Google",
+  
+  "signInRequired": "Yêu cầu đăng nhập",
+  "signInToManageProfile": "Đăng nhập với Google để quản lý hồ sơ và đồng bộ dữ liệu trên các thiết bị.",
+  "signIn": "Đăng nhập",
+  "continueAsGuest": "Tiếp tục với tư cách khách",
+  "guestModeDescription": "Bạn có thể sử dụng ứng dụng mà không cần đăng nhập. Đăng nhập sau để đồng bộ dữ liệu trên các thiết bị.",
+  "continues": "Tiếp tục"
 }
 
 

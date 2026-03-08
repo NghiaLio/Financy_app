@@ -4,10 +4,9 @@ import 'dart:developer';
 
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
-import 'package:financy_ui/shared/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../core/constants/colors.dart';
 import '../models/money_source.dart';
@@ -136,7 +135,7 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
         } else {
           log(state.listAccounts.toString());
           return Scaffold(
-            backgroundColor: colorScheme.background,
+            backgroundColor: theme.scaffoldBackgroundColor,
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
@@ -164,17 +163,29 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
             ),
             body: Column(
               children: [
-                // Total Balance Card
+                // Total Balance Card with Gradient
                 Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(24),
+                  margin: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                  padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: colorScheme.onPrimary.withOpacity(0.15),
-                      width: 1.5,
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.primary,
+                        colorScheme.primary.withBlue(
+                          (colorScheme.primary.blue * 0.8).toInt(),
+                        ),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.primary.withOpacity(0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,14 +193,33 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            localizations?.totalMoney ?? 'Total Money',
-                            style: textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onPrimary.withOpacity(0.8),
-                              fontSize: 16,
-                            ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                localizations?.totalMoney ?? 'Total Money',
+                                style: textTheme.bodyLarge?.copyWith(
+                                  color: colorScheme.onPrimary.withOpacity(0.9),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                isBalanceVisible
+                                    ? '${isTotalInUSD ? '\$' : '₫'}${_formatCurrency(isTotalInUSD ? totalBalanceInUSD : totalBalanceInVND, isUSD: isTotalInUSD)}'
+                                    : '••••••',
+                                style: textTheme.displaySmall?.copyWith(
+                                  color: colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 36,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                            ],
                           ),
-                          Row(
+                          Column(
                             children: [
                               // Custom Currency Switch
                               _CurrencySwitch(
@@ -200,42 +230,63 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                                   });
                                 },
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(height: 8),
                               // Visibility toggle
-                              IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isBalanceVisible = !isBalanceVisible;
-                                  });
-                                },
-                                icon: Icon(
-                                  isBalanceVisible
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: colorScheme.onPrimary.withOpacity(0.7),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isBalanceVisible = !isBalanceVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    isBalanceVisible
+                                        ? Icons.visibility_rounded
+                                        : Icons.visibility_off_rounded,
+                                    color: colorScheme.onPrimary,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        isBalanceVisible
-                            ? '${isTotalInUSD ? '\$' : '₫'}${_formatCurrency(isTotalInUSD ? totalBalanceInUSD : totalBalanceInVND, isUSD: isTotalInUSD)}'
-                            : '••••••',
-                        style: textTheme.displaySmall?.copyWith(
-                          color: colorScheme.onPrimary,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        localizations?.sourcesAvailable(moneySources.length) ??
-                            '${moneySources.length} sources available',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onPrimary.withOpacity(0.75),
-                          fontSize: 14,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet_rounded,
+                              color: colorScheme.onPrimary.withOpacity(0.9),
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              localizations?.sourcesAvailable(
+                                    moneySources.length,
+                                  ) ??
+                                  '${moneySources.length} sources available',
+                              style: textTheme.bodyMedium?.copyWith(
+                                color: colorScheme.onPrimary.withOpacity(0.9),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -248,33 +299,46 @@ class _AccountMoneyScreenState extends State<AccountMoneyScreen> {
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
                       borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20),
+                        top: Radius.circular(28),
                       ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(20),
-                          child: Text(
-                            localizations?.moneySources ?? 'Money Sources',
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                            ),
+                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 4,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: colorScheme.primary,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                localizations?.moneySources ?? 'Money Sources',
+                                style: textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.onSurface,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Expanded(
                           child: RefreshIndicator(
+                            color: colorScheme.primary,
                             onRefresh: () async {
                               await context
                                   .read<ManageMoneyCubit>()
                                   .getAllAccount();
                             },
                             child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
+                              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                               itemCount: moneySources.length,
                               itemBuilder: (context, index) {
                                 final source = moneySources[index];
@@ -365,25 +429,41 @@ class _CurrencySwitch extends StatelessWidget {
     return GestureDetector(
       onTap: onToggle,
       child: Container(
-        width: 80,
-        height: 32,
+        width: 88,
+        height: 38,
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+          color: Colors.white.withOpacity(0.25),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Stack(
           children: [
-            // Background indicator
-            Positioned(
-              left: isUSD ? 2 : 40,
-              top: 2,
+            // Background indicator with animation
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              left: isUSD ? 3 : 45,
+              top: 3,
               child: Container(
-                width: 36,
-                height: 28,
+                width: 40,
+                height: 32,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(17),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -394,13 +474,13 @@ class _CurrencySwitch extends StatelessWidget {
                 // USD Option
                 Expanded(
                   child: Container(
-                    height: 32,
+                    height: 38,
                     alignment: Alignment.center,
                     child: Text(
                       '\$',
                       style: TextStyle(
-                        color: isUSD ? AppColors.primaryBlue : Colors.white70,
-                        fontSize: 16,
+                        color: isUSD ? AppColors.primaryBlue : Colors.white,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -410,13 +490,13 @@ class _CurrencySwitch extends StatelessWidget {
                 // VND Option
                 Expanded(
                   child: Container(
-                    height: 32,
+                    height: 38,
                     alignment: Alignment.center,
                     child: Text(
                       '₫',
                       style: TextStyle(
-                        color: !isUSD ? AppColors.primaryBlue : Colors.white70,
-                        fontSize: 16,
+                        color: !isUSD ? AppColors.primaryBlue : Colors.white,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -471,104 +551,188 @@ class _MoneySourceTile extends StatelessWidget {
     final textTheme = theme.textTheme;
     // AppLocalizations.of(context) will never be null in a properly configured app
     final localizations = AppLocalizations.of(context);
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceVariant,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        leading: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: (ColorUtils.parseColor(source.color) ??
-                    AppColors.primaryBlue)
-                .withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child:
-              MoneySourceImages.assetFor(source.name) != null
-                  ? ClipOval(
-                    child: Image.asset(
-                      MoneySourceImages.assetFor(source.name)!,
-                      width: 32,
-                      height: 32,
-                      fit: BoxFit.contain,
-                    ),
-                  )
-                  : Icon(
-                    MoneySourceIconColorMapper.iconFor(
-                      source.type?.toString().split('.').last ?? '',
-                    ),
-                    color:
-                        ColorUtils.parseColor(source.color) ??
-                        AppColors.primaryBlue,
-                    size: 20,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Icon Container with Image Icon
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-        ),
-        title: Text(
-          source.name,
-          style: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              isBalanceVisible
-                  ? '${source.currency == CurrencyType.vnd ? '₫' : '\$'}${_formatCurrency(source.balance, isUSD: source.currency == CurrencyType.usd)}'
-                  : '••••••',
-              style: textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: AppColors.positiveGreen,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              source.isActive == true
-                  ? localizations?.active ?? 'Active'
-                  : localizations?.inactive ?? 'Inactive',
-              style: textTheme.bodySmall?.copyWith(
-                color:
-                    source.isActive == true
-                        ? AppColors.positiveGreen
-                        : AppColors.negativeRed,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
-              ),
-            ),
-          ],
-        ),
-        trailing: PopupMenuButton<String>(
-          onSelected: (value) {
-            onDelete();
-          },
-          itemBuilder:
-              (context) => [
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
+                  child:
+                      MoneySourceImages.assetFor(source.name) != null
+                          ? ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Image.asset(
+                                MoneySourceImages.assetFor(source.name)!,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          )
+                          : Icon(
+                            MoneySourceIconColorMapper.iconFor(
+                              source.type?.toString().split('.').last ?? '',
+                            ),
+                            color: colorScheme.primary,
+                            size: 28,
+                          ),
+                ),
+                const SizedBox(width: 16),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.delete, size: 16, color: colorScheme.error),
-                      const SizedBox(width: 8),
-                      Text(
-                        localizations?.delete ?? 'Delete',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.error,
-                        ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              source.name,
+                              style: textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: colorScheme.onSurface,
+                                fontSize: 16,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  source.isActive == true
+                                      ? AppColors.positiveGreen.withOpacity(
+                                        0.15,
+                                      )
+                                      : AppColors.negativeRed.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              source.isActive == true
+                                  ? localizations?.active ?? 'Active'
+                                  : localizations?.inactive ?? 'Inactive',
+                              style: textTheme.bodySmall?.copyWith(
+                                color:
+                                    source.isActive == true
+                                        ? AppColors.positiveGreen
+                                        : AppColors.negativeRed,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              isBalanceVisible
+                                  ? '${source.currency == CurrencyType.vnd ? '₫' : '\$'}${_formatCurrency(source.balance, isUSD: source.currency == CurrencyType.usd)}'
+                                  : '••••••',
+                              style: textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: AppColors.positiveGreen,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                          ),
+                          // Menu Button
+                          Container(
+                            decoration: BoxDecoration(
+                              color: colorScheme.surfaceVariant,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: PopupMenuButton<String>(
+                              onSelected: (value) {
+                                onDelete();
+                              },
+                              icon: Icon(
+                                Icons.more_horiz_rounded,
+                                color: colorScheme.onSurfaceVariant,
+                                size: 20,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              itemBuilder:
+                                  (context) => [
+                                    PopupMenuItem(
+                                      value: 'delete',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete_outline_rounded,
+                                            size: 20,
+                                            color: colorScheme.error,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            localizations?.delete ?? 'Delete',
+                                            style: textTheme.bodyMedium
+                                                ?.copyWith(
+                                                  color: colorScheme.error,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
               ],
+            ),
+          ),
         ),
-        onTap: onTap,
       ),
     );
   }

@@ -11,17 +11,17 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
-import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
+import 'package:financy_ui/app/services/Local/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/colors.dart';
-import '../../../core/constants/icons.dart';
 import '../../../shared/utils/color_utils.dart';
 import '../../../shared/utils/mappingIcon.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -532,48 +532,6 @@ class _HomeState extends State<Home> {
     }
   }
 
-  // Helper method to get category info by name
-  Category? _getCategoryByName(String categoryName) {
-    // First check in default expense categories
-    final expenseCategory = defaultExpenseCategories.firstWhere(
-      (category) => category.name == categoryName,
-      orElse:
-          () => Category(
-            id: '',
-            name: '',
-            type: '',
-            icon: '',
-            color: '',
-            createdAt: DateTime.now(),
-          ),
-    );
-
-    if (expenseCategory.name.isNotEmpty) {
-      return expenseCategory;
-    }
-
-    // Then check in default income categories
-    final incomeCategory = defaultIncomeCategories.firstWhere(
-      (category) => category.name == categoryName,
-      orElse:
-          () => Category(
-            id: '',
-            name: '',
-            type: '',
-            icon: '',
-            color: '',
-            createdAt: DateTime.now(),
-          ),
-    );
-
-    if (incomeCategory.name.isNotEmpty) {
-      return incomeCategory;
-    }
-
-    // If not found in defaults, return null
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -593,13 +551,32 @@ class _HomeState extends State<Home> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/profile', arguments: user);
+                      final isGuest = SettingsService.isGuestLogin();
+                      if (isGuest) {
+                        _showLoginPromptDialog(context);
+                      } else {
+                        Navigator.pushNamed(
+                          context,
+                          '/profile',
+                          arguments: user,
+                        );
+                      }
                     },
                     child: CircleAvatar(
                       radius: 25,
                       backgroundColor: Colors.transparent,
                       child:
-                          (user?.picture ?? '').isNotEmpty
+                          SettingsService.isGuestLogin()
+                              ? Container(
+                                color: theme.colorScheme.surfaceVariant,
+                                child: Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: theme.colorScheme.onSurface
+                                      .withOpacity(0.5),
+                                ),
+                              )
+                              : (user?.picture ?? '').isNotEmpty
                               ? ClipOval(
                                 child: Builder(
                                   builder: (context) {
@@ -675,7 +652,12 @@ class _HomeState extends State<Home> {
                         _localText((l) => l.hello),
                         style: theme.textTheme.titleMedium,
                       ),
-                      Text(user?.name ?? '', style: theme.textTheme.titleLarge),
+                      Text(
+                        SettingsService.isGuestLogin()
+                            ? 'Guest'
+                            : (user?.name ?? ''),
+                        style: theme.textTheme.titleLarge,
+                      ),
                     ],
                   ),
                 ],
@@ -872,9 +854,10 @@ class _HomeState extends State<Home> {
                                         );
 
                                     // Get category info
-                                    final category = _getCategoryByName(
-                                      transaction.categoriesId,
-                                    );
+                                    final category =
+                                        IconMapping.getCategoryByName(
+                                          transaction.categoriesId,
+                                        );
                                     final categoryIcon =
                                         category != null
                                             ? IconMapping.stringToIcon(
@@ -921,6 +904,98 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void _showLoginPromptDialog(BuildContext context) {
+    final appLocal = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.all(24),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.lock_person,
+                size: 64,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                appLocal?.signInRequired ?? 'Sign In Required',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                appLocal?.signInToManageProfile ??
+                    'Sign in with Google to manage your profile and sync data across devices.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.hintColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: theme.dividerColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        appLocal?.cancel ?? 'Cancel',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: theme.hintColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        Navigator.pushNamed(context, '/dataSyncScreen');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.primary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        appLocal?.signIn ?? 'Sign In',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildDateHeader(String date, String day, BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -956,62 +1031,238 @@ class _HomeState extends State<Home> {
     required Transactionsmodels transaction,
   }) {
     final theme = Theme.of(context);
-    return GestureDetector(
-      onTap: () {
-        // Navigate to add screen with transaction data for editing
-        Navigator.pushNamed(context, '/add', arguments: transaction);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.2),
-                shape: BoxShape.circle,
+    return Slidable(
+      key: ValueKey(transaction.id),
+      endActionPane: ActionPane(
+        motion: const ScrollMotion(),
+        dismissible: DismissiblePane(
+          onDismissed: () {
+            _showDeleteConfirmation(context, transaction);
+          },
+        ),
+        children: [
+          SlidableAction(
+            onPressed: (context) {
+              _showDeleteConfirmation(context, transaction);
+            },
+            backgroundColor: AppColors.negativeRed,
+            foregroundColor: Colors.white,
+            icon: Icons.delete,
+            label: 'Xóa',
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ],
+      ),
+      child: GestureDetector(
+        onTap: () {
+          // Navigate to add screen with transaction data for editing
+          Navigator.pushNamed(context, '/add', arguments: transaction);
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: iconColor, size: 20),
               ),
-              child: Icon(icon, color: iconColor, size: 20),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty)
+                      Text(subtitle, style: theme.textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    title,
+                    isPositive ? '+ $amount' : '- $amount',
                     style: theme.textTheme.bodyLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
+                      color:
+                          isPositive
+                              ? AppColors.positiveGreen
+                              : AppColors.negativeRed,
                     ),
                   ),
-                  if (subtitle.isNotEmpty)
-                    Text(subtitle, style: theme.textTheme.bodySmall),
+                  Text(
+                    accountName,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textGrey,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  isPositive ? '+ $amount' : '- $amount',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color:
-                        isPositive
-                            ? AppColors.positiveGreen
-                            : AppColors.negativeRed,
-                  ),
-                ),
-                Text(
-                  accountName,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textGrey,
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    Transactionsmodels transaction,
+  ) {
+    final appLocal = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+
+    // Capture references before showing dialog to avoid using deactivated context
+    final transactionCubit = context.read<TransactionCubit>();
+    final manageMoneyCubit = context.read<ManageMoneyCubit>();
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          contentPadding: const EdgeInsets.all(24),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                size: 64,
+                color: AppColors.negativeRed,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Xóa giao dịch?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Bạn có chắc chắn muốn xóa giao dịch này? Hành động này không thể hoàn tác.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.hintColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: theme.dividerColor),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        appLocal?.cancel ?? 'Hủy',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: theme.hintColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(ctx).pop();
+
+                        // Update account balance before deleting transaction
+                        final account = manageMoneyCubit.listAccounts
+                            ?.firstWhere(
+                              (acc) => acc.id == transaction.accountId,
+                              orElse:
+                                  () => MoneySource(
+                                    name: '',
+                                    balance: 0,
+                                    isActive: true,
+                                  ),
+                            );
+
+                        if (account != null && account.id != null) {
+                          // Calculate new balance
+                          double newBalance = account.balance;
+                          if (transaction.type == TransactionType.expense) {
+                            // If expense, add money back to account
+                            newBalance += transaction.amount;
+                          } else if (transaction.type ==
+                              TransactionType.income) {
+                            // If income, subtract money from account
+                            newBalance -= transaction.amount;
+                          }
+
+                          // Update account with new balance
+                          final updatedAccount = MoneySource(
+                            id: account.id,
+                            uid: account.uid,
+                            name: account.name,
+                            balance: newBalance,
+                            type: account.type,
+                            currency: account.currency,
+                            iconCode: account.iconCode,
+                            color: account.color,
+                            description: account.description,
+                            isActive: account.isActive,
+                            updatedAt: DateTime.now().toUtc().toIso8601String(),
+                            isDeleted: account.isDeleted,
+                            pendingSync: false, // Mark for sync
+                          );
+
+                          await manageMoneyCubit.updateAccount(updatedAccount);
+                        }
+
+                        // Delete transaction
+                        transactionCubit.deleteTransaction(transaction.id);
+
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Đã xóa giao dịch'),
+                            backgroundColor: AppColors.positiveGreen,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.negativeRed,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: Text(
+                        'Xóa',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

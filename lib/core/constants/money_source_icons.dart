@@ -59,46 +59,41 @@ class MoneySourceImages {
   }
 }
 
-class MoneySourceColors {
-  static const Map<String, Color> nameToColor = {
+class MoneySourceBackgrounds {
+  static const String basePath = 'assets/background';
+
+  static const Map<String, String> nameToBackground = {
     // E-wallets
-    'shopeepay': Color(0xFFEE4D2D), // Shopee orange-red
-    'viettelpay': Color(0xFF1BA345), // Viettel green
-    'vnpay': Color(0xFF0066CC), // VNPay blue
-    'zalopay': Color(0xFF0068FF), // ZaloPay blue
-    'momo': Color(0xFFD82D8B), // MoMo pink
+    'shopeepay': '$basePath/shoppe.png',
+    'viettelpay': '$basePath/viettel.png',
+    'vnpay': '$basePath/vn.png',
+    'zalopay': '$basePath/zalo.png',
+    'momo': '$basePath/momo.png',
 
     // Banks
-    'tpbank': Color(0xFFFFD700), // TPBank yellow/gold
-    'acb': Color(0xFF00A651), // ACB green
-    'mbbank': Color(0xFF1E3A8A), // MB Bank blue
-    'vpbank': Color(0xFF00A86B), // VPBank green
-    'vietcombank': Color(0xFF007AC3), // Vietcombank blue
-    'vietinbank': Color(0xFF1E40AF), // VietinBank blue
-    'bidv': Color(0xFF0066CC), // BIDV blue
-    'techcombank': Color(0xFF00B14F), // Techcombank green
-    'agribank': Color(0xFF00A651), // Agribank green
-
-    // Misc
-    'google': Color(0xFF4285F4), // Google blue
+    'tpbank': '$basePath/tp.png',
+    'acb': '$basePath/acb.png',
+    'mbbank': '$basePath/mb.png',
+    'vpbank': '$basePath/vp.png',
+    'vietcombank': '$basePath/vcb.png',
+    'vietinbank': '$basePath/vettin.png',
+    'bidv': '$basePath/bidv.png',
+    'techcombank': '$basePath/tech.png',
+    'agribank': '$basePath/agri.png',
   };
 
-  static Color? colorFor(String name) {
+  static String? backgroundFor(String name) {
     final key = _normalizeName(name);
-    return nameToColor[key];
+    return nameToBackground[key];
   }
 
-  static Color? colorForNullable(String? name) {
+  static String? backgroundForNullable(String? name) {
     if (name == null) return null;
-    return colorFor(name);
+    return backgroundFor(name);
   }
 
-  static Color colorForWithFallback(String name, {Color fallback = const Color(0xFF6B7280)}) {
-    return colorFor(name) ?? fallback;
-  }
-
-  static bool hasColorFor(String name) {
-    return colorFor(name) != null;
+  static bool hasBackgroundFor(String name) {
+    return backgroundFor(name) != null;
   }
 
   static String _normalizeName(String name) {

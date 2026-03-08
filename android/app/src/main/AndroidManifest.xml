@@ -13,7 +13,7 @@
 
 
     <application
-        android:label="Personal Finance"
+        android:label="Thu Chi"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:requestLegacyExternalStorage="true"

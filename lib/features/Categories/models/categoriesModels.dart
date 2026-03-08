@@ -62,11 +62,13 @@ class Category extends HiveObject {
       color: json['color']?.toString() ?? '',
       createdAt:
           json['createdAt'] is int
-              ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
+              ? DateTime.fromMillisecondsSinceEpoch(
+                json['createdAt'] as int,
+              ).toLocal()
               : DateTime.parse(
                 json['createdAt']?.toString() ??
-                    DateTime.now().toIso8601String(),
-              ),
+                    DateTime.now().toUtc().toIso8601String(),
+              ).toLocal(),
       uid: json['uid']?.toString(),
       updatedAt: json['updatedAt']?.toString(),
       isDeleted: json['isDeleted'] as bool? ?? false,
@@ -74,13 +76,25 @@ class Category extends HiveObject {
   }
 
   Map<String, dynamic> toJson() {
+    // Ensure updatedAt is always in ISO8601 format
+    String? formattedUpdatedAt;
+    if (updatedAt != null) {
+      try {
+        final dt = DateTime.parse(updatedAt!);
+        formattedUpdatedAt = dt.toUtc().toIso8601String();
+      } catch (e) {
+        formattedUpdatedAt = DateTime.now().toUtc().toIso8601String();
+      }
+    }
+
     return {
+      'id': id,
       'uid': uid,
       'name': name,
       'type': type,
       'icon': icon,
       'color': color,
-      'updatedAt': updatedAt,
+      'updatedAt': formattedUpdatedAt,
       'isDeleted': isDeleted ?? false,
     };
   }

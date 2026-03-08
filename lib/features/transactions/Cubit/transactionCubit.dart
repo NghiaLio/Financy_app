@@ -34,6 +34,8 @@ class TransactionCubit extends Cubit<TransactionState> {
 
   Future<void> addTransaction(Transactionsmodels transaction) async {
     try {
+      // Mark as pending sync before saving
+      transaction.pendingSync = false;
       await _transactionsRepo.saveToLocal(transaction);
 
       // Add the new transaction to the correct date group in the map
@@ -68,6 +70,8 @@ class TransactionCubit extends Cubit<TransactionState> {
 
   Future<void> updateTransaction(Transactionsmodels transaction) async {
     try {
+      // Mark as pending sync before updating
+      transaction.pendingSync = false;
       await _transactionsRepo.updateInLocal(transaction);
       final updatedMap = Map<DateTime, List<Transactionsmodels>>.from(
         state.transactionsList,

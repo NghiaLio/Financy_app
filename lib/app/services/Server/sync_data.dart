@@ -1,5 +1,7 @@
-import 'dart:developer';
+import 'dart:convert';
+import 'package:financy_ui/core/utils/logger.dart';
 
+import 'package:dio/dio.dart';
 import 'package:financy_ui/app/services/Server/dio_client.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
@@ -20,7 +22,7 @@ class SyncDataService {
   ) async {
     // send to server
     _apiService.setToken(jwtbox.get('accessToken'));
-    final data = {
+    final syncDataObject = {
       'uid': boxUser?.uid ?? '',
       'users':
           boxUser?.pendingSync == false || boxUser?.pendingSync == null
@@ -32,35 +34,61 @@ class SyncDataService {
       'categories':
           categoriesData.map((category) => category.toJson()).toList(),
     };
-    log('Sync result: $data');
-    final result = await _apiService.post('/sync', data: data);
 
-    log('Sync result: $result');
+    debugLog('Sync data object: $syncDataObject');
+
+    // Create FormData with JSON stringified in 'data' field
+    final formData = FormData.fromMap({
+      'data': jsonEncode(syncDataObject),
+      // Add images field here if needed in the future
+      // 'images': [
+      //   await MultipartFile.fromFile('./path/to/image.png', filename: 'avatar.png')
+      // ],
+    });
+
+    final result = await _apiService.post('/sync', data: formData);
+
+    debugLog('Sync result: $result');
 
     return result;
   }
 
   Future fetchData() async {
-    final since = Hive.box('settings').get('lastSync');
-    final boxUser = Hive.box<UserModel>('userBox').get('currentUser');
+    final sinceValue = Hive.box('settings').get('lastSync');
     _apiService.setToken(jwtbox.get('accessToken'));
-    final result = await _apiService.get(
-      '/sync',
-      queryParameters: {'since': since.toString(), 'uid': boxUser?.uid ?? ''},
-    );
-    log('Fetch result: ${result.data}');
 
-    int lastSyncValue;
-    if (result.data['lastSync'] is int) {
-      lastSyncValue = result.data['lastSync'];
-    } else if (result.data['lastSync'] is String) {
-      lastSyncValue =
-          int.tryParse(result.data['lastSync']) ??
-          DateTime.now().millisecondsSinceEpoch;
-    } else {
-      lastSyncValue = DateTime.now().millisecondsSinceEpoch;
+    // Build query parameters with optional 'since' in ISO8601 format
+    Map<String, dynamic> queryParams = {};
+    if (sinceValue != null) {
+      String? sinceISO;
+      if (sinceValue is int) {
+        // Convert milliseconds to ISO8601
+        sinceISO =
+            DateTime.fromMillisecondsSinceEpoch(
+              sinceValue,
+            ).toUtc().toIso8601String();
+      } else if (sinceValue is String) {
+        sinceISO = sinceValue; // already ISO8601
+      }
+      if (sinceISO != null) {
+        queryParams['since'] = sinceISO;
+      }
     }
-    Hive.box('settings').put('lastSync', lastSyncValue);
+
+    final result = await _apiService.get('/pull', queryParameters: queryParams);
+    debugLog('Fetch result: ${result.data}');
+
+    // Parse 'since' from response and save as ISO8601 string
+    final responseSince = result.data['since'];
+    if (responseSince != null && responseSince is String) {
+      Hive.box('settings').put('lastSync', responseSince);
+      debugLog('Updated lastSync to: $responseSince');
+    } else {
+      // Fallback: use current time in ISO8601
+      final currentTime = DateTime.now().toUtc().toIso8601String();
+      Hive.box('settings').put('lastSync', currentTime);
+      debugLog('No valid since from server, using current time: $currentTime');
+    }
     return result;
   }
 }

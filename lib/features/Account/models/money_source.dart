@@ -99,7 +99,7 @@ class MoneySource extends HiveObject {
     final accountTypeStr = json['type']?.toString() ?? '';
     final iconData = MoneySourceIconColorMapper.iconFor(accountTypeStr);
     return MoneySource(
-      id: json['_id']?.toString(),
+      id: json['id']?.toString(),
       uid: json['uid']?.toString(),
       name: json['accountName']?.toString() ?? '',
       balance:
@@ -126,23 +126,37 @@ class MoneySource extends HiveObject {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'uid': uid,
-    'accountName': name,
-    "balance": balance,
-    'type': type?.toString().split('.').last,
-    'currency': currency?.toString().split('.').last,
-    'color': color ?? ColorUtils.colorToHex(AppColors.blue),
-    'iconCode': _getCodeFromIcon(
-      MoneySourceIconColorMapper.iconFor(
-        type?.toString().split('.').last ?? '',
-      ),
-    ), // Default color if not provided
-    'description': description ?? '',
-    'isActive': isActive,
-    'isDeleted': isDeleted ?? false,
-    'updatedAt': updatedAt,
-  };
+  Map<String, dynamic> toJson() {
+    // Ensure updatedAt is always in ISO8601 format
+    String? formattedUpdatedAt;
+    if (updatedAt != null) {
+      try {
+        final dt = DateTime.parse(updatedAt!);
+        formattedUpdatedAt = dt.toUtc().toIso8601String();
+      } catch (e) {
+        formattedUpdatedAt = DateTime.now().toUtc().toIso8601String();
+      }
+    }
+
+    return {
+      'id': id,
+      'uid': uid,
+      'accountName': name,
+      "balance": balance,
+      'type': type?.toString().split('.').last,
+      'currency': currency?.toString().split('.').last,
+      'color': color ?? ColorUtils.colorToHex(AppColors.blue),
+      'iconCode': _getCodeFromIcon(
+        MoneySourceIconColorMapper.iconFor(
+          type?.toString().split('.').last ?? '',
+        ),
+      ), // Default color if not provided
+      'description': description ?? '',
+      'isActive': isActive,
+      'isDeleted': isDeleted ?? false,
+      'updatedAt': formattedUpdatedAt,
+    };
+  }
 
   // Helper methods for IconData conversion
   static String _getCodeFromIcon(IconData iconData) {

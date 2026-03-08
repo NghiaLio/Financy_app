@@ -4,7 +4,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
@@ -937,7 +937,7 @@ class _IncomeState extends State<Income> {
         PieChartSectionData(
           color: Colors.grey,
           value: 100,
-          title: AppLocalizations.of(context)?.noData ?? 'No Data',
+          title: '',
           titleStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
             fontSize: 12,
             fontWeight: FontWeight.w600,

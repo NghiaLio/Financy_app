@@ -8,7 +8,7 @@ import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
 import 'package:financy_ui/features/notification/cubit/notificationState.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -26,7 +26,7 @@ class _NotificationSettingsScreenState
   TimeOfDay? _reminderTime;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     context.read<NotificationCubit>().loadNotificationSettings();
   }
@@ -36,12 +36,11 @@ class _NotificationSettingsScreenState
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    
 
     TimeOfDay parseTimeOfDay(String timeString) {
       try {
         // Try parsing as full DateTime
-        return TimeOfDay.fromDateTime(DateTime.parse(timeString));
+        return TimeOfDay.fromDateTime(DateTime.parse(timeString).toLocal());
       } catch (_) {
         // Try parsing as 'HH:mm'
         final parts = timeString.split(':');

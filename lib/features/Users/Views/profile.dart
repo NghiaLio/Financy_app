@@ -7,7 +7,7 @@ import 'package:financy_ui/features/Users/Cubit/userState.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -499,7 +499,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         name: _nameController.text,
         email: _emailController.text,
         dateOfBirth: _selectedBirthDate,
-        updatedAt: DateTime.now().toString(),
+        updatedAt: DateTime.now().toUtc().toIso8601String(),
         isDeleted: widget.user?.isDeleted ?? false,
         pendingSync: false,
       ),
@@ -515,18 +515,48 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       source: ImageSource.gallery,
     );
     if (pickedFile != null) {
-      // Lấy thư mục appData
-      final appDir = await getApplicationDocumentsDirectory();
-      final fileName = "avatar_${DateTime.now().millisecondsSinceEpoch}.png";
+      try {
+        // Lấy thư mục appData
+        final appDir = await getApplicationDocumentsDirectory();
 
-      // Copy ảnh vào appData
-      final savedImage = await File(
-        pickedFile.path,
-      ).copy("${appDir.path}/$fileName");
+        // Lấy extension từ file gốc (jpg, png, etc.)
+        final originalExtension = pickedFile.path.split('.').last.toLowerCase();
+        final fileName =
+            "avatar_${DateTime.now().millisecondsSinceEpoch}.$originalExtension";
+        final newPath = "${appDir.path}/$fileName";
 
-      setState(() {
-        _avatarPath = savedImage.path;
-      });
+        // Xóa ảnh cũ trong appData nếu có (để tránh lãng phí dung lượng)
+        if (_avatarPath.isNotEmpty) {
+          final oldFile = File(_avatarPath);
+          // Check if old file is in appData directory and exists
+          if (oldFile.path.startsWith(appDir.path) && await oldFile.exists()) {
+            try {
+              await oldFile.delete();
+              log('Old avatar deleted: ${oldFile.path}');
+            } catch (e) {
+              log('Error deleting old avatar: $e');
+            }
+          }
+        }
+
+        // Copy ảnh mới vào appData
+        final savedImage = await File(pickedFile.path).copy(newPath);
+        log('New avatar saved: ${savedImage.path}');
+
+        setState(() {
+          _avatarPath = savedImage.path;
+        });
+      } catch (e) {
+        log('Error saving avatar: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error saving avatar: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 

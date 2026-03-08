@@ -28,6 +28,8 @@ class UserCubit extends Cubit<UserState> {
   Future<void> updateUser(UserModel user) async {
     emit(UserState.loading());
     try {
+      // Mark as pending sync before updating
+      user.pendingSync = false;
       await _userRepository.updateUser(user);
       _currentUser = user;
       emit(UserState.success(user));
