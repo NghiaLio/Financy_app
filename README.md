@@ -16,6 +16,11 @@
 - Local Notification
 
 ---
+### 📱 Video demo & cài đặt ứng dụng
+Video demo, file APK có sẵn tại đây:  
+👉 [Google Drive](https://drive.google.com/drive/folders/1Fe48WZxZOVdHyJiVlq2p4rmDCrmMPfyp)
+
+---
 
 ### 📋 Yêu cầu hệ thống
 
@@ -177,11 +182,7 @@ flutter run
 ```
 ---
 
-### 📱 Video demo & cài đặt ứng dụng
-Video demo, file APK có sẵn tại đây:  
-👉 [Google Drive](https://drive.google.com/drive/folders/1Fe48WZxZOVdHyJiVlq2p4rmDCrmMPfyp)
 
----
 
 📌 Ghi chú:
 
