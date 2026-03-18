@@ -188,15 +188,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       body: BlocListener<TransactionCubit, TransactionState>(
         listener: (listenerContext, state) async {
           if (state.status == TransactionStateStatus.success) {
+            // TransactionCubit đã tự fetch lại từ Hive và emit loaded rồi
+            // Chỉ cần sync account name và show result
             final accountID =
                 context
                     .read<ManageMoneyCubit>()
                     .getAccountByName(selectedAccount)
                     ?.id ??
                 '';
-            await context.read<TransactionCubit>().fetchTransactionsByAccount(
-              accountID,
-            );
             context.read<ManageMoneyCubit>().setCurrentAccountName(accountID);
             _showResultEvent(listenerContext, true, context);
             amountController.clear();

@@ -21,6 +21,8 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
 import 'package:financy_ui/features/notification/models/notificationModel.dart';
+import 'package:financy_ui/features/ai_assistant/cubit/ai_settings_cubit.dart';
+import 'package:financy_ui/features/ai_assistant/models/AI_settings.dart';
 import 'package:financy_ui/firebase_options.dart';
 import 'package:financy_ui/features/Setting/interfaceSettings.dart';
 import 'package:financy_ui/l10n/l10n.dart';
@@ -61,6 +63,7 @@ void main() async {
   Hive.registerAdapter(TransactionsmodelsAdapter());
   Hive.registerAdapter(CategoryAdapter());
   Hive.registerAdapter(NotificationModelAdapter());
+  Hive.registerAdapter(AiSettingsAdapter());
 
   await dotenv.load(fileName: ".env");
   await Hive.openBox('settings');
@@ -76,6 +79,7 @@ void main() async {
   await Hive.openBox<Category>('categoryBox');
   await Hive.openBox<Transactionsmodels>('transactionsBox');
   await Hive.openBox<NotificationModel>('notificationSettings');
+  await Hive.openBox<AiSettings>('aiSettingsBox');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
@@ -114,6 +118,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (_) => TransactionCubit()),
         BlocProvider(create: (_) => Categoriescubit()),
         BlocProvider(create: (_) => NotificationCubit()),
+        BlocProvider(create: (_) => AiSettingsCubit()..loadSettings()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {

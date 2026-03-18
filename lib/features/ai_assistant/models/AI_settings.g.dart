@@ -1,44 +1,37 @@
-// ignore: file_names
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 // ignore_for_file: file_names
 
-part of 'notificationModel.dart';
+part of 'AI_settings.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class NotificationModelAdapter extends TypeAdapter<NotificationModel> {
+class AiSettingsAdapter extends TypeAdapter<AiSettings> {
   @override
-  final int typeId = 9;
+  final int typeId = 10;
 
   @override
-  NotificationModel read(BinaryReader reader) {
+  AiSettings read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return NotificationModel(
-      isNotificationEnabled: fields[0] as bool,
-      isDaily: fields[1] as bool,
-      isWeekly: fields[2] as bool,
-      reminderTime: fields[3] as String,
+    return AiSettings(
+      isConfirm: fields[0] as bool,
+      defaultMoneySource: fields[1] as MoneySource?,
     );
   }
 
   @override
-  void write(BinaryWriter writer, NotificationModel obj) {
+  void write(BinaryWriter writer, AiSettings obj) {
     writer
-      ..writeByte(4)
-      ..writeByte(0)
-      ..write(obj.isNotificationEnabled)
-      ..writeByte(1)
-      ..write(obj.isDaily)
       ..writeByte(2)
-      ..write(obj.isWeekly)
-      ..writeByte(3)
-      ..write(obj.reminderTime);
+      ..writeByte(0)
+      ..write(obj.isConfirm)
+      ..writeByte(1)
+      ..write(obj.defaultMoneySource);
   }
 
   @override
@@ -47,7 +40,7 @@ class NotificationModelAdapter extends TypeAdapter<NotificationModel> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is NotificationModelAdapter &&
+      other is AiSettingsAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

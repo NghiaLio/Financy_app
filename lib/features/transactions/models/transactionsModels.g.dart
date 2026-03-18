@@ -1,8 +1,6 @@
-// ignore: file_names
-// ignore: file_names
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-// ignore_for_file: file_names, duplicate_ignore
+// ignore_for_file: file_names
 
 part of 'transactionsModels.dart';
 
