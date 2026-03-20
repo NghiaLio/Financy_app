@@ -15,5 +15,5 @@ class ManageMoneyState {
   factory ManageMoneyState.loading() => ManageMoneyState(status: ManageMoneyStatus.loading);
   factory ManageMoneyState.loaded(List<MoneySource> listData) => ManageMoneyState(status: ManageMoneyStatus.loaded, listAccounts: listData);
   factory ManageMoneyState.error(String errMess)=> ManageMoneyState(status: ManageMoneyStatus.error, message: errMess);
-  factory ManageMoneyState.success(String message) => ManageMoneyState(status: ManageMoneyStatus.success, message: message);
+  factory ManageMoneyState.success(String message, {List<MoneySource>? accounts}) => ManageMoneyState(status: ManageMoneyStatus.success, message: message, listAccounts: accounts);
 }

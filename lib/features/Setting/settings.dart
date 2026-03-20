@@ -3,6 +3,7 @@
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/app/services/Local/settings_service.dart';
 import 'package:financy_ui/features/auth/repository/authRepo.dart';
+import 'package:financy_ui/features/ai_assistant/view/ai_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/l10n/app_localizations.dart';
@@ -45,90 +46,104 @@ class Settings extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          _buildMenuItem(
-            icon: Icons.translate,
-            title: _localText(context, (l) => l.language),
-            iconColor: theme.primaryColor,
-            onTap: () {
-              Navigator.pushNamed(context, '/languageSelection');
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.people,
-            title: _localText(context, (l) => l.manageCategory),
-            iconColor: Colors.orange,
-            onTap: () {
-              Navigator.pushNamed(context, '/manageCategory');
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.campaign,
-            title: _localText(context, (l) => l.systemTheme),
-            iconColor: Colors.red,
-            onTap: () {
-              Navigator.pushNamed(context, '/interfaceSettings');
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.people_alt,
-            title: _localText(context, (l) => l.userManagement),
-            iconColor: Colors.green,
-            onTap: () {
-              final isGuest = SettingsService.isGuestLogin();
-              if (isGuest) {
-                _showLoginPromptDialog(context);
-              } else {
-                Navigator.pushNamed(
-                  context,
-                  '/profile',
-                  arguments: context.read<UserCubit>().currentUser,
-                );
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.account_balance_wallet,
-            title: _localText(context, (l) => l.account),
-            iconColor: Colors.teal,
-            onTap: () {
-              Navigator.pushNamed(context, '/manageAccount');
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.notifications,
-            title: _localText(context, (l) => l.notification),
-            iconColor: Colors.orange,
-            hasNotification: true,
-            onTap: () {
-              Navigator.pushNamed(context, '/notificationSettings');
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildMenuItem(
-            icon: Icons.sync,
-            title: _localText(context, (l) => l.dataSync),
-            iconColor: Colors.blue,
-            onTap: () {
-              Navigator.pushNamed(context, '/dataSync');
-            },
-          ),
-          const SizedBox(height: 12),
-          if (SettingsService.isGoogleLogin())
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
             _buildMenuItem(
-              icon: Icons.logout,
-              title: _localText(context, (l) => l.logout),
-              iconColor: Colors.red,
-              onTap: () => _logout(context),
+              icon: Icons.translate,
+              title: _localText(context, (l) => l.language),
+              iconColor: theme.primaryColor,
+              onTap: () {
+                Navigator.pushNamed(context, '/languageSelection');
+              },
             ),
-          const Spacer(),
-        ],
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.people,
+              title: _localText(context, (l) => l.manageCategory),
+              iconColor: Colors.orange,
+              onTap: () {
+                Navigator.pushNamed(context, '/manageCategory');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.campaign,
+              title: _localText(context, (l) => l.systemTheme),
+              iconColor: Colors.red,
+              onTap: () {
+                Navigator.pushNamed(context, '/interfaceSettings');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.people_alt,
+              title: _localText(context, (l) => l.userManagement),
+              iconColor: Colors.green,
+              onTap: () {
+                final isGuest = SettingsService.isGuestLogin();
+                if (isGuest) {
+                  _showLoginPromptDialog(context);
+                } else {
+                  Navigator.pushNamed(
+                    context,
+                    '/profile',
+                    arguments: context.read<UserCubit>().currentUser,
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.account_balance_wallet,
+              title: _localText(context, (l) => l.account),
+              iconColor: Colors.teal,
+              onTap: () {
+                Navigator.pushNamed(context, '/manageAccount');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.notifications,
+              title: _localText(context, (l) => l.notification),
+              iconColor: Colors.orange,
+              hasNotification: true,
+              onTap: () {
+                Navigator.pushNamed(context, '/notificationSettings');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.sync,
+              title: _localText(context, (l) => l.dataSync),
+              iconColor: Colors.blue,
+              onTap: () {
+                Navigator.pushNamed(context, '/dataSync');
+              },
+            ),
+            const SizedBox(height: 12),
+            _buildMenuItem(
+              icon: Icons.smart_toy,
+              title: 'AI Settings',
+              iconColor: Colors.deepPurple,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const AiSettingsScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            if (SettingsService.isGoogleLogin())
+              _buildMenuItem(
+                icon: Icons.logout,
+                title: _localText(context, (l) => l.logout),
+                iconColor: Colors.red,
+                onTap: () => _logout(context),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }

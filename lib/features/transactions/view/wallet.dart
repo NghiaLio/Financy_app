@@ -4,7 +4,6 @@ import 'dart:developer';
 
 import 'package:financy_ui/core/constants/colors.dart';
 import 'package:financy_ui/core/constants/money_source_icons.dart';
-
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyState.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
@@ -108,7 +107,9 @@ class _WalletState extends State<Wallet> {
     return BlocConsumer<TransactionCubit, TransactionState>(
       listener: (context, state) {
         if (state.status == TransactionStateStatus.success) {
-          log('hllo');
+          // TransactionCubit đã tự fetch lại từ Hive và emit loaded,
+          // chỉ cần reload accounts để cập nhật balance mới nhất
+          context.read<ManageMoneyCubit>().getAllAccount();
         }
       },
       builder: (context, state) {
@@ -277,24 +278,22 @@ class BalanceCard extends StatelessWidget {
     final theme = Theme.of(context);
     return BlocBuilder<ManageMoneyCubit, ManageMoneyState>(
       builder: (context, state) {
-        // Lấy tên tài khoản hiện tại dựa vào id
-        String currentAccountName = '';
+        // Luôn ưu tiên lấy listAccounts từ cubit field vì nó luôn được cập nhật đồng bộ
+        // state.listAccounts có thể null trong một số trạng thái (loading, error, success không có accounts)
+        final cubit = context.read<ManageMoneyCubit>();
+        String currentAccountName = cubit.currentAccountName ?? '';
         log(state.status.toString());
-        List<MoneySource>? listAccounts;
-        if (state.status == ManageMoneyStatus.loaded) {
-          listAccounts = state.listAccounts;
-          currentAccountName =
-              context.read<ManageMoneyCubit>().currentAccountName ?? '';
-        } else {
-          listAccounts = [];
-        }
+
+        // Ưu tiên: state.listAccounts (nếu có) → cubit.listAccounts (field cache) → []
+        List<MoneySource> listAccounts =
+            state.listAccounts ?? cubit.listAccounts ?? [];
 
         MoneySource? currentAccount;
-        if (listAccounts != null && listAccounts.isNotEmpty) {
+        if (listAccounts.isNotEmpty) {
           if (currentAccountId != null) {
             final found = listAccounts.firstWhere(
               (acc) => acc.id == currentAccountId,
-              orElse: () => listAccounts!.first,
+              orElse: () => listAccounts.first,
             );
             currentAccount = found;
           } else {
@@ -513,8 +512,7 @@ class BalanceCard extends StatelessWidget {
                             child: DropdownButton<String>(
                               value:
                                   currentAccountId ??
-                                  (listAccounts != null &&
-                                          listAccounts.isNotEmpty
+                                  (listAccounts.isNotEmpty
                                       ? listAccounts.first.id
                                       : null),
                               icon: Icon(
@@ -523,30 +521,29 @@ class BalanceCard extends StatelessWidget {
                                 size: 16,
                               ),
                               selectedItemBuilder: (BuildContext context) {
-                                return listAccounts?.map((e) {
-                                      return Center(
-                                        child: Text(
-                                          e.name,
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                            shadows:
-                                                brandBackground != null
-                                                    ? [
-                                                      Shadow(
-                                                        color: Colors.black
-                                                            .withOpacity(0.5),
-                                                        blurRadius: 3,
-                                                        offset: Offset(0, 1),
-                                                      ),
-                                                    ]
-                                                    : null,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList() ??
-                                    [];
+                                return listAccounts.map((e) {
+                                  return Center(
+                                    child: Text(
+                                      e.name,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12,
+                                        shadows:
+                                            brandBackground != null
+                                                ? [
+                                                  Shadow(
+                                                    color: Colors.black
+                                                        .withOpacity(0.5),
+                                                    blurRadius: 3,
+                                                    offset: Offset(0, 1),
+                                                  ),
+                                                ]
+                                                : null,
+                                      ),
+                                    ),
+                                  );
+                                }).toList();
                               },
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: onBrand,
@@ -555,58 +552,56 @@ class BalanceCard extends StatelessWidget {
                               dropdownColor: theme.cardColor,
                               borderRadius: BorderRadius.circular(16),
                               items:
-                                  listAccounts != null
-                                      ? listAccounts
-                                          .map(
-                                            (e) => DropdownMenuItem(
-                                              value: e.id,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  if (MoneySourceImages.assetFor(
-                                                        e.name,
-                                                      ) !=
-                                                      null)
-                                                    ClipOval(
-                                                      child: Image.asset(
-                                                        MoneySourceImages.assetFor(
-                                                          e.name,
-                                                        )!,
-                                                        width: 18,
-                                                        height: 18,
-                                                        fit: BoxFit.contain,
-                                                      ),
-                                                    )
-                                                  else
-                                                    Icon(
-                                                      MoneySourceIconColorMapper.iconFor(
-                                                        e.type.toString(),
-                                                      ),
-                                                      color:
-                                                          theme
-                                                              .textTheme
-                                                              .bodyMedium
-                                                              ?.color,
-                                                      size: 18,
-                                                    ),
-                                                  SizedBox(width: 6),
-                                                  Flexible(
-                                                    child: Text(
+                                  listAccounts
+                                      .map(
+                                        (e) => DropdownMenuItem(
+                                          value: e.id,
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              if (MoneySourceImages.assetFor(
+                                                    e.name,
+                                                  ) !=
+                                                  null)
+                                                ClipOval(
+                                                  child: Image.asset(
+                                                    MoneySourceImages.assetFor(
                                                       e.name,
-                                                      style:
-                                                          theme
-                                                              .textTheme
-                                                              .bodyMedium,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    ),
+                                                    )!,
+                                                    width: 18,
+                                                    height: 18,
+                                                    fit: BoxFit.contain,
                                                   ),
-                                                ],
+                                                )
+                                              else
+                                                Icon(
+                                                  MoneySourceIconColorMapper.iconFor(
+                                                    e.type.toString(),
+                                                  ),
+                                                  color:
+                                                      theme
+                                                          .textTheme
+                                                          .bodyMedium
+                                                          ?.color,
+                                                  size: 18,
+                                                ),
+                                              SizedBox(width: 6),
+                                              Flexible(
+                                                child: Text(
+                                                  e.name,
+                                                  style:
+                                                      theme
+                                                          .textTheme
+                                                          .bodyMedium,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
                                               ),
-                                            ),
-                                          )
-                                          .toList()
-                                      : [],
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
                               onChanged: changeAccount,
                             ),
                           ),

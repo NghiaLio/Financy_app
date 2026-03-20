@@ -95,7 +95,40 @@ class ApiService {
     } on DioException catch (e) {
       final resp = e.response;
       if (resp != null && resp.data != null) {
-        debugLog('API error [${resp.statusCode}]: ${resp.data}');
+        throw ApiException(resp.statusCode, resp.data);
+      }
+      throw Exception(e.message);
+    }
+  }
+
+  Future<ResponseBody> postStream(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      final options = Options(
+        method: 'POST',
+        responseType: ResponseType.stream,
+        headers: {
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/json',
+          ...?headers,
+        },
+      );
+
+      final requestOptions = options.compose(_dio.options, path, data: data);
+
+      final response = await _dio.fetch<ResponseBody>(requestOptions);
+      final body = response.data;
+      if (body == null) {
+        throw Exception('Empty stream response');
+      }
+      return body;
+    } on DioException catch (e) {
+      final resp = e.response;
+      if (resp != null && resp.data != null) {
         throw ApiException(resp.statusCode, resp.data);
       }
       throw Exception(e.message);

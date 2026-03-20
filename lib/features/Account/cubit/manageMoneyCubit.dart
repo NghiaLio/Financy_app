@@ -30,11 +30,12 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   // create account
   Future<void> createAccount(MoneySource source) async {
     try {
-      // Mark as pending sync before saving
       source.pendingSync = false;
       await _manageMoneyRepo.saveToLocal(source);
-      await getAllAccount(); // Đảm bảo luôn lấy danh sách mới nhất từ local
-      emit(ManageMoneyState.success('Account created successfully'));
+      // Lấy danh sách mới nhất trước, rồi mới emit success với accounts
+      final List<MoneySource> latestList = _manageMoneyRepo.getAllFromLocal();
+      _listAccounts = latestList;
+      emit(ManageMoneyState.success('Account created successfully', accounts: latestList));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
@@ -43,17 +44,11 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   //update account
   Future<void> updateAccount(MoneySource source) async {
     try {
-      // Mark as pending sync before updating
       source.pendingSync = false;
       await _manageMoneyRepo.updateInLocal(source);
-      final updatedList =
-          state.listAccounts
-              ?.map((s) => s.id == source.id ? source : s)
-              .toList() ??
-          [];
-      _listAccounts = updatedList;
-      emit(ManageMoneyState.loaded(updatedList));
-      emit(ManageMoneyState.success('Account updated successfully'));
+      final List<MoneySource> latestList = _manageMoneyRepo.getAllFromLocal();
+      _listAccounts = latestList;
+      emit(ManageMoneyState.success('Account updated successfully', accounts: latestList));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }
@@ -63,8 +58,10 @@ class ManageMoneyCubit extends Cubit<ManageMoneyState> {
   Future<void> deleteAccount(MoneySource source) async {
     try {
       await _manageMoneyRepo.deleteFromLocal(source.id!);
-      emit(ManageMoneyState.success('Account deleted successfully'));
-      getAllAccount();
+      // Luôn lấy list mới nhất và đính kèm vào state success
+      final List<MoneySource> latestList = _manageMoneyRepo.getAllFromLocal();
+      _listAccounts = latestList;
+      emit(ManageMoneyState.success('Account deleted successfully', accounts: latestList));
     } catch (e) {
       emit(ManageMoneyState.error(e.toString()));
     }

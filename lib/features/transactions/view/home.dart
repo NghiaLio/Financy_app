@@ -782,7 +782,7 @@ class _HomeState extends State<Home> {
             // Transaction List
             BlocConsumer<TransactionCubit, TransactionState>(
               listener: (context, stateTransaction) {
-                if (stateTransaction == TransactionStateStatus.error) {
+                if (stateTransaction.status == TransactionStateStatus.error) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
@@ -793,7 +793,7 @@ class _HomeState extends State<Home> {
                     ),
                   );
                 }
-                if (stateTransaction == TransactionStateStatus.success) {
+                if (stateTransaction.status == TransactionStateStatus.success) {
                   context.read<TransactionCubit>().fetchTransactionsByDate();
                 }
               },
