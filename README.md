@@ -8,10 +8,12 @@
 
 ### 🌟 Chức năng chính của hệ thống
 
+
 #### 1. Quản lý tài khoản & Ví (Account Management)
 - **Đa dạng nguồn tiền**: Hỗ trợ tạo và quản lý nhiều loại tài khoản như Tiền mặt, Ngân hàng, Ví điện tử.
 - **Tùy biến cá nhân**: Mỗi tài khoản có thể chọn biểu tượng, màu sắc và tên riêng biệt.
 - **Theo dõi số dư**: Tự động tính toán và cập nhật số dư thực tế ngay sau mỗi giao dịch.
+
 
 #### 2. Quản lý giao dịch (Transaction Tracking)
 - **Ghi chép thu chi**: Nhập liệu nhanh chóng các khoản thu nhập và chi phí hàng ngày.
@@ -69,6 +71,7 @@
 Video demo, file APK có sẵn tại đây:  
 👉 [Google Drive](https://drive.google.com/drive/folders/1Fe48WZxZOVdHyJiVlq2p4rmDCrmMPfyp)
 
+
 ---
 ### 🚀 Công nghệ sử dụng
 
@@ -79,15 +82,18 @@ Video demo, file APK có sẵn tại đây:
 - Hive (dữ liệu offline, dữ liệu key value)
 - Local Notification
 
+
 ---
 
 ### 📋 Yêu cầu hệ thống
+
 
 - Flutter SDK 3.0.0 trở lên
 - Dart 3.0.0 trở lên
 - Android Studio / VS Code
 - iOS Simulator (cho macOS) hoặc Android Emulator
 - Node.js (cho backend development)
+
 
 ---
 
@@ -152,22 +158,16 @@ graph TB
 - [x] Dashboard báo cáo
 - [x] Offline mode (guest)
 - [x] Local Notification
+
 - [x] AI Assistant (Hỗ trợ nhập liệu bằng giọng nói)
 - [x] Tự động sync khi login lại
 
-
-
-
 ### 📞 Liên hệ
 
-- **Developer**: [Your Name]
-- **Email**: [your.email@example.com]
-- **GitHub**: [github.com/yourusername]
-
----
 
 📌 Ghi chú:
 
 - App hiện tại đang ở giai đoạn 1: CRUD + Auth
-- Giai đoạn 2: thêm sync, ngân hàng, báo cáo nâng cao
+- Giai đoạn 2: ngân hàng, báo cáo nâng cao
+
 
