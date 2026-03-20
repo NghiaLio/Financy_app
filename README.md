@@ -70,8 +70,35 @@
 ### 📱 Video demo & cài đặt ứng dụng
 Video demo, file APK có sẵn tại đây:  
 👉 [Google Drive](https://drive.google.com/drive/folders/1Fe48WZxZOVdHyJiVlq2p4rmDCrmMPfyp)
+---
+### Một số giao diện của hệ thống
+<h2 align="center">📸 Screenshots</h2>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/727a8605-98cf-4674-a4f8-c62e8cee99c9" width="220"/>
+  <img src="https://github.com/user-attachments/assets/958a52ce-86e5-464f-96d8-961fbea0a4b3" width="220"/>
+  <img src="https://github.com/user-attachments/assets/340f7823-d9a6-44cc-ab90-c501b75e1cf7" width="220"/>
+  <img src="https://github.com/user-attachments/assets/fc270b8f-29c7-452c-9980-80fd66f28ec6" width="220"/>
+</p>
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d353470b-aa4f-46aa-b91f-4cd942d1337e" width="220"/>
+  <img src="https://github.com/user-attachments/assets/036f3603-b45c-45e7-815c-cd54aba8bb2a" width="220"/>
+  <img src="https://github.com/user-attachments/assets/dcb03309-86b5-48d8-a8c3-b789c1e83e83" width="220"/>
+  <img src="https://github.com/user-attachments/assets/6b7f6ea0-7c92-491a-832a-d1751725e637" width="220"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4729e5d6-8c79-4cd8-8dd5-d56993c68cec" width="220"/>
+  <img src="https://github.com/user-attachments/assets/164dd03b-3fec-4ca3-8fbc-1c7087b54f30" width="220"/>
+  <img src="https://github.com/user-attachments/assets/ceb34c26-5a16-41c3-b575-8c347bcf74cc" width="220"/>
+  <img src="https://github.com/user-attachments/assets/09f70b9b-0e90-484c-befe-eb273c65d01d" width="220"/>
+</p>
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/031c2743-e1a4-4bd9-892d-c377cf386cbd" width="220"/>
+  <img src="https://github.com/user-attachments/assets/d6f7d65c-95f6-470d-997b-6f5d48afccce" width="220"/>
+</p>
 ---
 ### 🚀 Công nghệ sử dụng
 
