@@ -6,17 +6,10 @@ import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/transactions/view/home.dart';
 import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
 import 'package:financy_ui/features/Setting/settings.dart';
-import 'package:financy_ui/features/transactions/view/statiscal.dart';
 import 'package:financy_ui/features/transactions/view/wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/l10n/app_localizations.dart';
-import 'package:financy_ui/features/auth/cubits/authCubit.dart';
-import 'package:financy_ui/features/auth/cubits/authState.dart';
-import 'package:financy_ui/app/services/Local/settings_service.dart';
-import 'package:financy_ui/features/Sync/services/background_sync_service.dart';
-import 'package:financy_ui/core/utils/logger.dart';
-import 'package:financy_ui/features/ai_assistant/view/ai_listening_sheet.dart';
 
 class ExpenseTrackerScreen extends StatefulWidget {
   const ExpenseTrackerScreen({super.key});
@@ -31,7 +24,6 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen>
   bool _isAddMenuOpen = false;
   late final AnimationController _menuController;
   late final Animation<double> _manualOptionAnimation;
-  late final Animation<double> _aiOptionAnimation;
 
   int get _bottomNavIndex =>
       _currentIndex >= 2 ? _currentIndex + 1 : _currentIndex;
@@ -80,19 +72,7 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen>
     });
   }
 
-  void _openAiAssistant() {
-    _closeAddMenu().then((_) {
-      if (!mounted) return;
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (sheetContext) => AiListeningSheet(parentContext: context),
-      );
-    });
-  }
-
-  final List<Widget> _pages = [Home(), Wallet(), Statiscal(), Settings()];
+  final List<Widget> _pages = [Home(), Wallet(), Settings()];
 
   @override
   void initState() {
@@ -105,27 +85,10 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen>
       curve: const Interval(0.0, 0.7, curve: Curves.easeOutBack),
       reverseCurve: Curves.easeInCubic,
     );
-    _aiOptionAnimation = CurvedAnimation(
-      parent: _menuController,
-      curve: const Interval(0.22, 1.0, curve: Curves.easeOutBack),
-      reverseCurve: Curves.easeInCubic,
-    );
 
     context.read<UserCubit>().getUser();
     context.read<ManageMoneyCubit>().getAllAccount();
     context.read<NotificationCubit>().loadNotificationSettings();
-
-    // Start background sync if user is logged in with Google
-    if (!SettingsService.isGuestLogin()) {
-      debugLog('Starting background sync on app start');
-      BackgroundSyncService.startBackgroundSync()
-          .then((_) {
-            debugLog('Background sync initiated');
-          })
-          .catchError((e) {
-            debugLog('Failed to start background sync: $e');
-          });
-    }
 
     super.initState();
   }
@@ -140,140 +103,110 @@ class _ExpenseTrackerScreenState extends State<ExpenseTrackerScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final appLocal = AppLocalizations.of(context);
-    return BlocListener<Authcubit, Authstate>(
-      listener: (context, state) {
-        if (state.authStatus == AuthStatus.error ||
-            state.authStatus == AuthStatus.unAuthenticated) {
-          Navigator.pushNamed(context, '/login');
-        }
-      },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            SafeArea(child: _pages[_currentIndex]),
-            if (_isAddMenuOpen)
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _menuController,
-                  builder:
-                      (_, __) => GestureDetector(
-                        onTap: _closeAddMenu,
-                        child: Container(
-                          color: Colors.black.withValues(
-                            alpha: 0.08 + (_menuController.value * 0.14),
-                          ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          SafeArea(child: _pages[_currentIndex]),
+          if (_isAddMenuOpen)
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _menuController,
+                builder:
+                    (_, __) => GestureDetector(
+                      onTap: _closeAddMenu,
+                      child: Container(
+                        color: Colors.black.withValues(
+                          alpha: 0.08 + (_menuController.value * 0.14),
                         ),
                       ),
-                ),
+                    ),
               ),
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 320),
-              curve: Curves.easeOutCubic,
-              left: 0,
-              right: 0,
-              bottom: _isAddMenuOpen ? 20 : -140,
-              child: IgnorePointer(
-                ignoring: !_isAddMenuOpen,
-                child: AnimatedBuilder(
-                  animation: _menuController,
-                  builder: (_, __) {
-                    final manualSlide = (1 - _manualOptionAnimation.value) * 30;
-                    final aiSlide = (1 - _aiOptionAnimation.value) * 30;
-                    final menuOpacity = _menuController.value.clamp(0.0, 1.0);
-                    final manualOpacity = _manualOptionAnimation.value.clamp(
-                      0.0,
-                      1.0,
-                    );
-                    final aiOpacity = _aiOptionAnimation.value.clamp(0.0, 1.0);
+            ),
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 320),
+            curve: Curves.easeOutCubic,
+            left: 0,
+            right: 0,
+            bottom: _isAddMenuOpen ? 20 : -140,
+            child: IgnorePointer(
+              ignoring: !_isAddMenuOpen,
+              child: AnimatedBuilder(
+                animation: _menuController,
+                builder: (_, __) {
+                  final manualSlide = (1 - _manualOptionAnimation.value) * 30;
+                  final menuOpacity = _menuController.value.clamp(0.0, 1.0);
+                  final manualOpacity = _manualOptionAnimation.value.clamp(
+                    0.0,
+                    1.0,
+                  );
 
-                    return Opacity(
-                      opacity: menuOpacity,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Transform.translate(
-                            offset: Offset(0, manualSlide),
-                            child: Transform.scale(
-                              scale:
-                                  0.92 + (_manualOptionAnimation.value * 0.08),
-                              child: Opacity(
-                                opacity: manualOpacity,
-                                child: _AddOptionButton(
-                                  icon: Icons.edit_rounded,
-                                  label: 'Thủ công',
-                                  color: theme.colorScheme.primary,
-                                  onTap: _openManualAdd,
-                                ),
+                  return Opacity(
+                    opacity: menuOpacity,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Transform.translate(
+                          offset: Offset(0, manualSlide),
+                          child: Transform.scale(
+                            scale:
+                                0.92 + (_manualOptionAnimation.value * 0.08),
+                            child: Opacity(
+                              opacity: manualOpacity,
+                              child: _AddOptionButton(
+                                icon: Icons.edit_rounded,
+                                label: 'Thủ công',
+                                color: theme.colorScheme.primary,
+                                onTap: _openManualAdd,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          Transform.translate(
-                            offset: Offset(0, aiSlide),
-                            child: Transform.scale(
-                              scale: 0.92 + (_aiOptionAnimation.value * 0.08),
-                              child: Opacity(
-                                opacity: aiOpacity,
-                                child: _AddOptionButton(
-                                  icon: Icons.mic_rounded,
-                                  label: 'AI Assistant',
-                                  color: theme.colorScheme.tertiary,
-                                  onTap: _openAiAssistant,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
-          selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
-          unselectedItemColor:
-              theme.bottomNavigationBarTheme.unselectedItemColor,
-          currentIndex: _bottomNavIndex,
-          onTap: _toggleBottomNavigationBar,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.timeline),
-              label: appLocal?.transactionBook ?? 'Transaction Book',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.wallet),
-              label: appLocal?.wallet ?? 'Wallet',
-            ),
-            BottomNavigationBarItem(
-              icon: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: theme.bottomNavigationBarTheme.selectedItemColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.add,
-                  color: theme.bottomNavigationBarTheme.backgroundColor,
-                ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: theme.bottomNavigationBarTheme.backgroundColor,
+        selectedItemColor: theme.bottomNavigationBarTheme.selectedItemColor,
+        unselectedItemColor:
+            theme.bottomNavigationBarTheme.unselectedItemColor,
+        currentIndex: _bottomNavIndex,
+        onTap: _toggleBottomNavigationBar,
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timeline),
+            label: appLocal?.transactionBook ?? 'Transaction Book',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.wallet),
+            label: appLocal?.wallet ?? 'Wallet',
+          ),
+          BottomNavigationBarItem(
+            icon: Container(
+              padding: EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.bottomNavigationBarTheme.selectedItemColor,
+                shape: BoxShape.circle,
               ),
-              label: '',
+              child: Icon(
+                Icons.add,
+                color: theme.bottomNavigationBarTheme.backgroundColor,
+              ),
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.pie_chart),
-              label: appLocal?.statistics ?? 'Statistics',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: appLocal?.settings ?? 'Settings',
-            ),
-          ],
-        ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: appLocal?.settings ?? 'Settings',
+          ),
+        ],
       ),
     );
   }
@@ -321,15 +254,6 @@ class _AddOptionButton extends StatelessWidget {
                 ),
                 child: Icon(icon, color: color, size: 20),
               ),
-              // const SizedBox(width: 10),
-              // Text(
-              //   label,
-              //   style: theme.textTheme.labelLarge?.copyWith(
-              //     fontWeight: FontWeight.w700,
-              //     letterSpacing: 0.15,
-              //     color: colorScheme.onSurface,
-              //   ),
-              // ),
             ],
           ),
         ),
@@ -337,3 +261,4 @@ class _AddOptionButton extends StatelessWidget {
     );
   }
 }
+

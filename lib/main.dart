@@ -8,12 +8,10 @@ import 'package:financy_ui/features/Account/screen/manageAccount.dart';
 import 'package:financy_ui/features/Categories/cubit/CategoriesCubit.dart';
 import 'package:financy_ui/features/Categories/models/categoriesModels.dart';
 import 'package:financy_ui/features/Categories/view/edit_categories.dart';
-import 'package:financy_ui/features/Sync/view/dataSyncScreen.dart';
 
 import 'package:financy_ui/features/Users/Views/profile.dart';
 import 'package:financy_ui/features/transactions/Cubit/transactionCubit.dart';
 import 'package:financy_ui/features/transactions/view/add.dart';
-import 'package:financy_ui/features/auth/cubits/authCubit.dart';
 import 'package:financy_ui/features/Account/cubit/manageMoneyCubit.dart';
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
 import 'package:financy_ui/features/Users/models/userModels.dart';
@@ -21,36 +19,28 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/notification/cubit/notificationCubit.dart';
 import 'package:financy_ui/features/notification/models/notificationModel.dart';
-import 'package:financy_ui/features/ai_assistant/cubit/ai_settings_cubit.dart';
-import 'package:financy_ui/features/ai_assistant/models/AI_settings.dart';
-import 'package:financy_ui/firebase_options.dart';
 import 'package:financy_ui/features/Setting/interfaceSettings.dart';
 import 'package:financy_ui/l10n/l10n.dart';
 import 'package:financy_ui/features/Setting/languageSettings.dart';
 import 'package:financy_ui/features/Categories/view/man_Categories_spend.dart';
 import 'package:financy_ui/myApp.dart';
 import 'package:financy_ui/features/notification/view/notificationSetting.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
-import 'features/auth/views/login.dart';
 import 'app/theme/app_theme.dart';
 import 'core/constants/colors.dart';
 import 'package:financy_ui/l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:financy_ui/app/services/Local/settings_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // initialize notification
-
   NotiService().initNotification();
   await NotiService().requestNotificationPermission();
-  //
+
   final appDocDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocDir.path);
 
@@ -63,25 +53,17 @@ void main() async {
   Hive.registerAdapter(TransactionsmodelsAdapter());
   Hive.registerAdapter(CategoryAdapter());
   Hive.registerAdapter(NotificationModelAdapter());
-  Hive.registerAdapter(AiSettingsAdapter());
 
-  await dotenv.load(fileName: ".env");
   await Hive.openBox('settings');
   await Hive.openBox('jwt');
 
-  // Store baseUrl for isolate access
-  final baseUrl = dotenv.env['URL_DB'] ?? 'http://10.0.2.2:2310/api';
-  await Hive.box('settings').put('baseUrl', baseUrl);
-
-  // Initialize local storage for MoneySource
+  // Initialize local storage
   await Hive.openBox<MoneySource>('moneySourceBox');
   await Hive.openBox<UserModel>('userBox');
   await Hive.openBox<Category>('categoryBox');
   await Hive.openBox<Transactionsmodels>('transactionsBox');
   await Hive.openBox<NotificationModel>('notificationSettings');
-  await Hive.openBox<AiSettings>('aiSettingsBox');
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(MyApp());
 }
 
@@ -112,13 +94,11 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
-        BlocProvider(create: (_) => Authcubit()),
         BlocProvider(create: (_) => ManageMoneyCubit()),
         BlocProvider(create: (_) => UserCubit()),
         BlocProvider(create: (_) => TransactionCubit()),
         BlocProvider(create: (_) => Categoriescubit()),
         BlocProvider(create: (_) => NotificationCubit()),
-        BlocProvider(create: (_) => AiSettingsCubit()..loadSettings()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
@@ -132,7 +112,7 @@ class _MyAppState extends State<MyApp> {
               GlobalCupertinoLocalizations.delegate,
             ],
 
-            /// 👇 Always fallback to Vietnamese if locale doesn't match
+            /// Always fallback to Vietnamese if locale doesn't match
             localeResolutionCallback: (locale, supportedLocales) {
               for (var supportedLocale in supportedLocales) {
                 if (supportedLocale.languageCode == locale?.languageCode) {
@@ -162,7 +142,6 @@ class _MyAppState extends State<MyApp> {
               '/': (context) => const MainApp(),
               '/addMoneySource': (context) => const AddMoneySourceScreen(),
               '/add': (context) => const AddTransactionScreen(),
-              '/login': (context) => Login(),
               '/expenseTracker': (context) => ExpenseTrackerScreen(),
               '/manageAccount': (context) => AccountMoneyScreen(),
               '/interfaceSettings': (context) => InterfaceSettings(),
@@ -171,8 +150,6 @@ class _MyAppState extends State<MyApp> {
               '/editCategory': (context) => AddEditCategoryScreen(),
               '/notificationSettings':
                   (context) => NotificationSettingsScreen(),
-              '/dataSync': (context) => DataSyncScreen(),
-
               // Add other routes here
             },
             onGenerateRoute: (settings) {
@@ -198,40 +175,12 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-// MainApp to route
-
-class MainApp extends StatefulWidget {
+// Main entry point that always shows the expense tracker
+class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
-}
-
-class _MainAppState extends State<MainApp> {
-  late bool appState;
-  @override
-  void initState() {
-    appState = SettingsService.getAppState();
-    // Show one-time logout snackbar if applicable
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (SettingsService.getJustLoggedOut()) {
-        final ctx = context;
-        final appLocal = AppLocalizations.of(ctx);
-        final theme = Theme.of(ctx);
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          SnackBar(
-            content: Text(appLocal?.loggedOut ?? 'Logged out'),
-            backgroundColor: theme.primaryColor,
-          ),
-        );
-        await SettingsService.setJustLoggedOut(false);
-      }
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return !appState ? Login() : ExpenseTrackerScreen();
+    return ExpenseTrackerScreen();
   }
 }

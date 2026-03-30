@@ -11,7 +11,6 @@ import 'package:financy_ui/features/Users/models/userModels.dart';
 import 'package:financy_ui/features/transactions/Cubit/transctionState.dart';
 import 'package:financy_ui/features/transactions/models/transactionsModels.dart';
 import 'package:financy_ui/features/Account/models/money_source.dart';
-import 'package:financy_ui/app/services/Local/settings_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -551,65 +550,24 @@ class _HomeState extends State<Home> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      final isGuest = SettingsService.isGuestLogin();
-                      if (isGuest) {
-                        _showLoginPromptDialog(context);
-                      } else {
-                        Navigator.pushNamed(
-                          context,
-                          '/profile',
-                          arguments: user,
-                        );
-                      }
+                      Navigator.pushNamed(
+                        context,
+                        '/profile',
+                        arguments: user,
+                      );
                     },
-                    child: CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Colors.transparent,
-                      child:
-                          SettingsService.isGuestLogin()
-                              ? Container(
-                                color: theme.colorScheme.surfaceVariant,
-                                child: Icon(
-                                  Icons.person,
-                                  size: 40,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.5),
-                                ),
-                              )
-                              : (user?.picture ?? '').isNotEmpty
-                              ? ClipOval(
-                                child: Builder(
-                                  builder: (context) {
-                                    final pic = user!.picture;
-                                    if (pic.startsWith('http')) {
-                                      return Image.network(
-                                        pic,
-                                        width: 60,
-                                        height: 60,
-                                        fit: BoxFit.cover,
-                                        errorBuilder: (
-                                          context,
-                                          error,
-                                          stackTrace,
-                                        ) {
-                                          return Container(
-                                            color:
-                                                theme
-                                                    .colorScheme
-                                                    .surfaceVariant,
-                                            child: Icon(
-                                              Icons.person,
-                                              size: 40,
-                                              color: theme.colorScheme.onSurface
-                                                  .withOpacity(0.5),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    }
-                                    // assume local file path
-                                    return Image.file(
-                                      File(pic),
+                      child: CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.transparent,
+                        child:
+                            (user?.picture ?? '').isNotEmpty
+                            ? ClipOval(
+                              child: Builder(
+                                builder: (context) {
+                                  final pic = user!.picture;
+                                  if (pic.startsWith('http')) {
+                                    return Image.network(
+                                      pic,
                                       width: 60,
                                       height: 60,
                                       fit: BoxFit.cover,
@@ -620,7 +578,9 @@ class _HomeState extends State<Home> {
                                       ) {
                                         return Container(
                                           color:
-                                              theme.colorScheme.surfaceVariant,
+                                              theme
+                                                  .colorScheme
+                                                  .surfaceVariant,
                                           child: Icon(
                                             Icons.person,
                                             size: 40,
@@ -630,19 +590,43 @@ class _HomeState extends State<Home> {
                                         );
                                       },
                                     );
-                                  },
-                                ),
-                              )
-                              : Container(
-                                color: theme.colorScheme.surfaceVariant,
-                                child: Icon(
-                                  Icons.person,
-                                  size: 20,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.5),
-                                ),
+                                  }
+                                  // assume local file path
+                                  return Image.file(
+                                    File(pic),
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (
+                                      context,
+                                      error,
+                                      stackTrace,
+                                    ) {
+                                      return Container(
+                                        color:
+                                            theme.colorScheme.surfaceVariant,
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 40,
+                                          color: theme.colorScheme.onSurface
+                                              .withOpacity(0.5),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                               ),
-                    ),
+                            )
+                            : Container(
+                              color: theme.colorScheme.surfaceVariant,
+                              child: Icon(
+                                Icons.person,
+                                size: 20,
+                                color: theme.colorScheme.onSurface
+                                    .withOpacity(0.5),
+                              ),
+                            ),
+                      ),
                   ),
                   SizedBox(width: 10),
                   Column(
@@ -653,9 +637,7 @@ class _HomeState extends State<Home> {
                         style: theme.textTheme.titleMedium,
                       ),
                       Text(
-                        SettingsService.isGuestLogin()
-                            ? 'Guest'
-                            : (user?.name ?? ''),
+                        user?.name ?? '',
                         style: theme.textTheme.titleLarge,
                       ),
                     ],
@@ -899,98 +881,6 @@ class _HomeState extends State<Home> {
               },
             ),
           ],
-        );
-      },
-    );
-  }
-
-  void _showLoginPromptDialog(BuildContext context) {
-    final appLocal = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          contentPadding: const EdgeInsets.all(24),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.lock_person,
-                size: 64,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                appLocal?.signInRequired ?? 'Sign In Required',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                appLocal?.signInToManageProfile ??
-                    'Sign in with Google to manage your profile and sync data across devices.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.hintColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: theme.dividerColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        appLocal?.cancel ?? 'Cancel',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: theme.hintColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        Navigator.pushNamed(context, '/dataSyncScreen');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        appLocal?.signIn ?? 'Sign In',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
         );
       },
     );

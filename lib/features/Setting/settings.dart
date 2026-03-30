@@ -1,9 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:financy_ui/features/Users/Cubit/userCubit.dart';
-import 'package:financy_ui/app/services/Local/settings_service.dart';
-import 'package:financy_ui/features/auth/repository/authRepo.dart';
-import 'package:financy_ui/features/ai_assistant/view/ai_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:financy_ui/l10n/app_localizations.dart';
@@ -18,27 +15,6 @@ class Settings extends StatelessWidget {
   ) {
     final appLocal = AppLocalizations.of(context);
     return appLocal != null ? getter(appLocal) : '';
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    await Authrepo().logout();
-    if (context.mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/expenseTracker',
-        (route) => false,
-      );
-      final appLocal = AppLocalizations.of(context);
-      final theme = Theme.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(appLocal?.loggedOut ?? 'Logged out'),
-          backgroundColor: theme.primaryColor,
-        ),
-      );
-      // Clear one-time flag since we've already shown the snackbar here
-      await SettingsService.setJustLoggedOut(false);
-    }
   }
 
   @override
@@ -81,16 +57,11 @@ class Settings extends StatelessWidget {
               title: _localText(context, (l) => l.userManagement),
               iconColor: Colors.green,
               onTap: () {
-                final isGuest = SettingsService.isGuestLogin();
-                if (isGuest) {
-                  _showLoginPromptDialog(context);
-                } else {
-                  Navigator.pushNamed(
-                    context,
-                    '/profile',
-                    arguments: context.read<UserCubit>().currentUser,
-                  );
-                }
+                Navigator.pushNamed(
+                  context,
+                  '/profile',
+                  arguments: context.read<UserCubit>().currentUser,
+                );
               },
             ),
             const SizedBox(height: 12),
@@ -107,40 +78,10 @@ class Settings extends StatelessWidget {
               icon: Icons.notifications,
               title: _localText(context, (l) => l.notification),
               iconColor: Colors.orange,
-              hasNotification: true,
               onTap: () {
                 Navigator.pushNamed(context, '/notificationSettings');
               },
             ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.sync,
-              title: _localText(context, (l) => l.dataSync),
-              iconColor: Colors.blue,
-              onTap: () {
-                Navigator.pushNamed(context, '/dataSync');
-              },
-            ),
-            const SizedBox(height: 12),
-            _buildMenuItem(
-              icon: Icons.smart_toy,
-              title: 'AI Settings',
-              iconColor: Colors.deepPurple,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AiSettingsScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            if (SettingsService.isGoogleLogin())
-              _buildMenuItem(
-                icon: Icons.logout,
-                title: _localText(context, (l) => l.logout),
-                iconColor: Colors.red,
-                onTap: () => _logout(context),
-              ),
             const SizedBox(height: 8),
           ],
         ),
@@ -148,103 +89,10 @@ class Settings extends StatelessWidget {
     );
   }
 
-  void _showLoginPromptDialog(BuildContext context) {
-    final appLocal = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-
-    showDialog(
-      context: context,
-      builder: (BuildContext ctx) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          contentPadding: const EdgeInsets.all(24),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.lock_person,
-                size: 64,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                appLocal?.signInRequired ?? 'Sign In Required',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                appLocal?.signInToManageProfile ??
-                    'Sign in with Google to manage your profile and sync data across devices.',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.hintColor,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: theme.dividerColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        appLocal?.cancel ?? 'Cancel',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: theme.hintColor,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(ctx).pop();
-                        Navigator.pushNamed(context, '/dataSyncScreen');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        appLocal?.signIn ?? 'Sign In',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
     required Color iconColor,
-    bool hasNotification = false,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
@@ -282,3 +130,4 @@ class Settings extends StatelessWidget {
     );
   }
 }
+
